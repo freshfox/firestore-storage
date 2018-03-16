@@ -55,7 +55,7 @@ describe('UserRepository', function () {
 
 
 		should(user.id).eql(u1.id);
-		should(user.name).eql('u1');
+		should(user.name).eql('u3');
 
 	});
 
