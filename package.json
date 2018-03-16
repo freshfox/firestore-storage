@@ -4,6 +4,12 @@
   "description": "A typed wrapper around Firestore incluing a querybuilder and an in-memory implementation for testing",
   "main": "dist/app/index.js",
   "types": "dist/app/index.d.ts",
+  "keywords": [
+    "firestore",
+    "typescript",
+    "memory",
+    "querybuilder"
+  ],
   "directories": {
     "test": "test",
     "lib": "src"
