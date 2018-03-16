@@ -7,9 +7,14 @@ import {MemoryStorage} from '../lib/storage/memory_storage';
 
 export class TestFactory {
 
-	static createWithRepository<T extends BaseRepository<any>>(repoConstructor: interfaces.Newable<T>) {
+	static createWithRepository<T extends BaseRepository<any>>(context, repoConstructor: interfaces.Newable<T>) {
 		const tc = new TestCase();
-		tc.container.bind(repoConstructor);
+		tc.container.bind(repoConstructor).toSelf().inSingletonScope();
+
+		context.beforeEach(() => {
+			return tc.resolve(repoConstructor).clear();
+		});
+
 		return tc;
 	}
 

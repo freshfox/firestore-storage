@@ -20,7 +20,7 @@ export interface IStorageDriver {
 
 export interface QueryBuilder {
 
-	where(field: string, operator: string, value: any): QueryBuilder
+	where(field: string, operator: Operator, value: any): QueryBuilder
 
 	limit(limit: number): QueryBuilder;
 
@@ -35,6 +35,7 @@ export interface QueryBuilder {
 }
 
 export type OrderDirection = 'desc' | 'asc';
+export type Operator = '==' | '<' | '<=' | '>' | '>=';
 
 export const Storage = Symbol('Storage');
 export const FirestoreInstance = Symbol('FirestoreInstance');
