@@ -1,8 +1,9 @@
 import {inject, injectable} from 'inversify';
 import {QueryBuilder, IStorageDriver, Storage} from './storage';
+import {BaseModel} from './base_model';
 
 @injectable()
-export abstract class BaseRepository<T> {
+export abstract class BaseRepository<T extends BaseModel> {
 
 	@inject(Storage) protected storage: IStorageDriver;
 

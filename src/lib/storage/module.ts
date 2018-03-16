@@ -3,11 +3,11 @@ import {ContainerModule} from 'inversify';
 import {FirestoreStorage} from './firestore_storage';
 import {MemoryStorage} from './memory_storage';
 import * as admin from 'firebase-admin';
-import {FirestoreInstance} from './storage';
+import {FirestoreInstance, IStorageDriver, Storage} from './storage';
 
 export class FirestoreStorageModule {
 
-	private module: ContainerModule;
+	module: ContainerModule;
 
 	constructor(instance: admin.firestore.Firestore) {
 		this.module = new ContainerModule((bind) => {
@@ -15,7 +15,8 @@ export class FirestoreStorageModule {
 			bind(FirestoreStorage).toSelf().inSingletonScope();
 			bind(MemoryStorage).toSelf().inSingletonScope();
 			bind(FirestoreInstance).toConstantValue(instance);
-		})
+			bind<IStorageDriver>(Storage).to(MemoryStorage).inSingletonScope();
+		});
 	}
 
 	static create(instance: admin.firestore.Firestore): ContainerModule {
