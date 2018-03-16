@@ -33,8 +33,10 @@
   "license": "MIT",
   "homepage": "https://github.com/freshfox/firestore-storage",
   "dependencies": {
+    "@google-cloud/firestore": "^0.13.0",
     "bcrypt-nodejs": "0.0.3",
     "cnfg": "^1.2.0",
+    "firebase-admin": "^5.11.0",
     "inversify": "^4.3.0",
     "lodash": "^4.17.4",
     "node-env-file": "^0.1.8",

@@ -1,0 +1,274 @@
+import {OrderDirection, QueryBuilder, IStorageDriver} from './storage';
+import * as uuid from 'uuid/v4';
+import {injectable} from 'inversify';
+
+@injectable()
+export class MemoryStorage implements IStorageDriver {
+
+	private data: Document = new Document();
+
+	findById(collection: string, id: string): Promise<any> {
+		const doc = this.data.getCollection(collection).getDocument(id);
+		return Promise.resolve(MemoryStorage.mapWithId(id, doc));
+	}
+
+	async find(collection: string, cb: (qb: QueryBuilder) => QueryBuilder) {
+		const items = this.getAsArray(collection);
+		const query = cb(new MemoryQueryBuilder(items));
+		const result = await query.limit(1).get();
+		return result[0] || null;
+	}
+
+	save(collection: string, data): Promise<any> {
+		const model = MemoryStorage.clone(data);
+		const id = model.id ? model.id : MemoryStorage.createId();
+		this.addDocument(collection, id, model.data);
+		return this.findById(collection, id);
+	}
+
+	private addDocument(collection: string, id: string, data) {
+		const doc = this.data.getCollection(collection).getDocument(id);
+		const now = new Date();
+		doc.updatedAt = now;
+		if (doc.data) {
+			Object.assign(doc.data, data)
+		} else {
+			doc.createdAt = now;
+			doc.data = data;
+		}
+	}
+
+	query(collection: string, cb: (qb: QueryBuilder) => QueryBuilder): Promise<any[]> {
+		const items = this.getAsArray(collection);
+		const query = cb(new MemoryQueryBuilder(items));
+		return query.get();
+ 	}
+
+ 	batchGet(collection: string, ids: string[]) {
+		const collectionRef = this.data.getCollection(collection);
+		const items = Object.keys(collectionRef.documents)
+			.filter((id) => {
+				return ids.indexOf(id) >= 0;
+			})
+			.map((id) => {
+				return MemoryStorage.mapWithId(id, collectionRef.documents[id]);
+			});
+		return Promise.resolve(items);
+	}
+
+	listen(collection: string, cb: (qb: QueryBuilder) => QueryBuilder, onNext: (snapshot: any) => void, onError?: (error: Error) => void): () => void {
+		throw new Error('not supported');
+	}
+
+	async clear(collection: string) {
+		if (!collection) {
+			this.data = new Document();
+		} else {
+			this.data.getCollection(collection).clear();
+		}
+	}
+
+	delete(collection: string, id: string) {
+		delete this.data.getCollection(collection).documents[id];
+		return Promise.resolve();
+	}
+
+	private getAsArray(collection: string) {
+		const collectionRef = this.data.getCollection(collection);
+		return Object.keys(collectionRef.documents)
+			.map((key) => {
+				return MemoryStorage.mapWithId(key, collectionRef.documents[key]);
+			});
+	}
+
+	private static mapWithId(id: string, doc: Document) {
+		return Object.assign({
+			id,
+			createdAt: doc.createdAt,
+			updatedAt: doc.updatedAt
+		}, doc.data);
+	}
+
+	private static createId() {
+		return uuid();
+	}
+
+	private static clone(data): {id: string, data} {
+		const clone = Object.assign({}, data);
+		const id = data.id;
+		delete clone.id;
+		delete clone.createdAt;
+		delete clone.updatedAt;
+		return {
+			id: id,
+			data: clone
+		};
+	}
+
+}
+
+export class MemoryQueryBuilder implements QueryBuilder {
+
+	private offsetNumber: number = 0;
+	private limitNumber: number;
+	private clauses = [];
+	private ordering: { property: string, direction?: OrderDirection };
+
+	constructor(private data: any[]) {
+
+	}
+
+	where(field: string, operator: string, value: any): MemoryQueryBuilder {
+		this.clauses.push(check(field, operator, value));
+		return this;
+	}
+
+	get() {
+		if (!this.data || !this.data.length) {
+			return Promise.resolve([]);
+		}
+
+		let items = this.data.filter((item) => {
+			return this.clauses.reduce((prevValue, current) => {
+				return prevValue && current(item);
+			}, true)
+		});
+
+		if (this.ordering) {
+			items.sort((a, b) => {
+				const prop = this.ordering.property;
+				if (a[prop] === b[prop]) {
+					return 0;
+				}
+				if (this.ordering.direction === 'desc') {
+					if (a[prop] > b[prop]) {
+						return -1;
+					}
+					return 1;
+				}
+				if (a[prop] < b[prop]) {
+					return -1;
+				}
+				return 1;
+			})
+		}
+
+		if (this.limitNumber) {
+			items = items.slice(this.offsetNumber, this.offsetNumber + this.limitNumber);
+		} else {
+			items = items.slice(this.offsetNumber)
+		}
+
+		return Promise.resolve(items);
+	}
+
+	orderBy(property: string, direction?: OrderDirection) {
+		this.ordering = {
+			property, direction
+		};
+		return this;
+	}
+
+	limit(limit: number): QueryBuilder {
+		this.limitNumber = limit;
+		return this;
+	}
+
+	offset(offset: number): QueryBuilder {
+		this.offsetNumber = offset;
+		return this;
+	}
+
+	onSnapshot(onNext: (snapshot: any) => void, onError?: (error: Error) => void): () => void {
+		throw new Error('not supported');
+	}
+
+}
+
+const check = (field, operator, expected) => {
+	return (data) => {
+		const parts = field.split('.');
+		const actual = parts.reduce((obj, key) => {
+			if (!obj) {
+				return null;
+			}
+			return obj[key];
+		}, data);
+		if (!actual && expected) {
+			return false;
+		}
+		switch (operator) {
+			case '>': return actual > expected;
+			case '>=': return actual >= expected;
+			case '<': return actual < expected;
+			case '<=': return actual <= expected;
+			case '==': return actual === expected;
+		}
+		throw new Error(`Unsupported operator ${operator}`);
+	}
+};
+
+export class Collection {
+
+	documents: {
+		[id: string]: Document
+	} = {};
+
+	getDocument(path: string) {
+		const index = path.indexOf('/');
+
+		if (index === -1) {
+			return this.getOrCreateDocument(path);
+		}
+		const docId = path.substring(0, index);
+		const doc = this.getOrCreateDocument(docId);
+
+		const rest = path.substring(index + 1);
+		const nameEndIndex = rest.indexOf('/');
+		const collectionName = rest.substring(0, nameEndIndex);
+		return doc.getCollection(collectionName).getDocument(rest.substring(nameEndIndex + 1));
+	}
+
+	private getOrCreateDocument(id: string): Document {
+		if (!this.documents[id]) {
+			this.documents[id] = new Document();
+		}
+		return this.documents[id];
+	}
+
+	clear() {
+		this.documents = {};
+	}
+
+}
+
+export class Document {
+	collections: {
+		[name: string]: Collection
+	} = {};
+	createdAt: Date;
+	updatedAt: Date;
+	data: any;
+
+	private getOrCreateCollection(name): Collection {
+		if (!this.collections[name]) {
+			this.collections[name] = new Collection();
+		}
+		return this.collections[name];
+	}
+
+	getCollection(path): Collection {
+		const index = path.indexOf('/');
+		if (index === -1) {
+			return this.getOrCreateCollection(path);
+		}
+		const collectionName = path.substring(0, index);
+		const collection = this.getOrCreateCollection(collectionName);
+
+		const rest = path.substring(index + 1);
+		const idEndIndex = rest.indexOf('/');
+		const docId = rest.substring(0, idEndIndex);
+		return collection.getDocument(docId).getCollection(rest.substring(idEndIndex + 1));
+	}
+}
+
