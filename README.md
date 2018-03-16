@@ -1,6 +1,6 @@
 # Firestore Storage
 
-A typed wrapper around Firestore incluing a querybuilder and an in-memory implementation for testing
+_A typed wrapper for Node around Firestore including a querybuilder and an in-memory implementation for testing_
 
 ## Usage
 
@@ -27,7 +27,9 @@ const repo = new UserRepository();
 
 ## Repositories
 
-
+Create repositories for each collection you want to query documents. For example
+if you want to query documents at the root of Firestore ```/users``` you create
+a new class and extend the BaseRepository.
 
 ### Extending BaseRepository
 
