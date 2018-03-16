@@ -1,23 +1,5 @@
-import {TestFactory} from '../index';
-import {BaseModel} from '../../lib/storage/base_model';
-import {BaseRepository} from '../../lib/storage/base_repository';
+import {TestFactory, User, UserRepository} from '../index';
 import * as should from 'should';
-
-interface User extends BaseModel {
-
-	name?: string;
-	email?: string;
-	last_login?: Date;
-
-}
-
-class UserRepository extends BaseRepository<User> {
-
-	getCollectionPath(...documentIds: string[]): string {
-		return 'users';
-	}
-
-}
 
 describe('UserRepository', function () {
 

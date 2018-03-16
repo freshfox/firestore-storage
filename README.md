@@ -1,18 +1,43 @@
-# Freshfox Core Node
+# Firestore Storage
 
-## Release
+A typed wrapper around Firestore incluing a querybuilder and an in-memory implementation for testing
 
-    npm version <major|minor|patch>
+## Usage
 
-## Configure Typescript Mocha tests in WebStorm/Intellij
+**Firestore Storage** can be used with the dependency injection library [Inversify][inversify]
+as well as without it.
 
-```$xslt
-Working directory: <project root>
-Environment variables:
-	NODE_ENV=test
+```typescript
+const storage = new MemoryStorage();
 
-User interface: bdd
-Extra Mocha options: --opts test/mocha.ts.opts
+class UserRepository extends BaseRepository<User> {
+
+	constructor() {
+		super();
+		this.storage = storage;
+	}
+
+	getCollectionPath(...documentIds: string[]): string {
+		return 'users';
+	}
+}
+
+const repo = new UserRepository();
 ```
 
-use ```mocha.ts.opts``` from this repository
+## Repositories
+
+
+
+### Extending BaseRepository
+
+```typescript
+export class UserRepository extends BaseRepository<User> {
+
+	getCollectionPath(...documentIds: string[]): string {
+		return 'users';
+	}
+}
+```
+
+[inversify]: http://inversify.io/
