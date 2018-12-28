@@ -1,6 +1,6 @@
 {
   "name": "firestore-storage",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A typed wrapper around Firestore including a query-builder and an in-memory implementation for testing",
   "main": "dist/app/index.js",
   "types": "dist/app/index.d.ts",
