@@ -1,6 +1,7 @@
-import {OrderDirection, QueryBuilder, IStorageDriver} from './storage';
+import {OrderDirection, QueryBuilder, IStorageDriver, SaveOptions} from './storage';
 import * as uuid from 'uuid/v4';
 import {injectable} from 'inversify';
+import * as _ from 'lodash';
 
 @injectable()
 export class MemoryStorage implements IStorageDriver {
@@ -8,55 +9,62 @@ export class MemoryStorage implements IStorageDriver {
 	private data: Document = new Document();
 
 	findById(collection: string, id: string): Promise<any> {
-		const doc = this.data.getCollection(collection).getDocument(id);
-		return Promise.resolve(MemoryStorage.mapWithId(id, doc));
+		const doc = this.data.getCollection(collection).getDocument(id, true);
+		if (doc) {
+			return Promise.resolve(MemoryStorage.mapWithId(id, doc));
+		}
+		return Promise.resolve(null);
 	}
 
-	async find(collection: string, cb: (qb: QueryBuilder) => QueryBuilder) {
+	async find<T>(collection: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>) {
 		const items = this.getAsArray(collection);
 		const query = cb(new MemoryQueryBuilder(items));
 		const result = await query.limit(1).get();
 		return result[0] || null;
 	}
 
-	save(collection: string, data): Promise<any> {
+	save(collection: string, data: any, options?: SaveOptions): Promise<any> {
 		const model = MemoryStorage.clone(data);
 		const id = model.id ? model.id : MemoryStorage.createId();
-		this.addDocument(collection, id, model.data);
+		this.addDocument(collection, id, model.data, options);
 		return this.findById(collection, id);
 	}
 
-	private addDocument(collection: string, id: string, data) {
+	private addDocument(collection: string, id: string, data: any, options?: SaveOptions) {
 		const doc = this.data.getCollection(collection).getDocument(id);
 		const now = new Date();
 		doc.updatedAt = now;
 		if (doc.data) {
-			Object.assign(doc.data, data)
+			if (options && options.avoidMerge) {
+				doc.data = {...data};
+			} else {
+				_.merge(doc.data, data);
+			}
 		} else {
 			doc.createdAt = now;
 			doc.data = data;
 		}
 	}
 
-	query(collection: string, cb: (qb: QueryBuilder) => QueryBuilder): Promise<any[]> {
+	query<T>(collection: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<any[]> {
 		const items = this.getAsArray(collection);
 		const query = cb(new MemoryQueryBuilder(items));
 		return query.get();
- 	}
+	}
 
- 	batchGet(collection: string, ids: string[]) {
+	batchGet(collection: string, ids: string[]) {
 		const collectionRef = this.data.getCollection(collection);
-		const items = Object.keys(collectionRef.documents)
-			.filter((id) => {
-				return ids.indexOf(id) >= 0;
-			})
-			.map((id) => {
-				return MemoryStorage.mapWithId(id, collectionRef.documents[id]);
-			});
+		const items = ids.map((id) => {
+			const doc = collectionRef.documents[id];
+			if (doc) {
+				return MemoryStorage.mapWithId(id, doc);
+			}
+			return null;
+		});
 		return Promise.resolve(items);
 	}
 
-	listen(collection: string, cb: (qb: QueryBuilder) => QueryBuilder, onNext: (snapshot: any) => void, onError?: (error: Error) => void): () => void {
+	listen<T>(collection: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>, onNext: (snapshot: any) => void, onError?: (error: Error) => void): () => void {
 		throw new Error('not supported');
 	}
 
@@ -107,7 +115,7 @@ export class MemoryStorage implements IStorageDriver {
 
 }
 
-export class MemoryQueryBuilder implements QueryBuilder {
+export class MemoryQueryBuilder<T> implements QueryBuilder<T> {
 
 	private offsetNumber: number = 0;
 	private limitNumber: number;
@@ -118,7 +126,7 @@ export class MemoryQueryBuilder implements QueryBuilder {
 
 	}
 
-	where(field: string, operator: string, value: any): MemoryQueryBuilder {
+	where(field: string, operator: string, value: any): MemoryQueryBuilder<T> {
 		this.clauses.push(check(field, operator, value));
 		return this;
 	}
@@ -169,12 +177,12 @@ export class MemoryQueryBuilder implements QueryBuilder {
 		return this;
 	}
 
-	limit(limit: number): QueryBuilder {
+	limit(limit: number): QueryBuilder<T> {
 		this.limitNumber = limit;
 		return this;
 	}
 
-	offset(offset: number): QueryBuilder {
+	offset(offset: number): QueryBuilder<T> {
 		this.offsetNumber = offset;
 		return this;
 	}
@@ -188,7 +196,7 @@ export class MemoryQueryBuilder implements QueryBuilder {
 const check = (field, operator, expected) => {
 	return (data) => {
 		const parts = field.split('.');
-		const actual = parts.reduce((obj, key) => {
+		let actual = parts.reduce((obj, key) => {
 			if (!obj) {
 				return null;
 			}
@@ -196,6 +204,12 @@ const check = (field, operator, expected) => {
 		}, data);
 		if (!actual && expected) {
 			return false;
+		}
+		if (actual instanceof Date) {
+			actual = (<Date>actual).getTime();
+		}
+		if (expected instanceof Date) {
+			expected = (<Date>expected).getTime();
 		}
 		switch (operator) {
 			case '>': return actual > expected;
@@ -214,11 +228,11 @@ export class Collection {
 		[id: string]: Document
 	} = {};
 
-	getDocument(path: string) {
+	getDocument(path: string, avoidDocumentCreation?: boolean) {
 		const index = path.indexOf('/');
 
 		if (index === -1) {
-			return this.getOrCreateDocument(path);
+			return this.getOrCreateDocument(path, avoidDocumentCreation);
 		}
 		const docId = path.substring(0, index);
 		const doc = this.getOrCreateDocument(docId);
@@ -229,8 +243,11 @@ export class Collection {
 		return doc.getCollection(collectionName).getDocument(rest.substring(nameEndIndex + 1));
 	}
 
-	private getOrCreateDocument(id: string): Document {
+	private getOrCreateDocument(id: string, avoidDocumentCreation?: boolean): Document {
 		if (!this.documents[id]) {
+			if (avoidDocumentCreation) {
+				return null;
+			}
 			this.documents[id] = new Document();
 		}
 		return this.documents[id];
@@ -271,4 +288,3 @@ export class Document {
 		return collection.getDocument(docId).getCollection(rest.substring(idEndIndex + 1));
 	}
 }
-

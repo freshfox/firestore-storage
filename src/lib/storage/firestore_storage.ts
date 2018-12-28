@@ -1,7 +1,8 @@
-import {QueryBuilder, IStorageDriver, FirestoreInstance} from './storage';
+import {QueryBuilder, IStorageDriver, SaveOptions, FirestoreInstance} from './storage';
 import {inject, injectable} from 'inversify';
 import * as admin from 'firebase-admin';
 import {DocumentSnapshot, QuerySnapshot} from '@google-cloud/firestore';
+import DocumentReference = FirebaseFirestore.DocumentReference;
 
 @injectable()
 export class FirestoreStorage implements IStorageDriver {
@@ -15,38 +16,38 @@ export class FirestoreStorage implements IStorageDriver {
 		return FirestoreStorage.format(snapshot);
 	}
 
-	async find(collection: string, cb: (qb: QueryBuilder) => QueryBuilder) {
+	async find<T>(collection: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>) {
 		const result = await this.query(collection, (qb) => {
 			return cb(qb).limit(1);
 		});
 		return result[0] || null;
 	}
 
-	async save(collection: string, data) {
+	async save(collection: string, data: any, options?: SaveOptions) {
 		const model = FirestoreStorage.clone(data);
 		if (!model.id) {
 			return this.add(collection, model.data)
 		}
-		return this.update(collection, model.id, model.data);
+		return this.update(collection, model.id, model.data, options);
 	}
 
-	private async add(collection: string, data): Promise<any> {
+	private async add(collection: string, data: any): Promise<any> {
 		const result = await this.firestore.collection(collection).add(data);
 		const model = await result.get();
 		return FirestoreStorage.format(model);
 	}
 
-	private async update(collection: string, id: string, data) {
+	private async update(collection: string, id: string, data: any, options?: SaveOptions) {
 		const path = FirestoreStorage.getPath(collection, id);
 		const docRef = await this.firestore.doc(path);
 		await docRef.set(data, {
-			merge: true
+			merge: !(options && options.avoidMerge)
 		});
 		const model = await docRef.get();
 		return FirestoreStorage.format(model);
 	}
 
-	async query(collection: string, cb?: (qb: QueryBuilder) => QueryBuilder) {
+	async query<T>(collection: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>) {
 		const qb = this.firestore.collection(collection);
 		const query = cb ? cb(qb) : qb;
 		const result: QuerySnapshot = await query.get();
@@ -58,8 +59,8 @@ export class FirestoreStorage implements IStorageDriver {
 		});
 	}
 
-	listen(collection: string, cb: (qb: QueryBuilder) => QueryBuilder,
-				 onNext: (snapshot: any) => void, onError?: (error: Error) => void): () => void {
+	listen<T>(collection: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>,
+			  onNext: (snapshot: any) => void, onError?: (error: Error) => void): () => void {
 		const qb = this.firestore.collection(collection);
 		const query = cb(qb);
 		return query.onSnapshot((snapshot: QuerySnapshot) => {
@@ -74,10 +75,15 @@ export class FirestoreStorage implements IStorageDriver {
 	}
 
 	async batchGet(collection: string, ids: string[]): Promise<any> {
-		const docRefs = ids.map((id) => {
+		if (ids.length === 0) {
+			return [];
+		}
+
+		const docRefs: DocumentReference[] = ids.map((id) => {
 			return this.firestore.collection(collection).doc(id);
 		});
-		const result = await this.firestore.getAll(...docRefs);
+		const restDocRefs = docRefs.slice(1);
+		const result = await this.firestore.getAll(docRefs[0], ...restDocRefs);
 		return result.map((document) => {
 			return FirestoreStorage.format(document);
 		});
@@ -157,9 +163,8 @@ export class FirestoreStorage implements IStorageDriver {
 		}
 		return Object.assign({
 			id: snapshot.id,
-			createdAt: new Date(snapshot.createTime),
-			updatedAt: new Date(snapshot.updateTime)
+			createdAt: new Date(snapshot.createTime.toMillis()),
+			updatedAt: new Date(snapshot.updateTime.toMillis())
 		}, snapshot.data()) as any;
 	}
-
 }

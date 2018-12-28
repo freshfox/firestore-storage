@@ -26,7 +26,7 @@ export abstract class BaseRepository<T extends BaseModel> {
 		}, ...ids);
 	}
 
-	protected mapToWhereClause(query: QueryBuilder, attributes?: T): QueryBuilder {
+	protected mapToWhereClause(query: QueryBuilder<T>, attributes?: T): QueryBuilder<T> {
 		if (!attributes) {
 			return query;
 		}
@@ -36,7 +36,7 @@ export abstract class BaseRepository<T extends BaseModel> {
 			}, query);
 	}
 
-	query(cb: (qb: QueryBuilder) => QueryBuilder, ...ids: string[]): Promise<T[]> {
+	query(cb: (qb: QueryBuilder<T>) => QueryBuilder<T>, ...ids: string[]): Promise<T[]> {
 		return this.storage.query(this.getCollectionPath(...ids), cb);
 	}
 
@@ -57,7 +57,7 @@ export abstract class BaseRepository<T extends BaseModel> {
 		return this.storage.delete(this.getCollectionPath(...ids), docId);
 	}
 
-	listen(cb: (qb: QueryBuilder) => QueryBuilder, onNext, onError, ...ids: string[]) {
+	listen(cb: (qb: QueryBuilder<T>) => QueryBuilder<T>, onNext, onError, ...ids: string[]) {
 		return this.storage.listen(this.getCollectionPath(...ids), cb, onNext, onError);
 	}
 

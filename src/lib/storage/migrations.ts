@@ -4,7 +4,7 @@ import {injectable} from 'inversify';
 @injectable()
 export abstract class Migrations {
 
-	constructor(protected storage: FirestoreStorage){}
+	protected constructor(protected storage: FirestoreStorage){}
 
 	abstract getVersion(): number;
 
