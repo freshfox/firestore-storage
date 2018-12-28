@@ -28,7 +28,7 @@
   "scripts": {
     "test": "NODE_ENV=test mocha dist/test",
     "build": "tsc",
-    "preversion": "yarn build && yarn test",
+    "preversion": "git pull && yarn build && yarn test",
     "postversion": "git push && git push --tags && npm publish"
   },
   "repository": {
