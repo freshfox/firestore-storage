@@ -26,7 +26,7 @@ export class TestCase {
 	container = new Container();
 
 	constructor() {
-		this.container.load(FirestoreStorageModule.create(null));
+		this.container.load(FirestoreStorageModule.createWithMemoryStorage());
 	}
 
 	resolve<T>(constructorFunction: interfaces.Newable<T>): T {

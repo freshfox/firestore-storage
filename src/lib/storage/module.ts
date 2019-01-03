@@ -9,18 +9,23 @@ export class FirestoreStorageModule {
 
 	module: ContainerModule;
 
-	constructor(instance: admin.firestore.Firestore) {
+	private constructor(instance: admin.firestore.Firestore, defaultStorageDriver: any) {
 		this.module = new ContainerModule((bind) => {
 			bind(BaseRepository).toSelf().inSingletonScope();
 			bind(FirestoreStorage).toSelf().inSingletonScope();
 			bind(MemoryStorage).toSelf().inSingletonScope();
 			bind(FirestoreInstance).toConstantValue(instance);
-			bind<IStorageDriver>(Storage).to(MemoryStorage).inSingletonScope();
+			bind<IStorageDriver>(Storage).to(defaultStorageDriver).inSingletonScope();
 		});
 	}
 
-	static create(instance: admin.firestore.Firestore): ContainerModule {
-		let md = new FirestoreStorageModule(instance);
+	static createWithMemoryStorage(): ContainerModule {
+		let md = new FirestoreStorageModule(null, MemoryStorage);
+		return md.module;
+	}
+
+	static createWithFirestore(instance: admin.firestore.Firestore): ContainerModule {
+		let md = new FirestoreStorageModule(instance, FirestoreStorage);
 		return md.module;
 	}
 
