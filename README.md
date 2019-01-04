@@ -25,6 +25,16 @@ class UserRepository extends BaseRepository<User> {
 const repo = new UserRepository();
 ```
 
+### Inversify
+If you want to use this package with inversify you have load the `FirestoreStorageModule` module 
+into your container
+
+```typescript
+container.load(FirestoreStorageModule.createWithMemoryStorage());
+// or
+container.load(FirestoreStorageModule.createWithFirestore(instance));
+```
+
 ## Repositories
 
 Create repositories for each collection you want to query documents. For example
