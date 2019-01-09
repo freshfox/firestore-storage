@@ -5,7 +5,7 @@ import {BaseModel} from './base_model';
 @injectable()
 export abstract class BaseRepository<T extends BaseModel> {
 
-	@inject(Storage) protected storage: IStorageDriver;
+	constructor(@inject(Storage) protected storage: IStorageDriver) {}
 
 	abstract getCollectionPath(...documentIds: string[]): string;
 

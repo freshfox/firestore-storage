@@ -7,13 +7,10 @@ describe('Usage without Inversify', function () {
 
 	it('should create a repository without DI', async () => {
 
-		const storage = new MemoryStorage();
-
 		class UserRepository extends BaseRepository<User> {
 
 			constructor() {
-				super();
-				this.storage = storage;
+				super(new MemoryStorage());
 			}
 
 			getCollectionPath(...documentIds: string[]): string {
