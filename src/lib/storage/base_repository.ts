@@ -1,6 +1,7 @@
 import {inject, injectable} from 'inversify';
 import {QueryBuilder, IStorageDriver, Storage} from './storage';
 import {BaseModel} from './base_model';
+import {WebError} from 'ffc-errors/dist/error';
 
 @injectable()
 export abstract class BaseRepository<T extends BaseModel> {
@@ -18,6 +19,19 @@ export abstract class BaseRepository<T extends BaseModel> {
 		return this.storage.find(this.getCollectionPath(...ids), (qb) => {
 			return this.mapToWhereClause(qb, attributes);
 		})
+	}
+
+	async get(attributes: T, ...ids: string[]) {
+		const doc = await this.find(attributes, ...ids);
+		if (!doc) {
+			const id = attributes.id ? ` (${attributes.id})` : '';
+			throw WebError.notFound(`Unable to get document${id} from ${this.getCollectionPath(...ids)}`);
+		}
+		return doc;
+	}
+
+	getById(...ids: string[]) {
+		return this.get({ id: ids.pop() } as any, ...ids);
 	}
 
 	list(attributes?: T, ...ids: string[]): Promise<T[]> {

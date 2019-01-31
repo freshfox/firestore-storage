@@ -686,6 +686,11 @@ faye-websocket@0.11.1:
   dependencies:
     websocket-driver ">=0.5.1"
 
+ffc-errors@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/ffc-errors/-/ffc-errors-0.1.0.tgz#9b5e9966f07706aada29a74926a450fd961fb806"
+  integrity sha512-lSHwB5FsAFHEUvjbQO5gmf2i6TvaPN4FpOmumRNvPQQsErRinONKmqiMZ4j83YwUnYPGpIiJcJVmFHsBT9Biuw==
+
 firebase-admin@^6.4.0:
   version "6.4.0"
   resolved "https://registry.yarnpkg.com/firebase-admin/-/firebase-admin-6.4.0.tgz#55c288f4e324bc89174bad39735c78475eae7235"
