@@ -1,3 +1,5 @@
+import {interfaces} from 'inversify';
+
 export interface IStorageDriver {
 
 	findById(collection: string, id: string): Promise<any>;
@@ -39,10 +41,13 @@ export type Operator = '==' | '<' | '<=' | '>' | '>=';
 
 export const Storage = Symbol('Storage');
 export const FirestoreInstance = Symbol('FirestoreInstance');
+export const ErrorFactory = Symbol('ErrorFactory');
 
 export interface SaveOptions {
 	avoidMerge?: boolean;
 }
+
+export type IErrorFactory = (message: string) => Error;
 
 
 
