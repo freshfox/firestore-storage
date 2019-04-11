@@ -5,6 +5,7 @@ import {FirestoreStorageModule} from '../lib/storage/module';
 import {IStorageDriver} from '../lib/storage/storage';
 import {MemoryStorage} from '../lib/storage/memory_storage';
 import {BaseModel} from '../lib/storage/base_model';
+import * as admin from 'firebase-admin';
 
 export class TestFactory {
 
@@ -26,7 +27,7 @@ export class TestCase {
 	container = new Container();
 
 	constructor() {
-		this.container.load(FirestoreStorageModule.createWithMemoryStorage());
+		TestCase.initWithMemoryStorage(this);
 	}
 
 	resolve<T>(constructorFunction: interfaces.Newable<T>): T {
@@ -35,6 +36,18 @@ export class TestCase {
 
 	getStorage(): IStorageDriver {
 		return this.container.resolve(MemoryStorage);
+	}
+
+	private static initWithFirestore(tc: TestCase) {
+		admin.initializeApp({
+			credential: admin.credential.cert(require('/home/dominic/Downloads/firestore-storage-test-firebase-adminsdk-pvcvb-f50c0471f1.json')),
+			databaseURL: "https://firestore-storage-test.firebaseio.com"
+		});
+		tc.container.load(FirestoreStorageModule.createWithFirestore(admin.firestore()))
+	}
+
+	private static initWithMemoryStorage(tc: TestCase) {
+		tc.container.load(FirestoreStorageModule.createWithMemoryStorage())
 	}
 
 }

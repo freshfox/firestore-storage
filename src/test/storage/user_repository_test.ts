@@ -82,5 +82,12 @@ describe('UserRepository', function () {
 
 	});
 
+	it('should get an user by id and throw an error', async () => {
+
+		await userRepo.save({id: 'asd'});
+		const user = await userRepo.getById('asd');
+
+	});
+
 
 });

@@ -23,15 +23,18 @@ export abstract class BaseRepository<T extends BaseModel> {
 
 	async get(attributes: T, ...ids: string[]) {
 		const doc = await this.find(attributes, ...ids);
-		if (!doc) {
-			const id = attributes.id ? ` (${attributes.id})` : '';
-			throw this.errorFactory(`Unable to get document${id} from ${this.getCollectionPath(...ids)}`);
+		if (doc) {
+			return doc;
 		}
-		return doc;
+		throw this.createError(attributes, ids);
 	}
 
-	getById(...ids: string[]) {
-		return this.get({ id: ids.pop() } as any, ...ids);
+	async getById(...ids: string[]) {
+		const doc = await this.findById(...ids);
+		if (doc) {
+			return doc;
+		}
+		throw this.createError({id: ids.pop()} as any, ids);
 	}
 
 	list(attributes?: T, ...ids: string[]): Promise<T[]> {
@@ -73,6 +76,11 @@ export abstract class BaseRepository<T extends BaseModel> {
 
 	listen(cb: (qb: QueryBuilder<T>) => QueryBuilder<T>, onNext, onError, ...ids: string[]) {
 		return this.storage.listen(this.getCollectionPath(...ids), cb, onNext, onError);
+	}
+
+	private createError(attributes: T, ids: string[]) {
+			const id = attributes.id ? ` (${attributes.id})` : '';
+			return this.errorFactory(`Unable to get document${id} from ${this.getCollectionPath(...ids)}`);
 	}
 
 }

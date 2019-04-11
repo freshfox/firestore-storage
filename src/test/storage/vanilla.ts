@@ -10,7 +10,9 @@ describe('Usage without Inversify', function () {
 		class UserRepository extends BaseRepository<User> {
 
 			constructor() {
-				super(new MemoryStorage());
+				super(new MemoryStorage(), (msg) => {
+					return new Error(msg)
+				});
 			}
 
 			getCollectionPath(...documentIds: string[]): string {
