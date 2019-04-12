@@ -21,7 +21,7 @@ describe('Usage without Inversify', function () {
 		}
 
 		const repo = new UserRepository();
-		const user = await repo.save({});
+		const user = await repo.save({name: ''});
 
 		should(user).property('id');
 
