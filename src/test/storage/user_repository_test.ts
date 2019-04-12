@@ -41,7 +41,6 @@ describe('UserRepository', function () {
 			name: 'u2'
 		});
 		should(users).length(1);
-
 	});
 
 	it('should find a user by id', async () => {
@@ -62,9 +61,10 @@ describe('UserRepository', function () {
 	it('should query by date', async () => {
 
 		const start = new Date('2018-03-10');
-		await save(10, () => {
+		await save(10, (index) => {
 			start.setDate(start.getDate() + 1);
 			return {
+				name: 'n' + index,
 				last_login: new Date(start)
 			}
 		});
@@ -84,9 +84,17 @@ describe('UserRepository', function () {
 
 	it('should get an user by id and throw an error', async () => {
 
-		await userRepo.save({id: 'asd'});
-		const user = await userRepo.getById('asd');
+		// @ts-ignore
+		await userRepo.getById('asd').should.be.rejected();
 
+	});
+
+	it('should get an user by id', async () => {
+
+		const u1 = await userRepo.save({
+			name: 'test'
+		});
+		await userRepo.getById(u1.id).should.fulfilledWith(u1);
 	});
 
 
