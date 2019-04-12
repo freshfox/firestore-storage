@@ -10,7 +10,7 @@ describe('Error throwing', function () {
 		const tc = TestFactory.createWithRepository(this, UserRepository);
 		const userRepo = tc.resolve(UserRepository);
 
-		it('error should be the default error class', async () => {
+		it('error should be rejected with the default error class', async () => {
 			const p1 = userRepo.getById('none');
 			await should(p1).rejectedWith(Error);
 		});
@@ -24,7 +24,7 @@ describe('Error throwing', function () {
 		});
 		const userRepo = tc.resolve(UserRepository);
 
-		it('error should be the default error class', async () => {
+		it('error should be rejected with the custom error class', async () => {
 			const p1 = userRepo.getById('none');
 			await should(p1).rejectedWith(CustomError);
 		});
