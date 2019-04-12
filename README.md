@@ -170,7 +170,7 @@ FirestoreStorageModule.createWithFirestore(admin.firestore(), errorFactory)
 class UserRepository extends BaseRepository<User> {
 
   constructor() {
-    super(memoryStorage, errorFactory);
+    super(storage, errorFactory);
   }
 }
 ```
