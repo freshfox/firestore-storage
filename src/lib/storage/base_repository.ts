@@ -15,13 +15,13 @@ export abstract class BaseRepository<T extends BaseModel> {
 		return this.storage.findById(this.getCollectionPath(...ids), docId);
 	}
 
-	find(attributes: T, ...ids: string[]): Promise<T> {
+	find(attributes: Partial<T>, ...ids: string[]): Promise<T> {
 		return this.storage.find(this.getCollectionPath(...ids), (qb) => {
 			return this.mapToWhereClause(qb, attributes);
 		})
 	}
 
-	async get(attributes: T, ...ids: string[]) {
+	async get(attributes: Partial<T>, ...ids: string[]) {
 		const doc = await this.find(attributes, ...ids);
 		if (doc) {
 			return doc;
@@ -37,13 +37,13 @@ export abstract class BaseRepository<T extends BaseModel> {
 		throw this.createError({id: ids.pop()} as any, ids);
 	}
 
-	list(attributes?: T, ...ids: string[]): Promise<T[]> {
+	list(attributes?: Partial<T>, ...ids: string[]): Promise<T[]> {
 		return this.query((qb) => {
 			return this.mapToWhereClause(qb, attributes);
 		}, ...ids);
 	}
 
-	protected mapToWhereClause(query: QueryBuilder<T>, attributes?: T): QueryBuilder<T> {
+	protected mapToWhereClause(query: QueryBuilder<T>, attributes?: Partial<T>): QueryBuilder<T> {
 		if (!attributes) {
 			return query;
 		}
@@ -78,7 +78,7 @@ export abstract class BaseRepository<T extends BaseModel> {
 		return this.storage.listen(this.getCollectionPath(...ids), cb, onNext, onError);
 	}
 
-	private createError(attributes: T, ids: string[]) {
+	private createError(attributes: Partial<T>, ids: string[]) {
 			const id = attributes.id ? ` (${attributes.id})` : '';
 			return this.errorFactory(`Unable to get document${id} from ${this.getCollectionPath(...ids)}`);
 	}
