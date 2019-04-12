@@ -2,15 +2,15 @@ import 'reflect-metadata';
 import {Container, interfaces} from 'inversify';
 import {BaseRepository} from '../lib/storage/base_repository';
 import {FirestoreStorageModule} from '../lib/storage/module';
-import {IStorageDriver} from '../lib/storage/storage';
+import {IErrorFactory, IStorageDriver} from '../lib/storage/storage';
 import {MemoryStorage} from '../lib/storage/memory_storage';
 import {BaseModel} from '../lib/storage/base_model';
 import * as admin from 'firebase-admin';
 
 export class TestFactory {
 
-	static createWithRepository<T extends BaseRepository<any>>(context, repoConstructor: interfaces.Newable<T>) {
-		const tc = new TestCase();
+	static createWithRepository<T extends BaseRepository<any>>(context, repoConstructor: interfaces.Newable<T>, errorFactory?: IErrorFactory) {
+		const tc = new TestCase(errorFactory);
 		tc.container.bind(repoConstructor).toSelf().inSingletonScope();
 
 		context.beforeEach(() => {
@@ -19,15 +19,14 @@ export class TestFactory {
 
 		return tc;
 	}
-
 }
 
 export class TestCase {
 
 	container = new Container();
 
-	constructor() {
-		TestCase.initWithMemoryStorage(this);
+	constructor(errorFactory?: IErrorFactory) {
+		TestCase.initWithMemoryStorage(this, errorFactory);
 	}
 
 	resolve<T>(constructorFunction: interfaces.Newable<T>): T {
@@ -38,25 +37,26 @@ export class TestCase {
 		return this.container.resolve(MemoryStorage);
 	}
 
-	private static initWithFirestore(tc: TestCase) {
+	private static initWithFirestore(tc: TestCase, errorFactory?: IErrorFactory) {
 		admin.initializeApp({
 			credential: admin.credential.cert(require('/home/dominic/Downloads/firestore-storage-test-firebase-adminsdk-pvcvb-f50c0471f1.json')),
 			databaseURL: "https://firestore-storage-test.firebaseio.com"
 		});
-		tc.container.load(FirestoreStorageModule.createWithFirestore(admin.firestore()))
+		tc.container.load(FirestoreStorageModule.createWithFirestore(admin.firestore(), errorFactory))
 	}
 
-	private static initWithMemoryStorage(tc: TestCase) {
-		tc.container.load(FirestoreStorageModule.createWithMemoryStorage())
+	private static initWithMemoryStorage(tc: TestCase, errorFactory?: IErrorFactory) {
+		tc.container.load(FirestoreStorageModule.createWithMemoryStorage(errorFactory))
 	}
 
 }
 
 export interface User extends BaseModel {
 
-	name?: string;
+	name: string;
 	email?: string;
 	last_login?: Date;
+
 
 }
 
