@@ -1,0 +1,11 @@
+{
+    "name": "Firestore Storage",
+    "platforms": [
+        "Node",
+        "Admin"
+    ],
+    "content": "README.md",
+    "related": [
+        "firebase/firebase-admin-node"
+    ]
+}
