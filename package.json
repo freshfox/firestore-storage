@@ -40,14 +40,10 @@
   "homepage": "https://github.com/freshfox/firestore-storage",
   "dependencies": {
     "@google-cloud/firestore": "^1.2.0",
-    "bcrypt-nodejs": "0.0.3",
-    "cnfg": "^1.2.0",
     "firebase-admin": "^7.2.0",
     "inversify": "^4.3.0",
     "lodash": "^4.17.4",
-    "node-env-file": "^0.1.8",
-    "reflect-metadata": "^0.1.10",
-    "supertest": "^3.0.0"
+    "reflect-metadata": "^0.1.10"
   },
   "devDependencies": {
     "@types/mocha": "^2.2.42",
