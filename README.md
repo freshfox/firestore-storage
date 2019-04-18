@@ -91,6 +91,23 @@ if (process.env.NODE_ENV === 'test') {
 container.bind(UserRepository).toSelf().inSingletonScope();
 ```
 
+## Models
+
+Your models should extend or implement the interface `BaseModel` which contains the id and
+modification timestamps.
+```typescript
+interface BaseModel {
+  id?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+```
+
+Since those values are not in the document itself, they will be added to the
+returning object when reading from Firestore. You can pass objects with those attributes to
+the `save()` function. They will always be omitted and the id will be used as the document id
+when writing data.
+
 ## Repositories
 
 Create repository classes for each collection you want to query documents from. For example
