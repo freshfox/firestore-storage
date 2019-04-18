@@ -4,6 +4,10 @@ _Typed repositories (DAO) for Node around Firestore providing a very simple API 
 write and read documents. Including a simple to use query builder and an in-memory
 storage implementation for running blazing fast tests_
 
+Firestore Storage provides a thin layer of abstraction to accessing data in Firestore.
+It follows the repository pattern, for more information about it you can read this
+[short article][repo-article]
+
 ## Example
 
 ```typescript
@@ -236,3 +240,4 @@ class UserRepository extends BaseRepository<User> {
 ```
 
 [inversify]: http://inversify.io/
+[repo-article]: [https://medium.com/@pererikbergman/repository-design-pattern-e28c0f3e4a30]
