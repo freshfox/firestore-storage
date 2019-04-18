@@ -1,6 +1,36 @@
 # Firestore Storage
 
-_A typed wrapper for Node around Firestore including a querybuilder and an in-memory implementation for running tests_
+_Typed repositories (DAO) for Node around Firestore providing a very simple API to
+write and read documents. Including a simple to use query builder and an in-memory
+storage implementation for running blazing fast tests_
+
+## Example
+
+```typescript
+const userRepo = new UserRepository();
+
+// Saving a user
+const user = await userRepo.save({
+	name: 'John Doe',
+	active: true
+});
+
+// Listing all documents
+const allUsers = await userRepo.list();
+
+// Filtering documents based on attributes
+const activeUsers = await userRepo.list({
+	active: true
+});
+
+// More complex queries
+const date = new Date('2019-02-01');
+const asd = await userRepo.query((qb) => {
+	return qb
+		.where('signUpDate', '<=', date)
+		.orderBy('signUpDate', 'asc');
+});
+```
 
 ## Usage
 
@@ -25,26 +55,47 @@ class UserRepository extends BaseRepository<User> {
 	getCollectionPath(...documentIds: string[]): string {
 		return 'users';
 	}
+	
+	listAllActive() {
+		return this.list({active: true});
+	}
 }
 
 const repo = new UserRepository();
 ```
 
 ### Inversify
-If you want to use this package with inversify you have load the `FirestoreStorageModule` module 
-into your container and set the `@injectable()` decorator to each repository class.
+This library fully supports [Inversify][inversify] To use it you have load the `FirestoreStorageModule` module 
+into your container and add the `@injectable()` decorator to each repository class. This will automatically
+inject the correct storage implementation (Firestore or In-Memory) into your repositories
 
 ```typescript
-container.load(FirestoreStorageModule.createWithMemoryStorage());
-// or
-container.load(FirestoreStorageModule.createWithFirestore(admin.firestore()));
+if (process.env.NODE_ENV === 'test') {
+	container.load(FirestoreStorageModule.createWithMemoryStorage());
+} else {
+	container.load(FirestoreStorageModule.createWithFirestore(admin.firestore()));
+}
+
+container.bind(UserRepository).toSelf().inSingletonScope();
 ```
 
 ## Repositories
 
 Create repository classes for each collection you want to query documents from. For example
 if you want to query documents to query from the `users` collection you create a class `UserRepository` extending `BaseRepository`.
-Each repository provides a list of functions for saving, querying and deleting documents.
+Each repository provides a list of functions for saving, querying and deleting documents
+and you can extend each repository based on your needs.
+
+When extending `BaseRepository` you have to implement the function
+`getCollectionPath(...ids: string[])`. For root collections the ids[] will be empty.
+For sub-collections this parameter will contain an hierarchically ordered list of parent
+document ids.
+
+Each function takes multiple ids as its last arguments. Those are the hierarchically
+ordered list of parent document ids passed to the `getCollectionPath(...)` function.
+
+The following examples are based on the `UserRepository` and `TodoRepository`
+created [below](#Extending BaseRepository)
 
 ### findById
 Takes a hierarchical ordered list of document ids. Returns the document when found or `null`
@@ -86,6 +137,15 @@ const passedDeadlineTodos = await todoRepo.query(() => {
 });
 ```
 Valid operators are `==` | `<` | `<=` | `>` | `>=`
+
+#### QueryBuilder functions
+
+```
+qb.where(fieldName, operator, value)
+qb.orderBy(fieldName, direction) // 'asc' or 'desc'
+qb.offset(number)
+qb.limit(number)
+```
 
 ### batchGet
 Returns an array of documents for a given array of ids. The array will contain null values if some documents aren't found
@@ -174,6 +234,5 @@ class UserRepository extends BaseRepository<User> {
   }
 }
 ```
-
 
 [inversify]: http://inversify.io/
