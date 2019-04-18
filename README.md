@@ -1,6 +1,6 @@
 # Firestore Storage
 
-_Typed repositories (DAO) for Node around Firestore providing a very simple API to
+_Typed repositories for Node around Firestore providing a very simple API to
 write and read documents. Including a simple to use query builder and an in-memory
 storage implementation for running blazing fast tests_
 
