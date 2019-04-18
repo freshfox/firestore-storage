@@ -11,8 +11,8 @@ const userRepo = new UserRepository();
 
 // Saving a user
 const user = await userRepo.save({
-	name: 'John Doe',
-	active: true
+  name: 'John Doe',
+  active: true
 });
 
 // Listing all documents
@@ -20,15 +20,15 @@ const allUsers = await userRepo.list();
 
 // Filtering documents based on attributes
 const activeUsers = await userRepo.list({
-	active: true
+  active: true
 });
 
 // More complex queries
 const date = new Date('2019-02-01');
 const asd = await userRepo.query((qb) => {
-	return qb
-		.where('signUpDate', '<=', date)
-		.orderBy('signUpDate', 'asc');
+  return qb
+    .where('signUpDate', '<=', date)
+    .orderBy('signUpDate', 'asc');
 });
 ```
 
@@ -48,17 +48,17 @@ import {storage} from './storage';
 
 class UserRepository extends BaseRepository<User> {
 
-	constructor() {
-		super(storage);
-	}
+  constructor() {
+    super(storage);
+  }
 
-	getCollectionPath(...documentIds: string[]): string {
-		return 'users';
-	}
+  getCollectionPath(...documentIds: string[]): string {
+    return 'users';
+  }
 	
-	listAllActive() {
-		return this.list({active: true});
-	}
+  listAllActive() {
+    return this.list({active: true});
+  }
 }
 
 const repo = new UserRepository();
@@ -71,9 +71,9 @@ inject the correct storage implementation (Firestore or In-Memory) into your rep
 
 ```typescript
 if (process.env.NODE_ENV === 'test') {
-	container.load(FirestoreStorageModule.createWithMemoryStorage());
+  container.load(FirestoreStorageModule.createWithMemoryStorage());
 } else {
-	container.load(FirestoreStorageModule.createWithFirestore(admin.firestore()));
+  container.load(FirestoreStorageModule.createWithFirestore(admin.firestore()));
 }
 
 container.bind(UserRepository).toSelf().inSingletonScope();
@@ -188,13 +188,13 @@ When creating repositories for nested collection it's always a good idea to chec
 ```typescript
 export class TodoRepository<T> extends BaseRepository<Todo> {
 
-	getCollectionPath(...documentIds): string {
-		const id = documentIds.shift();
-		if (!id) {
-			throw new Error('User id is missing');
-		}
-		return `users/${id}/todos`;
-	}
+  getCollectionPath(...documentIds): string {
+    const id = documentIds.shift();
+    if (!id) {
+      throw new Error('User id is missing');
+    }
+    return `users/${id}/todos`;
+  }
 }
 ```
 
@@ -209,9 +209,9 @@ The query functions [get](#get) and [getById](#getbyid) will throw an error if t
 If you want to throw an custom error you can do that by passing an error factory.
 ```typescript
 export class HttpError extends Error {
-	constructor(msg: string, public code: number) {
-		super(msg)
-	}
+  constructor(msg: string, public code: number) {
+    super(msg)
+  }
 }
 
 const errorFactory = (msg) => {
