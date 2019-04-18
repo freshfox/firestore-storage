@@ -1,8 +1,8 @@
 # Firestore Storage
 
-_Typed repositories for Node around Firestore providing a very simple API to
+>Typed repositories for Node around Firestore providing a very simple API to
 write and read documents. Including a simple to use query builder and an in-memory
-storage implementation for running blazing fast tests_
+storage implementation for running blazing fast tests
 
 Firestore Storage provides a thin layer of abstraction to accessing data in Firestore.
 It follows the repository pattern, for more information about it you can read this
@@ -34,6 +34,14 @@ const asd = await userRepo.query((qb) => {
     .where('signUpDate', '<=', date)
     .orderBy('signUpDate', 'asc');
 });
+```
+
+## Installtion
+
+```bash
+$ npm install firestore-storage
+
+$ yarn add firestore-storage
 ```
 
 ## Usage
