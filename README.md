@@ -19,6 +19,16 @@ const user = await userRepo.save({
   active: true
 });
 
+console.log(user);
+/* prints
+{
+  id: '0vdxYqEisf5vwJLhyLjA',
+  name: 'John Doe',
+  active: true,
+  createdAt: '2019-04-29T16:35:33.195Z',
+  updatedAt: '2019-04-29T16:35:33.195Z'
+}*/
+
 // Listing all documents
 const allUsers = await userRepo.list();
 
