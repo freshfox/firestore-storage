@@ -53,7 +53,9 @@ export class TestCase {
 
 export interface User extends BaseModel {
 
-	name: string;
+	name?: string;
+	/** @deprecated */firstname?: string;
+	/** @deprecated */lastname?: string;
 	email?: string;
 	last_login?: Date;
 
