@@ -1,6 +1,6 @@
 import {inject, injectable} from 'inversify';
 import {QueryBuilder, IStorageDriver, Storage, ErrorFactory, IErrorFactory} from './storage';
-import {BaseModel} from './base_model';
+import {BaseModel, PatchUpdate} from './base_model';
 
 @injectable()
 export abstract class BaseRepository<T extends BaseModel> {
@@ -61,7 +61,7 @@ export abstract class BaseRepository<T extends BaseModel> {
 		return this.storage.batchGet(this.getCollectionPath(...ids), documentIds);
 	}
 
-	save(data: T, ...ids: string[]): Promise<T> {
+	save(data: T | PatchUpdate<T>, ...ids: string[]): Promise<T> {
 		return this.storage.save(this.getCollectionPath(...ids), data)
 	}
 
