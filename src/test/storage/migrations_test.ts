@@ -58,7 +58,7 @@ describe('Migrations', function () {
 
 		const version = migrations.readVersion();
 		should(version).eql(2);
-		
+
     });
 
 

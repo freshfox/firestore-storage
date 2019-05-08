@@ -58,6 +58,11 @@ export interface User extends BaseModel {
 	/** @deprecated */lastname?: string;
 	email?: string;
 	last_login?: Date;
+	address?: {
+		street: string;
+		postal: number;
+		city: string;
+	}
 
 
 }

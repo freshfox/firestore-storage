@@ -97,5 +97,32 @@ describe('UserRepository', function () {
 		await userRepo.getById(u1.id).should.fulfilledWith(u1);
 	});
 
+	it('should query with data from a sub map', async () => {
+
+		const u1 = await userRepo.save({
+			address: {
+				street: 'Some Street',
+				postal: 1234,
+				city: 'City'
+			}
+		});
+
+		const u2 = await userRepo.save({
+			address: {
+				street: 'Some Street',
+				postal: 5678,
+				city: 'City'
+			}
+		});
+
+		const users = await userRepo.query((qb) => {
+			return qb.where('address.postal', '==', 1234);
+		});
+
+		should(users).length(1);
+		should(users[0]).property('id', u1.id);
+
+	});
+
 
 });
