@@ -1,5 +1,17 @@
 # Firestore Storage
 
+## Table of Contents
+
+* [Overview](#overview)
+* [Example](#example)
+* [Installation](#installation)
+* [Usage](#usage)
+* [Models](#models)
+* [Repository](#repositories)
+* [Migrations](#migrations)
+* [Throwing custom errors](#custom-error)
+
+## Overview
 >Typed repositories for Node around Firestore providing a very simple API to
 write and read documents. Including a simple to use query builder and an in-memory
 storage implementation for running blazing fast tests
@@ -46,11 +58,13 @@ const asd = await userRepo.query((qb) => {
 });
 ```
 
-## Installtion
+## Installation
+
+The `firestore-storage` package is available via npm
 
 ```bash
 $ npm install firestore-storage
-
+# or
 $ yarn add firestore-storage
 ```
 
@@ -242,6 +256,11 @@ This will throw an error when trying to save or query without passing the user i
 await todoRepo.save({...}); // Throws and error
 await todoRepo.save({...}, '<userId>'); // Succeeds
 ```
+
+## Migrations
+
+This package provides a base class to migrate data in Firestore.
+For more info look at [this example](src/test/storage/migrations_test.ts)
 
 ## Custom error
 The query functions [get](#get) and [getById](#getbyid) will throw an error if the document doesn't exist.
