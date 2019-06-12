@@ -61,6 +61,11 @@ export abstract class BaseRepository<T extends BaseModel> {
 		return this.storage.batchGet(this.getCollectionPath(...ids), documentIds);
 	}
 
+	async batchGetNoNulls(documentIds: string[], ...ids: string[]) {
+		const docs = await this.batchGet(documentIds, ...ids);
+		return docs.filter(d => d);
+	}
+
 	save(data: T | PatchUpdate<T>, ...ids: string[]): Promise<T> {
 		return this.storage.save(this.getCollectionPath(...ids), data)
 	}
