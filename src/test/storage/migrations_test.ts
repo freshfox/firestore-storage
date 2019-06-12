@@ -56,7 +56,7 @@ describe('Migrations', function () {
 		const u2 = await userRepo.getById(u1.id);
 		should(u2.name).eql('John Doe');
 
-		const version = migrations.readVersion();
+		const version = await migrations.readVersion();
 		should(version).eql(2);
 
     });

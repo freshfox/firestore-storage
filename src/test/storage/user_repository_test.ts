@@ -124,5 +124,32 @@ describe('UserRepository', function () {
 
 	});
 
+	it('should batchGet() documents', async () => {
+
+		const u1 = await userRepo.save({});
+		const u2 = await userRepo.save({});
+		const u3 = await userRepo.save({});
+
+		const users1 = await userRepo.batchGet([u3.id, 'something', u1.id]);
+		should(users1).length(3);
+		should(users1[0]).property('id', u3.id);
+		should(users1[1]).eql(null);
+		should(users1[2]).property('id', u1.id);
+
+	});
+
+	it('should batchGet() documents without nulls', async () => {
+
+		const u1 = await userRepo.save({});
+		const u2 = await userRepo.save({});
+		const u3 = await userRepo.save({});
+
+		const users1 = await userRepo.batchGetNoNulls([u3.id, 'something', u1.id]);
+		should(users1).length(2);
+		should(users1[0]).property('id', u3.id);
+		should(users1[1]).property('id', u1.id);
+
+	});
+
 
 });
