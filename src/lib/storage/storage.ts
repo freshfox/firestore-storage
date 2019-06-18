@@ -1,4 +1,3 @@
-import {interfaces} from 'inversify';
 
 export interface IStorageDriver {
 
@@ -18,6 +17,9 @@ export interface IStorageDriver {
 
 	listen<T>(collection: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>,
 		   onNext: (snapshot: any) => void, onError?: (error: Error) => void): () => void;
+
+	transaction<T>(updateFunction: (transaction: IFirestoreTransaction) => Promise<T>,
+				   transactionOptions?:{maxAttempts?: number}): Promise<T>;
 }
 
 export interface QueryBuilder<T> {
@@ -33,6 +35,25 @@ export interface QueryBuilder<T> {
 	get(): Promise<any>;
 
 	onSnapshot(onNext: (snapshot: any) => void, onError?: (error: Error) => void) : () => void;
+
+}
+
+export interface IFirestoreTransaction {
+
+	query<T>(collectionPath: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<T[]>;
+
+	get<T>(collectionPath: string, docId: string): Promise<T>;
+
+	create<T>(collectionPath: string, data: T): IFirestoreTransaction;
+
+	set<T>(collectionPath: string, data: T): IFirestoreTransaction;
+
+	update<T>(collectionPath: string, data: T): IFirestoreTransaction;
+
+	delete(collectionPath: string, docId: string): IFirestoreTransaction;
+}
+
+export interface Transaction {
 
 }
 

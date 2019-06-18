@@ -1,4 +1,4 @@
-import {OrderDirection, QueryBuilder, IStorageDriver, SaveOptions} from './storage';
+import {OrderDirection, QueryBuilder, IStorageDriver, SaveOptions, IFirestoreTransaction} from './storage';
 import * as uuid from 'uuid/v4';
 import {injectable} from 'inversify';
 import * as _ from 'lodash';
@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 @injectable()
 export class MemoryStorage implements IStorageDriver {
 
-	private data: Document = new Document();
+	data: Document = new Document();
 
 	findById(collection: string, id: string): Promise<any> {
 		const doc = this.data.getCollection(collection).getDocument(id, true);
@@ -30,7 +30,7 @@ export class MemoryStorage implements IStorageDriver {
 		return this.findById(collection, id);
 	}
 
-	private addDocument(collection: string, id: string, data: any, options?: SaveOptions) {
+	addDocument(collection: string, id: string, data: any, options?: SaveOptions) {
 		const doc = this.data.getCollection(collection).getDocument(id);
 		const now = new Date();
 		doc.updatedAt = now;
@@ -81,6 +81,11 @@ export class MemoryStorage implements IStorageDriver {
 		return Promise.resolve();
 	}
 
+	transaction<T>(updateFunction: (transaction: IFirestoreTransaction) => Promise<T>,
+				   transactionOptions?: { maxAttempts?: number }): Promise<T> {
+		return updateFunction(new MemoryTransaction(this));
+	}
+
 	private getAsArray(collection: string) {
 		const collectionRef = this.data.getCollection(collection);
 		return Object.keys(collectionRef.documents)
@@ -97,11 +102,11 @@ export class MemoryStorage implements IStorageDriver {
 		}, doc.data);
 	}
 
-	private static createId() {
+	static createId() {
 		return uuid();
 	}
 
-	private static clone(data): {id: string, data} {
+	static clone(data): {id: string, data} {
 		const clone = Object.assign({}, data);
 		const id = data.id;
 		delete clone.id;
@@ -190,6 +195,51 @@ export class MemoryQueryBuilder<T> implements QueryBuilder<T> {
 	onSnapshot(onNext: (snapshot: any) => void, onError?: (error: Error) => void): () => void {
 		throw new Error('not supported');
 	}
+
+}
+
+export class MemoryTransaction implements IFirestoreTransaction {
+
+	constructor(private storage: MemoryStorage) {
+
+	}
+
+	create<T>(collectionPath: string, data: T): IFirestoreTransaction {
+		const model = MemoryStorage.clone(data);
+		this.storage.addDocument(collectionPath, MemoryStorage.createId(), model.data);
+		return this;
+	}
+
+	delete(collectionPath: string, docId: string): IFirestoreTransaction {
+		delete this.storage.data.getCollection(collectionPath).documents[docId];
+		return this;
+	}
+
+	get<T>(collectionPath: string, docId: string): Promise<T> {
+		return this.storage.findById(collectionPath, docId);
+	}
+
+	query<T>(collectionPath: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<T[]> {
+		return this.storage.query(collectionPath, cb);
+	}
+
+	set<T>(collectionPath: string, data: T): IFirestoreTransaction {
+		const model = MemoryStorage.clone(data);
+		const id = model.id ? model.id : MemoryStorage.createId();
+		this.storage.addDocument(collectionPath, id, model.data);
+		return this;
+	}
+
+	update<T>(collectionPath: string, data: T): IFirestoreTransaction {
+		const model = MemoryStorage.clone(data);
+		if (!model.id) {
+			throw new Error(`No document id found. Unable to update (${collectionPath}) ${JSON.stringify(model.data, null, 2)}`)
+		}
+		this.storage.addDocument(collectionPath, model.id, model.data);
+		return this;
+	}
+
+
 
 }
 

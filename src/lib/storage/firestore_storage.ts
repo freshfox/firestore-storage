@@ -1,8 +1,14 @@
-import {QueryBuilder, IStorageDriver, SaveOptions, FirestoreInstance} from './storage';
+import {QueryBuilder, IStorageDriver, SaveOptions, FirestoreInstance, IFirestoreTransaction} from './storage';
 import {inject, injectable} from 'inversify';
 import * as admin from 'firebase-admin';
 import {DocumentSnapshot, QuerySnapshot} from '@google-cloud/firestore';
 import DocumentReference = FirebaseFirestore.DocumentReference;
+import Transaction = FirebaseFirestore.Transaction;
+import Query = FirebaseFirestore.Query;
+import ReadOptions = FirebaseFirestore.ReadOptions;
+import DocumentData = FirebaseFirestore.DocumentData;
+import SetOptions = FirebaseFirestore.SetOptions;
+import Precondition = FirebaseFirestore.Precondition;
 
 @injectable()
 export class FirestoreStorage implements IStorageDriver {
@@ -89,6 +95,14 @@ export class FirestoreStorage implements IStorageDriver {
 		});
 	}
 
+	async transaction<T>(updateFunction: (firestoreTrx: IFirestoreTransaction) => Promise<T>,
+					  transactionOptions?:{maxAttempts?: number}) {
+		return this.firestore.runTransaction((transaction) => {
+			const trx = new FirestoreTransaction(this.firestore, transaction);
+			return updateFunction(trx);
+		}, transactionOptions);
+	}
+
 	async delete(collection: string, id: string) {
 		const qb = this.firestore.collection(collection);
 		await qb.doc(id).delete()
@@ -141,7 +155,7 @@ export class FirestoreStorage implements IStorageDriver {
 			.catch(reject);
 	}
 
-	private static clone(data): {id: string, data} {
+	static clone(data): {id: string, data} {
 		const clone = Object.assign({}, data);
 		const id = data.id;
 		delete clone.id;
@@ -157,7 +171,7 @@ export class FirestoreStorage implements IStorageDriver {
 		return `${collection}/${id}`;
 	}
 
-	private static format(snapshot: DocumentSnapshot) {
+	static format(snapshot: DocumentSnapshot) {
 		if (!snapshot.exists) {
 			return null;
 		}
@@ -166,5 +180,64 @@ export class FirestoreStorage implements IStorageDriver {
 			createdAt: new Date(snapshot.createTime.toMillis()),
 			updatedAt: new Date(snapshot.updateTime.toMillis())
 		}, snapshot.data()) as any;
+	}
+}
+
+export class FirestoreTransaction implements IFirestoreTransaction {
+
+	constructor(private firestore: admin.firestore.Firestore, private transaction: Transaction) {
+
+	}
+
+	async query<T>(collectionPath: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<T[]> {
+		//this.transaction.get()
+		const q = this.firestore.collection(collectionPath);
+		const result = await this.transaction.get(cb(q) as Query);
+		if (result.empty) {
+			return [];
+		}
+		return result.docs.map((document) => {
+			return FirestoreStorage.format(document);
+		});
+	}
+
+	async get<T>(collectionPath: string, docId: string): Promise<T> {
+		const doc = this.firestore.collection(collectionPath).doc(docId);
+		const data = await this.transaction.get(doc);
+		if (data.exists) {
+			return FirestoreStorage.format(data);
+		}
+		return null;
+	}
+
+	create<T>(collectionPath: string, data: T): FirestoreTransaction {
+		const model = FirestoreStorage.clone(data);
+		const doc = this.firestore.collection(collectionPath).doc();
+		this.transaction.create(doc, model.data);
+		return this;
+	};
+
+	set<T>(collectionPath: string, data: T): FirestoreTransaction {
+		const model = FirestoreStorage.clone(data);
+		const doc = model.id
+			? this.firestore.collection(collectionPath).doc()
+			: this.firestore.collection(collectionPath).doc(model.id);
+		this.transaction.set(doc, model.data, {
+			merge: true
+		});
+		return this;
+	}
+
+	update<T>(collectionPath: string, data: T): FirestoreTransaction {
+		const model = FirestoreStorage.clone(data);
+		const doc = this.firestore.collection(collectionPath).doc(model.id);
+		this.transaction.update(doc, model.data);
+		return this;
+	}
+
+	delete(collectionPath: string, docId: string): FirestoreTransaction {
+		const doc = this.firestore.collection(collectionPath).doc(docId);
+		this.transaction.delete(doc);
+		return this;
 	}
 }
