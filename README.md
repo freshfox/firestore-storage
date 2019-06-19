@@ -1,4 +1,5 @@
 # Firestore Storage
+[![Build Status](https://travis-ci.org/freshfox/firestore-storage.svg?branch=master)](https://travis-ci.org/freshfox/firestore-storage)
 [![npm version](https://badge.fury.io/js/firestore-storage.svg)](https://badge.fury.io/js/firestore-storage)
 
 ## Table of Contents
