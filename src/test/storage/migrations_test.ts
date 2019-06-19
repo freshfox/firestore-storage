@@ -1,5 +1,5 @@
-import {FirestoreStorageModule, Migrations} from '../../lib';
-import {Container, injectable} from 'inversify';
+import {FirestoreStorageModule, IStorageDriver, Migrations, Storage} from '../../lib';
+import {Container, inject, injectable} from 'inversify';
 import {User, UserRepository} from '../index';
 import * as should from 'should';
 
@@ -7,6 +7,11 @@ describe('Migrations', function () {
 
 	@injectable()
 	class MyProjectMigrations extends Migrations {
+
+		constructor(private userRepo: UserRepository,
+					@inject(Storage) protected storage: IStorageDriver) {
+			super(storage);
+		}
 
 		getVersion(): number {
 			return 2;
@@ -22,10 +27,11 @@ describe('Migrations', function () {
 		}
 
 		private async combineName() {
-			const users: User[] = await this.storage.query('users', qb => qb);
+			const collectionPath = this.userRepo.getCollectionPath();
+			const users: User[] = await this.storage.query(collectionPath, qb => qb);
 			for (const user of users) {
 				user.name = `${user.firstname} ${user.lastname}`;
-				await this.storage.save('users', user);
+				await this.storage.save(collectionPath, user);
 			}
 		}
 
@@ -42,6 +48,10 @@ describe('Migrations', function () {
 
 	const userRepo = container.resolve(UserRepository);
 	const migrations = container.resolve(MyProjectMigrations);
+
+	beforeEach(async () => {
+		return userRepo.clear();
+	});
 
     it('should run a simple migration', async () => {
 

@@ -6,11 +6,18 @@ import {IErrorFactory, IStorageDriver} from '../lib/storage/storage';
 import {MemoryStorage} from '../lib/storage/memory_storage';
 import {BaseModel} from '../lib/storage/base_model';
 import * as admin from 'firebase-admin';
+import * as env from 'node-env-file';
+import * as fs from 'fs';
+
+const path = __dirname + '/../../.env';
+if(fs.existsSync(path)){
+	env(path);
+}
 
 export class TestFactory {
 
-	static createWithRepository<T extends BaseRepository<any>>(context, repoConstructor: interfaces.Newable<T>, errorFactory?: IErrorFactory) {
-		const tc = new TestCase(errorFactory);
+	static createWithRepository<T extends BaseRepository<any>>(context, repoConstructor: interfaces.Newable<T>, errorFactory?: IErrorFactory, forceFirebaseStorage?: boolean) {
+		const tc = new TestCase(errorFactory, forceFirebaseStorage);
 		tc.container.bind(repoConstructor).toSelf().inSingletonScope();
 
 		context.beforeEach(() => {
@@ -25,8 +32,17 @@ export class TestCase {
 
 	container = new Container();
 
-	constructor(errorFactory?: IErrorFactory) {
-		TestCase.initWithMemoryStorage(this, errorFactory);
+	constructor(errorFactory?: IErrorFactory, forceFirebaseStorage?: boolean) {
+		const runWithFirestore = process.argv.indexOf('--firestore') >= 0;
+		const credentialsFile = process.env.FIREBASE_CREDENTIALS;
+		if (runWithFirestore || forceFirebaseStorage) {
+			if (!credentialsFile) {
+				throw new Error('FIREBASE_CREDENTIALS env variable not set');
+			}
+			TestCase.initWithFirestore(this, credentialsFile, errorFactory);
+		} else {
+			TestCase.initWithMemoryStorage(this, errorFactory);
+		}
 	}
 
 	resolve<T>(constructorFunction: interfaces.Newable<T>): T {
@@ -37,11 +53,17 @@ export class TestCase {
 		return this.container.resolve(MemoryStorage);
 	}
 
-	private static initWithFirestore(tc: TestCase, errorFactory?: IErrorFactory) {
-		admin.initializeApp({
-			credential: admin.credential.cert(require('/home/dominic/Downloads/firestore-storage-test-firebase-adminsdk-pvcvb-f50c0471f1.json')),
-			databaseURL: "https://firestore-storage-test.firebaseio.com"
-		});
+	private static initWithFirestore(tc: TestCase, credentials: string, errorFactory?: IErrorFactory) {
+		if (admin.apps.length === 0) {
+			console.log('Initializing Firestore');
+			admin.initializeApp({
+				credential: admin.credential.cert(require(credentials)),
+				databaseURL: 'https://firestore-storage-test.firebaseio.com'
+			});
+			admin.firestore().settings({
+				timestampsInSnapshots: false
+			})
+		}
 		tc.container.load(FirestoreStorageModule.createWithFirestore(admin.firestore(), errorFactory))
 	}
 
@@ -63,14 +85,14 @@ export interface User extends BaseModel {
 		postal: number;
 		city: string;
 	}
-
-
 }
+
+const testRun = `tests/${Date.now()}`;
 
 export class UserRepository extends BaseRepository<User> {
 
 	getCollectionPath(...documentIds: string[]): string {
-		return 'users';
+		return `${testRun}/users`;
 	}
 
 }

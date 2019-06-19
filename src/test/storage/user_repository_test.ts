@@ -6,6 +6,10 @@ describe('UserRepository', function () {
 	const tc = TestFactory.createWithRepository(this, UserRepository);
 	const userRepo = tc.resolve(UserRepository);
 
+	beforeEach(async () => {
+		return userRepo.clear();
+	});
+
 	const save = async (count: number, cb?: (index: number) => User) => {
 		for (let i = 0; i < count; i++) {
 			await userRepo.save(cb ? cb(i) : {
@@ -77,7 +81,7 @@ describe('UserRepository', function () {
 		should(users).length(6);
 		for (let i = 0; i < users.length; i++) {
 			const user = users[i];
-			should(user.last_login > queryDate).true();
+			should(user.last_login.getTime() > queryDate.getTime()).true();
 		}
 
 	});

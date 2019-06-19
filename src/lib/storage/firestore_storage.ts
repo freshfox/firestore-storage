@@ -5,10 +5,6 @@ import {DocumentSnapshot, QuerySnapshot} from '@google-cloud/firestore';
 import DocumentReference = FirebaseFirestore.DocumentReference;
 import Transaction = FirebaseFirestore.Transaction;
 import Query = FirebaseFirestore.Query;
-import ReadOptions = FirebaseFirestore.ReadOptions;
-import DocumentData = FirebaseFirestore.DocumentData;
-import SetOptions = FirebaseFirestore.SetOptions;
-import Precondition = FirebaseFirestore.Precondition;
 
 @injectable()
 export class FirestoreStorage implements IStorageDriver {
@@ -219,9 +215,8 @@ export class FirestoreTransaction implements IFirestoreTransaction {
 
 	set<T>(collectionPath: string, data: T): FirestoreTransaction {
 		const model = FirestoreStorage.clone(data);
-		const doc = model.id
-			? this.firestore.collection(collectionPath).doc()
-			: this.firestore.collection(collectionPath).doc(model.id);
+		//model.id can be null
+		const doc = this.firestore.collection(collectionPath).doc(model.id);
 		this.transaction.set(doc, model.data, {
 			merge: true
 		});

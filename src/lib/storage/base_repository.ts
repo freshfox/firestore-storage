@@ -1,5 +1,5 @@
 import {inject, injectable} from 'inversify';
-import {QueryBuilder, IStorageDriver, Storage, ErrorFactory, IErrorFactory} from './storage';
+import {QueryBuilder, IStorageDriver, Storage, ErrorFactory, IErrorFactory, IFirestoreTransaction} from './storage';
 import {BaseModel, PatchUpdate} from './base_model';
 
 @injectable()
@@ -83,9 +83,47 @@ export abstract class BaseRepository<T extends BaseModel> {
 		return this.storage.listen(this.getCollectionPath(...ids), cb, onNext, onError);
 	}
 
+	transaction<R>(updateFunction: (transaction: RepositoryTransaction<T>) => Promise<R>, ...ids: string[]): Promise<R> {
+		return this.storage.transaction<R>((trx) => {
+			return updateFunction(new RepositoryTransaction(this.getCollectionPath(...ids), trx))
+		});
+	}
+
 	private createError(attributes: Partial<T>, ids: string[]) {
 			const id = attributes.id ? ` (${attributes.id})` : '';
 			return this.errorFactory(`Unable to get document${id} from ${this.getCollectionPath(...ids)}`);
+	}
+
+}
+
+export class RepositoryTransaction<T> {
+
+	constructor(private collectionPath: string,
+				private trx: IFirestoreTransaction) {
+	}
+
+	create(data: T): IFirestoreTransaction {
+		return this.trx.create(this.collectionPath, data);
+	}
+
+	delete(docId: string): IFirestoreTransaction {
+		return this.trx.delete(this.collectionPath, docId);
+	}
+
+	get(docId: string): Promise<T> {
+		return this.trx.get(this.collectionPath, docId);
+	}
+
+	query(cb: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<T[]> {
+		return this.trx.query(this.collectionPath, cb);
+	}
+
+	set(data: T): IFirestoreTransaction {
+		return this.trx.set(this.collectionPath, data);
+	}
+
+	update(data: T): IFirestoreTransaction {
+		return this.trx.update(this.collectionPath, data);
 	}
 
 }

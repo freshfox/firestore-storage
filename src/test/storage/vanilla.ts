@@ -3,7 +3,7 @@ import {User} from '../index';
 import {MemoryStorage} from '../../lib/storage/memory_storage';
 import * as should from 'should';
 
-describe('Usage without Inversify', function () {
+describe('Usage without Inversify (MemoryStorage only)', function () {
 
 	it('should create a repository without DI', async () => {
 

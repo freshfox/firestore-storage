@@ -200,30 +200,41 @@ export class MemoryQueryBuilder<T> implements QueryBuilder<T> {
 
 export class MemoryTransaction implements IFirestoreTransaction {
 
+	private didWrite = false;
+
 	constructor(private storage: MemoryStorage) {
 
 	}
 
 	create<T>(collectionPath: string, data: T): IFirestoreTransaction {
+		this.didWrite = true;
 		const model = MemoryStorage.clone(data);
 		this.storage.addDocument(collectionPath, MemoryStorage.createId(), model.data);
 		return this;
 	}
 
 	delete(collectionPath: string, docId: string): IFirestoreTransaction {
+		this.didWrite = true;
 		delete this.storage.data.getCollection(collectionPath).documents[docId];
 		return this;
 	}
 
 	get<T>(collectionPath: string, docId: string): Promise<T> {
+		if (this.didWrite) {
+			throw MemoryTransaction.getReadAfterWriteError();
+		}
 		return this.storage.findById(collectionPath, docId);
 	}
 
 	query<T>(collectionPath: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<T[]> {
+		if (this.didWrite) {
+			throw MemoryTransaction.getReadAfterWriteError();
+		}
 		return this.storage.query(collectionPath, cb);
 	}
 
 	set<T>(collectionPath: string, data: T): IFirestoreTransaction {
+		this.didWrite = true;
 		const model = MemoryStorage.clone(data);
 		const id = model.id ? model.id : MemoryStorage.createId();
 		this.storage.addDocument(collectionPath, id, model.data);
@@ -231,6 +242,7 @@ export class MemoryTransaction implements IFirestoreTransaction {
 	}
 
 	update<T>(collectionPath: string, data: T): IFirestoreTransaction {
+		this.didWrite = true;
 		const model = MemoryStorage.clone(data);
 		if (!model.id) {
 			throw new Error(`No document id found. Unable to update (${collectionPath}) ${JSON.stringify(model.data, null, 2)}`)
@@ -239,6 +251,9 @@ export class MemoryTransaction implements IFirestoreTransaction {
 		return this;
 	}
 
+	private static getReadAfterWriteError() {
+		return new Error('Firestore transactions require all reads to be executed before all writes.')
+	}
 
 
 }
