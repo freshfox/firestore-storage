@@ -30,7 +30,7 @@
     "test:firestore": "yarn test --opts test/mocha.firestore.opts",
     "test:all": "yarn test && yarn test:firestore",
     "build": "tsc",
-    "preversion": "git pull && yarn build && yarn test",
+    "preversion": "git pull && yarn build && yarn test:all",
     "postversion": "git push && git push --tags && npm publish"
   },
   "repository": {
