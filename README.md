@@ -8,6 +8,7 @@
 * [Usage](#usage)
 * [Models](#models)
 * [Repository](#repositories)
+* [Transactions](#transactions)
 * [Migrations](#migrations)
 * [Throwing custom errors](#custom-error)
 
@@ -150,6 +151,11 @@ ordered list of parent document ids passed to the `getCollectionPath(...)` funct
 The following examples are based on the `UserRepository` and `TodoRepository`
 created [below](#Extending BaseRepository)
 
+## Transactions
+
+Each repository as well as the FirestoreStorage and MemoryStorage implementations
+provide a [transaction()](#transaction) function.
+
 ### findById
 Takes a hierarchical ordered list of document ids. Returns the document when found or `null`
 ```typescript
@@ -224,6 +230,18 @@ await todoRepo.delete(userId, todoId);
 await userRepo.delete(userId);
 ```
 
+### transaction
+Takes an update function and an array of ids. Find more about transactions at the
+[Firestore documentation][transaction-doc]
+```typescript
+const result = await userRepo.transaction((trx) => {
+	const u = trx.get('some-id');
+	u.name = 'John';
+	trx.set(u);
+	return 'worked';
+})
+```
+
 ### Extending BaseRepository
 
 ```typescript
@@ -295,3 +313,4 @@ class UserRepository extends BaseRepository<User> {
 
 [inversify]: http://inversify.io/
 [repo-article]: [https://medium.com/@pererikbergman/repository-design-pattern-e28c0f3e4a30]
+[transaction-doc]: https://firebase.google.com/docs/firestore/manage-data/transactions
