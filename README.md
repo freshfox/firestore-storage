@@ -5,6 +5,7 @@
 * [Overview](#overview)
 * [Example](#example)
 * [Installation](#installation)
+* [Tests](#tests)
 * [Usage](#usage)
 * [Models](#models)
 * [Repository](#repositories)
@@ -67,6 +68,25 @@ The `firestore-storage` package is available via npm
 $ npm install firestore-storage
 # or
 $ yarn add firestore-storage
+```
+
+## Tests
+To run all tests using only the `MemoryStorage` implementation run:
+```bash
+$ yarn test
+```
+
+It's also possible to run all tests using the `FirestoreStorage` implementation. To do this
+you need to create a Firebase project and download the Admin SDK credentials file.
+Copy the `.env.sample` to `.env` and add the absolute path to the `FIREBASE_CREDENTIALS` file.
+To execute the tests run:
+```bash
+$ yarn test:firestore
+```
+
+To run tests using both `MemoryStorage` and `FirestoreStorage` run
+```bash
+$ yarn test:all
 ```
 
 ## Usage
