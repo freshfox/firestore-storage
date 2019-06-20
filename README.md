@@ -235,9 +235,29 @@ const users = await userRepo.batchGet([userId1, userId2]);
 ```
 
 ### save
-Saves a document into Firestore
+Saves a document into Firestore.
 ```typescript
 const user = await userRepo.save({
+  name: 'John',
+  email: 'john@exmaple.com'
+});
+```
+If you want to update data you just have to pass the id of the document.
+```typescript
+const user = await userRepo.save({
+  id: '8zCW4UszD0wmdrpBNswp',
+  name: 'John',
+  email: 'john@exmaple.com'
+});
+```
+By default this will create the document with this id if it doesn't exist
+or merge the properties into the existing document. If you want to write a document
+and instead of don't merge use the [write()][write] function
+
+### write 
+Sets the passed data. If the document exists it will be overwritten.
+```typescript
+const user = await userRepo.write({
   name: 'John',
   email: 'john@exmaple.com'
 });
