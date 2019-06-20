@@ -13,8 +13,8 @@
 * [Tests](#tests)
 * [Usage](#usage)
 * [Models](#models)
-* [Repository](#repositories)
 * [Transactions](#transactions)
+* [Repository](#repositories)
 * [Migrations](#migrations)
 * [Throwing custom errors](#custom-error)
 
@@ -158,6 +158,11 @@ returning object when reading from Firestore. You can pass objects with those at
 the `save()` function. They will always be omitted and the id will be used as the document id
 when writing data.
 
+## Transactions
+
+Each repository as well as the FirestoreStorage and MemoryStorage implementations
+provide a [transaction()](#transaction) function.
+
 ## Repositories
 
 Create repository classes for each collection you want to query documents from. For example
@@ -175,11 +180,6 @@ ordered list of parent document ids passed to the `getCollectionPath(...)` funct
 
 The following examples are based on the `UserRepository` and `TodoRepository`
 created [below](#Extending BaseRepository)
-
-## Transactions
-
-Each repository as well as the FirestoreStorage and MemoryStorage implementations
-provide a [transaction()](#transaction) function.
 
 ### findById
 Takes a hierarchical ordered list of document ids. Returns the document when found or `null`
