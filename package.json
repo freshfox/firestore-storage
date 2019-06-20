@@ -45,7 +45,7 @@
     "firebase-admin": "^7.2.0",
     "inversify": "^4.3.0",
     "lodash": "^4.17.4",
-    "reflect-metadata": "^0.1.10"
+    "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
     "@types/mocha": "^2.2.42",
@@ -55,6 +55,6 @@
     "node-env-file": "^0.1.8",
     "should": "^13.2.3",
     "ts-node": "^5.0.1",
-    "typescript": "^3.2.2"
+    "typescript": "^3.5.2"
   }
 }
