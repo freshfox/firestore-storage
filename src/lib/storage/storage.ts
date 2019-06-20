@@ -5,7 +5,7 @@ export interface IStorageDriver {
 
 	find<T>(collection: string, query: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<any>;
 
-	save(collection: string, data): Promise<any>;
+	save(collection: string, data: any, options?: SaveOptions): Promise<any>;
 
 	query<T>(collection: string, query: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<any>;
 

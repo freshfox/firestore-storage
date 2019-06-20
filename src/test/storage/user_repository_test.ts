@@ -155,5 +155,42 @@ describe('UserRepository', function () {
 
 	});
 
+	it('should save a document using default merge strategy', async () => {
+
+		const u1 = await userRepo.save({
+			lastname: 'Doe'
+		});
+
+		const u2 = await userRepo.save({
+			id: u1.id,
+			firstname: 'John'
+		});
+
+		should(u2).properties({
+			firstname: 'John',
+			lastname: 'Doe'
+		})
+
+	});
+
+	it('should save a document without merging data', async () => {
+
+		const u1 = await userRepo.save({
+			lastname: 'Doe'
+		});
+
+		const u2 = await userRepo.write({
+			id: u1.id,
+			firstname: 'John'
+		});
+
+		should(u2).properties({
+			id: u1.id,
+			firstname: 'John'
+		});
+		should(u2).not.property('lastname');
+
+	});
+
 
 });

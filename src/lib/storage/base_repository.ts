@@ -70,6 +70,10 @@ export abstract class BaseRepository<T extends BaseModel> {
 		return this.storage.save(this.getCollectionPath(...ids), data)
 	}
 
+	write(data: T | PatchUpdate<T>, ...ids: string[]) {
+		return this.storage.save(this.getCollectionPath(...ids), data, {avoidMerge: true});
+	}
+
 	clear(...ids: string[]): Promise<void> {
 		return this.storage.clear(this.getCollectionPath(...ids))
 	}
