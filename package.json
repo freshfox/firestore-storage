@@ -41,10 +41,10 @@
   "license": "MIT",
   "homepage": "https://github.com/freshfox/firestore-storage",
   "dependencies": {
-    "@google-cloud/firestore": "^1.2.0",
-    "firebase-admin": "^7.2.0",
-    "inversify": "^4.3.0",
-    "lodash": "^4.17.4",
+    "@google-cloud/firestore": "^2.2.1",
+    "firebase-admin": "^8.2.0",
+    "inversify": "^5.0.1",
+    "lodash": "^4.17.11",
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
