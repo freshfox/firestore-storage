@@ -4,7 +4,7 @@ import {BaseRepository} from '../lib/storage/base_repository';
 import {FirestoreStorageModule} from '../lib/storage/module';
 import {IErrorFactory, IStorageDriver} from '../lib/storage/storage';
 import {MemoryStorage} from '../lib/storage/memory_storage';
-import {BaseModel} from '../lib/storage/base_model';
+import {BaseModel, ReferenceMap} from '../lib/storage/base_model';
 import * as admin from 'firebase-admin';
 import * as env from 'node-env-file';
 import * as fs from 'fs';
@@ -16,12 +16,14 @@ if(fs.existsSync(path)){
 
 export class TestFactory {
 
-	static createWithRepository<T extends BaseRepository<any>>(context, repoConstructor: interfaces.Newable<T>, errorFactory?: IErrorFactory, forceFirebaseStorage?: boolean) {
+	static createWithRepository<T extends BaseRepository<any>>(context, repoConstructor: interfaces.Newable<T>,
+															   errorFactory?: IErrorFactory,
+															   forceFirebaseStorage?: boolean, ...ids: string[]) {
 		const tc = new TestCase(errorFactory, forceFirebaseStorage);
 		tc.container.bind(repoConstructor).toSelf().inSingletonScope();
 
 		context.beforeEach(() => {
-			return tc.resolve(repoConstructor).clear();
+			return tc.resolve(repoConstructor).clear(...ids);
 		});
 
 		return tc;
@@ -96,3 +98,35 @@ export class UserRepository extends BaseRepository<User> {
 	}
 
 }
+
+export interface Guest extends BaseModel {
+
+	gender?: 'm' | 'f';
+	locale?: string;
+	company?: string;
+	birthday?: string;
+	firstname?: string;
+	lastname?: string;
+	address?: string;
+	phone?: string;
+	email?: string;
+	onBlacklist?: boolean;
+	notes?: string;
+	tagIds?: ReferenceMap;
+	deleted?: boolean;
+
+	protelId?: string;
+
+}
+
+export class GuestRepository extends BaseRepository<Guest> {
+
+	getCollectionPath(...ids: string[]) {
+		if (!ids[0]) {
+			throw new Error('account id missing');
+		}
+		return `${testRun}/accounts/${ids[0]}/guests`;
+	}
+
+}
+
