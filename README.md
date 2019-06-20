@@ -1,6 +1,9 @@
 # Firestore Storage
 [![Build Status](https://travis-ci.org/freshfox/firestore-storage.svg?branch=master)](https://travis-ci.org/freshfox/firestore-storage)
 [![npm version](https://badge.fury.io/js/firestore-storage.svg)](https://badge.fury.io/js/firestore-storage)
+[![Dependencies](https://david-dm.org/inversify/inversify-express-utils.svg)](https://david-dm.org/freshfox/firestore-storage#info=dependencies)
+[![img](https://david-dm.org/freshfox/firestore-storage/dev-status.svg)](https://david-dm.org/freshfox/firestore-storage/#info=devDependencies)
+[![Known Vulnerabilities](https://snyk.io/test/github/freshfox/firestore-storage/badge.svg)](https://snyk.io/test/github/freshfox/firestore-storage)
 
 ## Table of Contents
 
