@@ -83,7 +83,7 @@ $ yarn test
 
 It's also possible to run all tests using the `FirestoreStorage` implementation. To do this
 you need to create a Firebase project and download the Admin SDK credentials file.
-Copy the `.env.sample` to `.env` and add the absolute path to the `FIREBASE_CREDENTIALS` file.
+Copy the `.env.sample` to `.env` and add the absolute path to the `FIREBASE_CREDENTIALS` variable.
 To execute the tests run:
 ```bash
 $ yarn test:firestore
