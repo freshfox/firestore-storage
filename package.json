@@ -48,13 +48,19 @@
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
+    "@firebase/testing": "^0.11.2",
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.0.8",
     "@types/should": "^13.0.0",
+    "firebase-tools": "^7.0.1",
     "mocha": "^6.1.4",
     "node-env-file": "^0.1.8",
     "should": "^13.2.3",
     "ts-node": "^8.3.0",
     "typescript": "^3.5.2"
+  },
+  "peerDependencies": {
+    "firebase-tools": "^7.0.1",
+    "@firebase/testing": "^0.11.2"
   }
 }
