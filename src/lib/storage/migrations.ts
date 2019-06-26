@@ -12,7 +12,9 @@ export abstract class Migrations {
 
 	async upgrade() {
 		let version = await this.readVersion();
-		while (version < this.getVersion()) {
+		const targetVersion = this.getVersion();
+		console.log(`Current database version (${version}). Target version (${targetVersion})`)
+		while (version < targetVersion) {
 			console.log(`Upgrading from ${version} to ${version + 1}`);
 			version++;
 			const label = `Successfully upgraded to ${version}`;
