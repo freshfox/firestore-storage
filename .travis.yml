@@ -4,3 +4,6 @@ node_js:
 before_script:
   - yarn build
 cache: yarn
+notifications:
+  email: false
+  webhooks: "https://ship.freshfox.at/travis/-1001141933878"
