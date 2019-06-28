@@ -94,6 +94,81 @@ To run tests using both `MemoryStorage` and `FirestoreStorage` run
 $ yarn test:all
 ```
 
+### Running tests on your firestore.rules
+
+This packages provides utilities to run tests against your Firestore rules.
+You need the `@firebase/testing` package and the local emulator installed.
+To install the emulator run `$ firebase setup:emulators:firestore`
+
+Below is an example of how to run tests against the rules. Create a new instance
+of FirestoreRuleTest for each test. Add some test data, load the rules and run your assertions.
+The constructor of `FirestoreRuleTest` takes the uid of the authenticated user as an argument.
+This will be the `request.auth.uid` property which you can read in your rules.
+Passing no uid will send unauthenticated requests to the emulator.
+
+```typescript
+import {FirestoreRuleTest} from 'firestore-storage';
+import * as firebase from "@firebase/testing";
+
+describe('Rules', function () {
+
+	const pathToRules = `${__dirname}/../../../../firestore.rules`;
+
+	before(async () => {
+		await FirestoreRuleTest.start();
+	});
+
+	after(async () => {
+		await FirestoreRuleTest.stop();
+	});
+
+	describe('Unauthenticated', function () {
+
+		it('should not be able to read from users', async () => {
+			const tc = new FirestoreRuleTest();
+			const userId = 'alice';
+			const userDoc = tc.firestore.collection('users').doc(userId);
+			await userDoc.set({});
+			await tc.loadRules(pathToRules);
+			await firebase.assertFails(userDoc.get())
+		});
+	});
+
+	describe('Authenticated', function () {
+
+		it('should not be able to read reservations from different account', async () => {
+
+			const userId1 = 'alice';
+			const accountId1 = `account-${userId1}`;
+			const userId2 = 'bob';
+			const accountId2 = `account-${userId2}`;
+
+
+			const tc = new FirestoreRuleTest(userId1);
+			const userDoc1 = tc.firestore.collection('users').doc(userId1);
+			const userDoc2 = tc.firestore.collection('users').doc(userId2);
+
+			await userDoc1.set({accountId: accountId1});
+			await userDoc2.set({accountId: accountId2});
+
+			const resColl1 = tc.firestore.collection('accounts').doc(accountId1).collection('reservations');
+			const resColl2 = tc.firestore.collection('accounts').doc(accountId2).collection('reservations');
+
+			await resColl1.add({});
+			await resColl2.add({});
+
+			await tc.loadRules(pathToRules);
+
+			await firebase.assertSucceeds(resColl1.get());
+			await firebase.assertFails(resColl2.get());
+
+		});
+
+	});
+
+});
+```
+
 ## Usage
 
 **Firestore Storage** can be used with the dependency injection library [Inversify][inversify]

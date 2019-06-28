@@ -60,7 +60,6 @@
     "typescript": "^3.5.2"
   },
   "peerDependencies": {
-    "firebase-tools": "^7.0.1",
-    "@firebase/testing": "^0.11.2"
+    "firebase-tools": "^7.0.1"
   }
 }
