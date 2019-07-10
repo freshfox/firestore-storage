@@ -78,4 +78,22 @@ describe('Transactions', function () {
 
 	});
 
+	it('should make batch updates in a transaction', async () => {
+
+		let u1 = await userRepo.save({firstname: 'John', last_login: new Date('2019-06-02')});
+		await userRepo.transaction(async (trx) => {
+			trx.update({
+				id: u1.id,
+				lastname: 'Doe'
+			});
+		});
+
+		u1 = await userRepo.findById(u1.id);
+		should(u1).properties({
+			id: u1.id,
+			firstname: 'John',
+			lastname: 'Doe'
+		});
+	});
+
 });
