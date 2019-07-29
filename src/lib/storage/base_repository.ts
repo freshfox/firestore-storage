@@ -126,6 +126,10 @@ export class RepositoryTransaction<T> {
 		return this.trx.set(this.collectionPath, data);
 	}
 
+	setAvoidMerge(data: T): IFirestoreTransaction {
+		return this.trx.setAvoidMerge(this.collectionPath, data);
+	}
+
 	update(data: T): IFirestoreTransaction {
 		return this.trx.update(this.collectionPath, data);
 	}

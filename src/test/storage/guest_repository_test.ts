@@ -176,6 +176,32 @@ describe('GuestRepository', function () {
 
 	});
 
+	it('should save a guest and check if data was merged', async () => {
+
+		let g1 = await guestRepo.save({
+			meta: {
+				test1: true
+			}
+		} as any, accountId);
+
+		g1 = await guestRepo.save({
+			id: g1.id,
+			firstname: 'John',
+			meta: {
+				test2: true
+			}
+		} as any, accountId);
+
+		should(g1).properties({
+			id: g1.id,
+			firstname: 'John',
+			meta: {
+				test1: true,
+				test2: true
+			}
+		});
+	});
+
 	describe('#orderBy()', function () {
 
 		const save = (firstname: string) => {

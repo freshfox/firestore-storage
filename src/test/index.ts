@@ -83,8 +83,8 @@ export interface User extends BaseModel {
 	email?: string;
 	last_login?: Date;
 	address?: {
-		street: string;
-		postal: number;
+		street?: string;
+		postal?: number;
 		city: string;
 	}
 }

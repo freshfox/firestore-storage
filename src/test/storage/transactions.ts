@@ -96,4 +96,37 @@ describe('Transactions', function () {
 		});
 	});
 
+	it('should make a transaction without merges', async () => {
+
+		let u1 = await userRepo.save({
+			firstname: 'John',
+			last_login: new Date('2019-06-02'),
+			address: {
+				city: 'Vienna',
+				postal: 1234
+			}
+		});
+
+		await userRepo.transaction(async (trx) => {
+			trx.setAvoidMerge({
+				id: u1.id,
+				firstname: 'John',
+				address: {
+					city: 'Vienna'
+				}
+			})
+		});
+
+		u1 = await userRepo.findById(u1.id);
+		should(u1).eql({
+			id: u1.id,
+			firstname: 'John',
+			address: {
+				city: 'Vienna'
+			},
+			createdAt: u1.createdAt,
+			updatedAt: u1.updatedAt
+		});
+	});
+
 });

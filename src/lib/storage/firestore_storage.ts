@@ -223,6 +223,16 @@ export class FirestoreTransaction implements IFirestoreTransaction {
 		return this;
 	}
 
+	setAvoidMerge<T>(collectionPath: string, data: T): FirestoreTransaction {
+		const model = FirestoreStorage.clone(data);
+		//model.id can be null
+		const doc = this.firestore.collection(collectionPath).doc(model.id);
+		this.transaction.set(doc, model.data, {
+			merge: false
+		});
+		return this;
+	}
+
 	update<T>(collectionPath: string, data: T): FirestoreTransaction {
 		const model = FirestoreStorage.clone(data);
 		const doc = this.firestore.collection(collectionPath).doc(model.id);

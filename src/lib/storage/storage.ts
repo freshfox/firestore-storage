@@ -48,6 +48,8 @@ export interface IFirestoreTransaction {
 
 	set<T>(collectionPath: string, data: T): IFirestoreTransaction;
 
+	setAvoidMerge<T>(collectionPath: string, data: T): IFirestoreTransaction;
+
 	update<T>(collectionPath: string, data: T): IFirestoreTransaction;
 
 	delete(collectionPath: string, docId: string): IFirestoreTransaction;

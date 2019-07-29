@@ -241,6 +241,14 @@ export class MemoryTransaction implements IFirestoreTransaction {
 		return this;
 	}
 
+	setAvoidMerge<T>(collectionPath: string, data: T): IFirestoreTransaction {
+		this.didWrite = true;
+		const model = MemoryStorage.clone(data);
+		const id = model.id ? model.id : MemoryStorage.createId();
+		this.storage.addDocument(collectionPath, id, model.data, {avoidMerge: true});
+		return this;
+	}
+
 	update<T>(collectionPath: string, data: T): IFirestoreTransaction {
 		this.didWrite = true;
 		const model = MemoryStorage.clone(data);
