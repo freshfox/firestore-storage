@@ -110,6 +110,10 @@ export class FirestoreStorage implements IStorageDriver {
 		}
 	}
 
+	generateId(): string {
+		return this.firestore.collection('').doc().id;
+	}
+
 	private deleteCollection(collectionPath, batchSize) {
 		const collectionRef = this.firestore.collection(collectionPath);
 		const query = collectionRef.orderBy('__name__', ).limit(batchSize);

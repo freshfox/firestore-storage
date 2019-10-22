@@ -20,6 +20,8 @@ export interface IStorageDriver {
 
 	transaction<T>(updateFunction: (transaction: IFirestoreTransaction) => Promise<T>,
 				   transactionOptions?:{maxAttempts?: number}): Promise<T>;
+
+	generateId(): string;
 }
 
 export interface QueryBuilder<T> {

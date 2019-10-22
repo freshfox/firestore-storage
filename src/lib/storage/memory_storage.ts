@@ -25,7 +25,7 @@ export class MemoryStorage implements IStorageDriver {
 
 	save(collection: string, data: any, options?: SaveOptions): Promise<any> {
 		const model = MemoryStorage.clone(data);
-		const id = model.id ? model.id : MemoryStorage.createId();
+		const id = model.id ? model.id : this.generateId();
 		this.addDocument(collection, id, model.data, options);
 		return this.findById(collection, id);
 	}
@@ -86,6 +86,10 @@ export class MemoryStorage implements IStorageDriver {
 		return updateFunction(new MemoryTransaction(this));
 	}
 
+	generateId(): string {
+		return uuid();
+	}
+
 	private getAsArray(collection: string) {
 		const collectionRef = this.data.getCollection(collection);
 		return Object.keys(collectionRef.documents)
@@ -100,10 +104,6 @@ export class MemoryStorage implements IStorageDriver {
 			createdAt: doc.createdAt,
 			updatedAt: doc.updatedAt
 		}, doc.data);
-	}
-
-	static createId() {
-		return uuid();
 	}
 
 	static clone(data): {id: string, data} {
@@ -209,7 +209,7 @@ export class MemoryTransaction implements IFirestoreTransaction {
 	create<T>(collectionPath: string, data: T): IFirestoreTransaction {
 		this.didWrite = true;
 		const model = MemoryStorage.clone(data);
-		this.storage.addDocument(collectionPath, MemoryStorage.createId(), model.data);
+		this.storage.addDocument(collectionPath, this.storage.generateId(), model.data);
 		return this;
 	}
 
@@ -236,7 +236,7 @@ export class MemoryTransaction implements IFirestoreTransaction {
 	set<T>(collectionPath: string, data: T): IFirestoreTransaction {
 		this.didWrite = true;
 		const model = MemoryStorage.clone(data);
-		const id = model.id ? model.id : MemoryStorage.createId();
+		const id = model.id ? model.id : this.storage.generateId();
 		this.storage.addDocument(collectionPath, id, model.data);
 		return this;
 	}
@@ -244,7 +244,7 @@ export class MemoryTransaction implements IFirestoreTransaction {
 	setAvoidMerge<T>(collectionPath: string, data: T): IFirestoreTransaction {
 		this.didWrite = true;
 		const model = MemoryStorage.clone(data);
-		const id = model.id ? model.id : MemoryStorage.createId();
+		const id = model.id ? model.id : this.storage.generateId();
 		this.storage.addDocument(collectionPath, id, model.data, {avoidMerge: true});
 		return this;
 	}
