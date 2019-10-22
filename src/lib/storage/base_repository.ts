@@ -93,6 +93,10 @@ export abstract class BaseRepository<T extends BaseModel> {
 		});
 	}
 
+	generateId() {
+		return this.storage.generateId();
+	}
+
 	private createError(attributes: Partial<T>, ids: string[]) {
 			const id = attributes.id ? ` (${attributes.id})` : '';
 			return this.errorFactory(`Unable to get document${id} from ${this.getCollectionPath(...ids)}`);
