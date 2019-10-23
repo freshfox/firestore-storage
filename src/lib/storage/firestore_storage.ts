@@ -1,10 +1,7 @@
 import {QueryBuilder, IStorageDriver, SaveOptions, FirestoreInstance, IFirestoreTransaction} from './storage';
 import {inject, injectable} from 'inversify';
 import * as admin from 'firebase-admin';
-import {DocumentSnapshot, QuerySnapshot} from '@google-cloud/firestore';
 import DocumentReference = FirebaseFirestore.DocumentReference;
-import Transaction = FirebaseFirestore.Transaction;
-import Query = FirebaseFirestore.Query;
 
 @injectable()
 export class FirestoreStorage implements IStorageDriver {
@@ -52,7 +49,7 @@ export class FirestoreStorage implements IStorageDriver {
 	async query<T>(collection: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>) {
 		const qb = this.firestore.collection(collection);
 		const query = cb ? cb(qb) : qb;
-		const result: QuerySnapshot = await query.get();
+		const result: FirebaseFirestore.QuerySnapshot = await query.get();
 		if (result.empty) {
 			return [];
 		}
@@ -65,7 +62,7 @@ export class FirestoreStorage implements IStorageDriver {
 			  onNext: (snapshot: any) => void, onError?: (error: Error) => void): () => void {
 		const qb = this.firestore.collection(collection);
 		const query = cb(qb);
-		return query.onSnapshot((snapshot: QuerySnapshot) => {
+		return query.onSnapshot((snapshot: FirebaseFirestore.QuerySnapshot) => {
 			let result = [];
 			if (!snapshot.empty) {
 				result = snapshot.docs.map((document) => {
@@ -171,7 +168,7 @@ export class FirestoreStorage implements IStorageDriver {
 		return `${collection}/${id}`;
 	}
 
-	static format(snapshot: DocumentSnapshot) {
+	static format(snapshot: FirebaseFirestore.DocumentSnapshot) {
 		if (!snapshot.exists) {
 			return null;
 		}
@@ -185,14 +182,14 @@ export class FirestoreStorage implements IStorageDriver {
 
 export class FirestoreTransaction implements IFirestoreTransaction {
 
-	constructor(private firestore: admin.firestore.Firestore, private transaction: Transaction) {
+	constructor(private firestore: admin.firestore.Firestore, private transaction: FirebaseFirestore.Transaction) {
 
 	}
 
 	async query<T>(collectionPath: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<T[]> {
 		//this.transaction.get()
 		const q = this.firestore.collection(collectionPath);
-		const result = await this.transaction.get(cb(q) as Query);
+		const result = await this.transaction.get(cb(q) as FirebaseFirestore.Query);
 		if (result.empty) {
 			return [];
 		}
