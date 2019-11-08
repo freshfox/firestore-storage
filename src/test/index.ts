@@ -2,8 +2,7 @@ import 'reflect-metadata';
 import {Container, interfaces} from 'inversify';
 import {BaseRepository} from '../lib/storage/base_repository';
 import {FirestoreStorageModule} from '../lib/storage/module';
-import {IErrorFactory, IStorageDriver} from '../lib/storage/storage';
-import {MemoryStorage} from '../lib/storage/memory_storage';
+import {IErrorFactory, IStorageDriver, Storage} from '../lib/storage/storage';
 import {BaseModel, ReferenceMap} from '../lib/storage/base_model';
 import * as admin from 'firebase-admin';
 import * as env from 'node-env-file';
@@ -28,6 +27,7 @@ export class TestFactory {
 
 		return tc;
 	}
+
 }
 
 export class TestCase {
@@ -52,7 +52,7 @@ export class TestCase {
 	}
 
 	getStorage(): IStorageDriver {
-		return this.container.resolve(MemoryStorage);
+		return this.container.get<IStorageDriver>(Storage);
 	}
 
 	private static initWithFirestore(tc: TestCase, credentials: string, errorFactory?: IErrorFactory) {
@@ -86,7 +86,8 @@ export interface User extends BaseModel {
 		street?: string;
 		postal?: number;
 		city: string;
-	}
+	},
+	tags?: string[]
 }
 
 const testRun = `tests/${Date.now()}`;

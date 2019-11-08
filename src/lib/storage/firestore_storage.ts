@@ -27,20 +27,19 @@ export class FirestoreStorage implements IStorageDriver {
 		if (!model.id) {
 			return this.add(collection, model.data)
 		}
-		return this.update(collection, model.id, model.data, options);
+		return this.internalUpdate(collection, model.id, model.data, options);
 	}
 
-	private async add(collection: string, data: any): Promise<any> {
-		const result = await this.firestore.collection(collection).add(data);
-		const model = await result.get();
-		return FirestoreStorage.format(model);
-	}
-
-	private async update(collection: string, id: string, data: any, options?: SaveOptions) {
-		const path = FirestoreStorage.getPath(collection, id);
+	async update(collection: string, data: any, options?: SaveOptions) {
+		const clone = FirestoreStorage.clone(data);
+		if (!clone.id) {
+			return this.add(collection, clone.data)
+		}
+		const path = FirestoreStorage.getPath(collection, clone.id);
 		const docRef = await this.firestore.doc(path);
-		await docRef.set(data, {
-			merge: !(options && options.avoidMerge)
+		const shouldMerge = !(options && options.avoidMerge);
+		await docRef.update(clone.data, {
+			merge: shouldMerge
 		});
 		const model = await docRef.get();
 		return FirestoreStorage.format(model);
@@ -109,6 +108,22 @@ export class FirestoreStorage implements IStorageDriver {
 
 	generateId(): string {
 		return this.firestore.collection('').doc().id;
+	}
+
+	private async add(collection: string, data: any): Promise<any> {
+		const result = await this.firestore.collection(collection).add(data);
+		const model = await result.get();
+		return FirestoreStorage.format(model);
+	}
+
+	private async internalUpdate(collection: string, id: string, data: any, options?: SaveOptions) {
+		const path = FirestoreStorage.getPath(collection, id);
+		const docRef = await this.firestore.doc(path);
+		await docRef.set(data, {
+			merge: !(options && options.avoidMerge)
+		});
+		const model = await docRef.get();
+		return FirestoreStorage.format(model);
 	}
 
 	private deleteCollection(collectionPath, batchSize) {
