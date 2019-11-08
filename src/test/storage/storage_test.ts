@@ -30,7 +30,7 @@ describe('Storage', function () {
 			content: {
 				text: 'text'
 			}
-		});
+		}, {avoidMerge: true});
 		should(data.content).eql({
 			text: 'text',
 		});
