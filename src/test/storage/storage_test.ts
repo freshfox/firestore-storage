@@ -3,7 +3,7 @@ import * as should from 'should'
 
 describe('Storage', function () {
 
-	const tc = new TestCase(null, false);
+	const tc = new TestCase();
 	const storage = tc.getStorage();
 
 	it('should save a document and override a sub-array', async () => {
