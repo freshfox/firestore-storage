@@ -41,7 +41,6 @@
   "license": "MIT",
   "homepage": "https://github.com/freshfox/firestore-storage",
   "dependencies": {
-    "firebase-admin": "^8.6.1",
     "inversify": "^5.0.1",
     "lodash": "^4.17.15",
     "reflect-metadata": "^0.1.13"
@@ -51,6 +50,7 @@
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.11.5",
     "@types/should": "^13.0.0",
+    "firebase-admin": "^8.8.0",
     "firebase-tools": "^7.6.1",
     "mocha": "^6.2.2",
     "node-env-file": "^0.1.8",
@@ -59,6 +59,7 @@
     "typescript": "^3.6.4"
   },
   "peerDependencies": {
-    "firebase-tools": "^7.0.1"
+    "firebase-tools": "^7.6.1",
+    "firebase-admin": "^8.8.0"
   }
 }
