@@ -23,7 +23,7 @@ class ModelRepository extends BaseRepository<Model> {
 
 describe('Repository', function () {
 
-	const tc = TestFactory.createWithRepository(this, ModelRepository, null, false);
+	const tc = TestFactory.createWithRepository(this, ModelRepository);
 	const modelRepo = tc.resolve(ModelRepository);
 
 	it('should query a nested object field', async () => {

@@ -1,4 +1,3 @@
 --recursive
 --exit
---firestore
 --timeout 10000
