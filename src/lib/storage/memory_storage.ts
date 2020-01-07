@@ -1,4 +1,4 @@
-import {OrderDirection, QueryBuilder, IStorageDriver, SaveOptions, IFirestoreTransaction} from './storage';
+import {OrderDirection, QueryBuilder, IStorageDriver, SaveOptions, IFirestoreTransaction, Operator} from './storage';
 import * as uuid from 'uuid/v4';
 import {injectable} from 'inversify';
 import * as _ from 'lodash';
@@ -131,7 +131,7 @@ export class MemoryQueryBuilder<T> implements QueryBuilder<T> {
 
 	}
 
-	where(field: string, operator: string, value: any): MemoryQueryBuilder<T> {
+	where(field: string, operator: Operator, value: any): MemoryQueryBuilder<T> {
 		this.clauses.push(check(field, operator, value));
 		return this;
 	}
@@ -266,7 +266,7 @@ export class MemoryTransaction implements IFirestoreTransaction {
 
 }
 
-const check = (field, operator, expected) => {
+const check = (field, operator: Operator, expected) => {
 	return (data) => {
 		const parts = field.split('.');
 		let actual = parts.reduce((obj, key) => {
@@ -275,7 +275,8 @@ const check = (field, operator, expected) => {
 			}
 			return obj[key];
 		}, data);
-		if (!actual && expected) {
+		// If actual is falsy and expected is truthy return false
+		if ((actual === null || actual === undefined) && expected) {
 			return false;
 		}
 		if (actual instanceof Date) {
@@ -283,6 +284,9 @@ const check = (field, operator, expected) => {
 		}
 		if (expected instanceof Date) {
 			expected = (<Date>expected).getTime();
+		}
+		if (operator === '==' && _.isPlainObject(expected)) {
+			return _.isEqual(actual, expected);
 		}
 		switch (operator) {
 			case '>': return actual > expected;
