@@ -15,11 +15,9 @@
     "lib": "src"
   },
   "files": [
-    "dist/",
-    "src/",
-    "test/",
-    ".editorconfig",
-    "tsconfig.json",
+    "src/lib",
+    "dist/lib",
+    "dist/test/rules",
     "README.md"
   ],
   "engines": {
@@ -29,7 +27,7 @@
     "test": "NODE_ENV=test mocha dist/test",
     "test:firestore": "yarn test --opts test/mocha.firestore.opts",
     "test:all": "yarn test && yarn test:firestore",
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "preversion": "git pull && yarn build && yarn test:all",
     "postversion": "git push && git push --tags && npm publish"
   },
