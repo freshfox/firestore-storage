@@ -123,6 +123,11 @@ export class MemoryStorage implements IStorageDriver {
 		};
 	}
 
+	export(base: string): any {
+		console.error('Export isn\'t implemented in MemoryStorage');
+		return null;
+	}
+
 }
 
 export class MemoryQueryBuilder<T> implements QueryBuilder<T> {

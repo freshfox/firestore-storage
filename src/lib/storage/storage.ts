@@ -22,6 +22,8 @@ export interface IStorageDriver {
 				   transactionOptions?:{maxAttempts?: number}): Promise<T>;
 
 	generateId(): string;
+
+	export(base: string): any;
 }
 
 export interface QueryBuilder<T> {
