@@ -91,8 +91,12 @@ export interface User extends BaseModel {
 }
 
 const testRun = `tests/${Date.now()}`;
-export function getFirestoreTestPath(path: string) {
-	return `${testRun}/${path}`;
+
+export function getFirestoreTestPath(path?: string) {
+	if (path) {
+		return `${testRun}/${path}`;
+	}
+	return testRun;
 }
 
 export class UserRepository extends BaseRepository<User> {

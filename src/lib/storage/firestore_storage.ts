@@ -2,6 +2,7 @@ import {QueryBuilder, IStorageDriver, SaveOptions, FirestoreInstance, IFirestore
 import {inject, injectable} from 'inversify';
 import * as admin from 'firebase-admin';
 import DocumentReference = FirebaseFirestore.DocumentReference;
+import {MemoryStorage} from "./memory_storage";
 
 @injectable()
 export class FirestoreStorage implements IStorageDriver {
@@ -108,6 +109,24 @@ export class FirestoreStorage implements IStorageDriver {
 
 	generateId(): string {
 		return this.firestore.collection('').doc().id;
+	}
+
+	async export(rootDoc?: string) {
+		const root = rootDoc ? await this.firestore.doc(rootDoc) : this.firestore;
+		const storage = new MemoryStorage();
+		await this.exportDocument(storage, root);
+		return storage.data.toJson();
+	}
+
+	private async exportDocument(storage: MemoryStorage, root: DocumentReference | admin.firestore.Firestore) {
+		const collections = await root.listCollections();
+		for (const coll of collections) {
+			const query = await coll.get();
+			for (const doc of query.docs) {
+				await storage.save(coll.path, FirestoreStorage.format(doc));
+				await this.exportDocument(storage, doc.ref);
+			}
+		}
 	}
 
 	private async add(collection: string, data: any): Promise<any> {

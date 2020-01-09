@@ -2,6 +2,7 @@ import {OrderDirection, QueryBuilder, IStorageDriver, SaveOptions, IFirestoreTra
 import * as uuid from 'uuid/v4';
 import {injectable} from 'inversify';
 import * as _ from 'lodash';
+import Doc = Mocha.reporters.Doc;
 
 @injectable()
 export class MemoryStorage implements IStorageDriver {
@@ -88,6 +89,10 @@ export class MemoryStorage implements IStorageDriver {
 
 	generateId(): string {
 		return uuid();
+	}
+
+	setData(data: IDocument) {
+		this.data = new Document(data);
 	}
 
 	private getAsArray(collection: string) {
@@ -305,6 +310,14 @@ export class Collection {
 		[id: string]: Document
 	} = {};
 
+	constructor(collection?: ICollection) {
+		if (collection && collection.documents) {
+			this.documents = mapObjects(collection.documents, (doc: IDocument) => {
+				return new Document(doc);
+			});
+		}
+	}
+
 	getDocument(path: string, avoidDocumentCreation?: boolean) {
 		const index = path.indexOf('/');
 
@@ -334,6 +347,14 @@ export class Collection {
 		this.documents = {};
 	}
 
+	toJson(): ICollection {
+		return {
+			documents: mapObjects(this.documents, (doc: Document) => {
+				return doc.toJson();
+			})
+		}
+	}
+
 }
 
 export class Document {
@@ -343,6 +364,19 @@ export class Document {
 	createdAt: Date;
 	updatedAt: Date;
 	data: any;
+
+	constructor(data?: IDocument) {
+		if (data) {
+			this.data = Document.parseData(data.data);
+			this.createdAt = new Date(data.createdAt);
+			this.updatedAt = new Date(data.updatedAt);
+			if (data.collections) {
+				this.collections = mapObjects(data.collections, (collection: ICollection) => {
+					return new Collection(collection);
+				});
+			}
+		}
+	}
 
 	private getOrCreateCollection(name): Collection {
 		if (!this.collections[name]) {
@@ -364,4 +398,81 @@ export class Document {
 		const docId = rest.substring(0, idEndIndex);
 		return collection.getDocument(docId).getCollection(rest.substring(idEndIndex + 1));
 	}
+
+	toJson(): IDocument {
+		let data = null;
+		if (this.data) {
+			data = mapObjects(this.data, (value) => {
+				if (value instanceof Date) {
+					value = {
+						instance: 'date',
+						value: value.toISOString()
+					};
+				}
+				return value;
+			})
+		}
+		return {
+			data: Document.formatData(this.data),
+			createdAt: this.createdAt,
+			updatedAt: this.updatedAt,
+			collections: mapObjects(this.collections, (collection: Collection) => {
+				return collection.toJson();
+			})
+		};
+	}
+
+	private static parseData(data) {
+		if (data) {
+			return mapObjects(data, (value) => {
+				if (_.isPlainObject(value)) {
+					if (value.__instance && value.__instance === 'date') {
+						return new Date(value.value);
+					}
+					return this.parseData(value)
+				}
+				return value;
+			});
+		}
+	}
+
+	private static formatData(data) {
+		if (!data) {
+			return;
+		}
+		return mapObjects(data, (value) => {
+			if (value instanceof Date) {
+				return {
+					__instance: 'date',
+					value: value.toISOString()
+				};
+			}
+			if (_.isPlainObject(value)) {
+				return this.formatData(value)
+			}
+			return value;
+		});
+	}
+}
+
+function mapObjects(obj: object, mapper: (data) => any) {
+	return Object.keys(obj).reduce((result, id) => {
+	    result[id] = mapper(obj[id]);
+		return result;
+	}, {})
+}
+
+export interface IDocument {
+	collections: {
+		[name: string]: ICollection
+	};
+	createdAt: Date;
+	updatedAt: Date;
+	data: any;
+}
+
+export interface ICollection {
+	documents: {
+		[id: string]: IDocument
+	};
 }

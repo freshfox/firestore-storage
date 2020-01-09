@@ -1,5 +1,6 @@
-import {TestCase} from "../index";
+import {getFirestoreTestPath, TestCase} from "../index";
 import * as should from 'should'
+import {FirestoreStorage, MemoryStorage} from "../../lib";
 
 describe('Storage', function () {
 
@@ -53,6 +54,33 @@ describe('Storage', function () {
 			html: 'html'
 		});
 	});
+
+	if (storage instanceof FirestoreStorage) {
+		it('should export data', async function () {
+
+			this.timeout(100000);
+
+			const restaurantPath = getFirestoreTestPath('restaurants');
+
+			const r1 = await storage.save(restaurantPath, {name: 'Ebi'});
+			const r2 = await storage.save(restaurantPath, {name: 'Hiro'});
+			const r3 = await storage.save(restaurantPath, {name: 'McDonalds'});
+
+			const rev = await storage.save(`${restaurantPath}/${r1.id}/reviews`, {
+				rating: 5,
+				date: new Date()
+			});
+
+			const exportData = await (storage as FirestoreStorage).export(getFirestoreTestPath());
+
+			const mem = new MemoryStorage();
+			mem.setData(exportData);
+
+			const rev2 = await mem.findById(`${restaurantPath}/${r1.id}/reviews`, rev.id);
+			should(rev2.date).instanceOf(Date);
+
+		});
+	}
 
 });
 
