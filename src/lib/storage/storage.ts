@@ -23,7 +23,7 @@ export interface IStorageDriver {
 
 	generateId(): string;
 
-	export(base: string): any;
+	export(base?: string): any;
 }
 
 export interface QueryBuilder<T> {
