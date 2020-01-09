@@ -1,8 +1,8 @@
 import {QueryBuilder, IStorageDriver, SaveOptions, FirestoreInstance, IFirestoreTransaction} from './storage';
 import {inject, injectable} from 'inversify';
 import * as admin from 'firebase-admin';
-import DocumentReference = FirebaseFirestore.DocumentReference;
 import {MemoryStorage} from "./memory_storage";
+import DocumentReference = admin.firestore.DocumentReference;
 
 @injectable()
 export class FirestoreStorage implements IStorageDriver {
@@ -119,14 +119,22 @@ export class FirestoreStorage implements IStorageDriver {
 	}
 
 	private async exportDocument(storage: MemoryStorage, root: DocumentReference | admin.firestore.Firestore) {
+		const docStart = Date.now();
 		const collections = await root.listCollections();
 		for (const coll of collections) {
+			const collStart = Date.now();
 			const query = await coll.get();
 			for (const doc of query.docs) {
 				await storage.save(coll.path, FirestoreStorage.format(doc));
 				await this.exportDocument(storage, doc.ref);
 			}
+			console.log('Exported', coll.path, 'in', time(Date.now() - collStart));
 		}
+		let path = 'database';
+		if (root instanceof DocumentReference) {
+			path = root.path;
+		}
+		console.log('Exported', path, 'in', time(Date.now() - docStart));
 	}
 
 	private async add(collection: string, data: any): Promise<any> {
@@ -280,4 +288,12 @@ export class FirestoreTransaction implements IFirestoreTransaction {
 		this.transaction.delete(doc);
 		return this;
 	}
+}
+
+function time(ms: number): string {
+	if (ms < 1000) {
+		return `${ms}ms`
+	}
+	const seconds = Math.round(ms / 10) / 100;
+	return `${seconds}s`;
 }
