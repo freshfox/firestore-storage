@@ -112,6 +112,7 @@ export class MemoryStorage implements IStorageDriver {
 	}
 
 	static clone(data): {id: string, data} {
+		this.checkForUndefined(data);
 		const clone = Object.assign({}, data);
 		const id = data.id;
 		delete clone.id;
@@ -121,6 +122,21 @@ export class MemoryStorage implements IStorageDriver {
 			id: id,
 			data: clone
 		};
+	}
+
+	private static checkForUndefined(data: any) {
+		if (Array.isArray(data)) {
+			for (const item of data) {
+				this.checkForUndefined(item);
+			}
+		} else if(_.isPlainObject(data)) {
+			const keys = Object.keys(data);
+			for (const key of keys) {
+				this.checkForUndefined(data[key]);
+			}
+		} else if (data === undefined) {
+			throw new Error('Data contains undefined' + JSON.stringify(data, null, 2));
+		}
 	}
 
 	export(base: string): any {
