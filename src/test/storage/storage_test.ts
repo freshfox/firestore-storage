@@ -4,7 +4,7 @@ import {FirestoreStorage, MemoryStorage} from "../../lib";
 
 describe('Storage', function () {
 
-	const tc = new TestCase();
+	const tc = new TestCase(null, true);
 	const storage = tc.getStorage();
 
 	it('should save a document and override a sub-array', async () => {
@@ -69,6 +69,14 @@ describe('Storage', function () {
 			const rev = await storage.save(`${restaurantPath}/${r1.id}/reviews`, {
 				rating: 5,
 				date: new Date()
+			});
+			const parts = getFirestoreTestPath().split('/');
+			if (parts.length !== 2) {
+				throw new Error('Test collection has changed');
+			}
+			await storage.save(parts[0], {
+				id: parts[1],
+				testData: 123
 			});
 
 			const exportData = await (storage as FirestoreStorage).export(getFirestoreTestPath());

@@ -112,8 +112,19 @@ export class FirestoreStorage implements IStorageDriver {
 	}
 
 	async export(rootDoc?: string) {
-		const root = rootDoc ? await this.firestore.doc(rootDoc) : this.firestore;
 		const storage = new MemoryStorage();
+		let root: DocumentReference | admin.firestore.Firestore;
+		if (rootDoc) {
+			root = await this.firestore.doc(rootDoc);
+			const rootData = await root.get();
+			console.log(rootData);
+			const modelData = FirestoreStorage.format(rootData);
+			if (modelData) {
+				await storage.save(root.parent.path, modelData);
+			}
+		} else {
+			root = this.firestore;
+		}
 		await this.exportDocument(storage, root);
 		return storage.data.toJson();
 	}
