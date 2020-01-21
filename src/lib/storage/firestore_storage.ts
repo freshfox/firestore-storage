@@ -117,7 +117,6 @@ export class FirestoreStorage implements IStorageDriver {
 		if (rootDoc) {
 			root = await this.firestore.doc(rootDoc);
 			const rootData = await root.get();
-			console.log(rootData);
 			const modelData = FirestoreStorage.format(rootData);
 			if (modelData) {
 				await storage.save(root.parent.path, modelData);
