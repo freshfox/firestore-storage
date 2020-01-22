@@ -30,38 +30,42 @@ It follows the repository pattern, for more information about it you can read th
 ## Example
 
 ```typescript
-const userRepo = new UserRepository();
+const restaurantRepo = new RestaurantRepository();
 
-// Saving a user
-const user = await userRepo.save({
-  name: 'John Doe',
-  active: true
+// Saving data
+const restaurant = await restaurantRepo.save({
+  name: 'FreshFoods',
+  address: 'SomeStreet 123',
+  city: 'New York',
+  type: 'vegan'
 });
 
-console.log(user);
-/* prints
+console.log(restaurant);
+/*
 {
   id: '0vdxYqEisf5vwJLhyLjA',
-  name: 'John Doe',
-  active: true,
-  createdAt: '2019-04-29T16:35:33.195Z',
-  updatedAt: '2019-04-29T16:35:33.195Z'
+  name: 'FreshFoods',
+  address: 'SomeStreet 123',
+  city: 'New York',
+  type: 'vegan',
+  createdAt: Date('2019-04-29T16:35:33.195Z'),
+  updatedAt: Date('2019-04-29T16:35:33.195Z')
 }*/
 
 // Listing all documents
-const allUsers = await userRepo.list();
+const allRestaurants = await restaurantRepo.list();
 
 // Filtering documents based on attributes
-const activeUsers = await userRepo.list({
-  active: true
+const restaurantsInNewYork = await restaurantRepo.list({
+  city: 'New York'
 });
 
 // More complex queries
 const date = new Date('2019-02-01');
-const asd = await userRepo.query((qb) => {
+const restaurants = await restaurantRepo.query((qb) => {
   return qb
-    .where('signUpDate', '<=', date)
-    .orderBy('signUpDate', 'asc');
+    .where('openDate', '<=', date)
+    .orderBy('openDate', 'asc');
 });
 ```
 
@@ -180,25 +184,25 @@ export const storage = new FirestoreStorage(admin.firestore());
 // OR
 export const storage = new MemoryStorage();
 
-// user_repository.ts
+// restaurant_repository.ts
 import {storage} from './storage';
 
-class UserRepository extends BaseRepository<User> {
+class RestaurantRepository extends BaseRepository<Restaurant> {
 
   constructor() {
     super(storage);
   }
 
   getCollectionPath(...documentIds: string[]): string {
-    return 'users';
+    return 'restaurants';
   }
 
-  listAllActive() {
-    return this.list({active: true});
+  listVegan() {
+    return this.list({type: 'vegan'});
   }
 }
 
-const repo = new UserRepository();
+const repo = new RestaurantRepository();
 ```
 
 ### Inversify
@@ -213,7 +217,7 @@ if (process.env.NODE_ENV === 'test') {
   container.load(FirestoreStorageModule.createWithFirestore(admin.firestore()));
 }
 
-container.bind(UserRepository).toSelf().inSingletonScope();
+container.bind(RestaurantRepository).toSelf().inSingletonScope();
 ```
 
 ## Models
@@ -253,13 +257,13 @@ document ids.
 Each function takes multiple ids as its last arguments. Those are the hierarchically
 ordered list of parent document ids passed to the `getCollectionPath(...)` function.
 
-The following examples are based on the `UserRepository` and `TodoRepository`
-created [below](#Extending BaseRepository)
+The following examples are based on the `RestaurantRepository` and `ReviewRepository`
+created [below](#extending-baserepository)
 
 ### findById
 Takes a hierarchical ordered list of document ids. Returns the document when found or `null`
 ```typescript
-const todo = await todoRepo.findById(userId, todoId);
+const review = await reviewRepo.findById(restaurantId, reviewId);
 ```
 
 ### find
@@ -309,23 +313,22 @@ qb.limit(number)
 ### batchGet
 Returns an array of documents for a given array of ids. The array will contain null values if some documents aren't found
 ```typescript
-const users = await userRepo.batchGet([userId1, userId2]);
+const users = await restaurantRepo.batchGet([id1, id2]);
 ```
 
 ### save
 Saves a document into Firestore.
 ```typescript
-const user = await userRepo.save({
-  name: 'John',
-  email: 'john@exmaple.com'
+const restaurant = await restaurantRepo.save({
+  name: 'Ebi'
 });
 ```
 If you want to update data you just have to pass the id of the document.
 ```typescript
-const user = await userRepo.save({
+const user = await restaurantRepo.save({
   id: '8zCW4UszD0wmdrpBNswp',
-  name: 'John',
-  email: 'john@exmaple.com'
+  name: 'Ebi',
+  openDate: new Date()
 });
 ```
 By default this will create the document with this id if it doesn't exist
@@ -335,9 +338,9 @@ and instead of don't merge use the [write()][write] function
 ### write
 Sets the passed data. If the document exists it will be overwritten.
 ```typescript
-const user = await userRepo.write({
-  name: 'John',
-  email: 'john@exmaple.com'
+const user = await restaurantRepo.write({
+  name: 'FreshBurgers',
+  openDate: new Date()
 });
 ```
 
@@ -347,28 +350,28 @@ Deletes a document by a given id
 // For a nested collection
 await reviewRepo.delete(restaurantId, reviewId);
 // For a root level collection
-await userRepo.delete(userId);
+await restaurantRepo.delete(restaurantId);
 ```
 
 ### transaction
 Takes an update function and an array of ids. Find more about transactions at the
 [Firestore documentation][transaction-doc]
 ```typescript
-const result = await userRepo.transaction((trx) => {
+const result = await restaurantRepo.transaction((trx) => {
 	const u = trx.get('some-id');
-	u.name = 'John';
+	u.name = 'Burger Store';
 	trx.set(u);
-	return 'worked';
+	return 'done';
 })
 ```
 
 ### Extending BaseRepository
 
 ```typescript
-export class UserRepository extends BaseRepository<User> {
+export class RestaurantRepository extends BaseRepository<Restaurant> {
 
 	getCollectionPath(...documentIds: string[]): string {
-		return 'users';
+		return 'restaurants';
 	}
 }
 ```
@@ -423,7 +426,7 @@ FirestoreStorageModule.createWithFirestore(admin.firestore(), errorFactory)
 
 ### Using vanilla Typescript
 ```typescript
-class UserRepository extends BaseRepository<User> {
+class RestaurantRepository extends BaseRepository<Restaurant> {
 
   constructor() {
     super(storage, errorFactory);
