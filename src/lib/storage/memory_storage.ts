@@ -2,7 +2,8 @@ import {OrderDirection, QueryBuilder, IStorageDriver, SaveOptions, IFirestoreTra
 import * as uuid from 'uuid/v4';
 import {injectable} from 'inversify';
 import * as _ from 'lodash';
-import Doc = Mocha.reporters.Doc;
+import * as admin from "firebase-admin";
+import Timestamp = admin.firestore.Timestamp;
 
 @injectable()
 export class MemoryStorage implements IStorageDriver {
@@ -182,16 +183,19 @@ export class MemoryQueryBuilder<T> implements QueryBuilder<T> {
 		if (this.ordering) {
 			items.sort((a, b) => {
 				const prop = this.ordering.property;
-				if (a[prop] === b[prop]) {
+				const val1 = toComparableValue(a[prop]);
+				const val2 = toComparableValue(b[prop]);
+
+				if (val1 === val2) {
 					return 0;
 				}
 				if (this.ordering.direction === 'desc') {
-					if (a[prop] > b[prop]) {
+					if (val1 > val2) {
 						return -1;
 					}
 					return 1;
 				}
-				if (a[prop] < b[prop]) {
+				if (val1 < val2) {
 					return -1;
 				}
 				return 1;
@@ -311,12 +315,9 @@ const check = (field, operator: Operator, expected) => {
 		if ((actual === null || actual === undefined) && expected) {
 			return false;
 		}
-		if (actual instanceof Date) {
-			actual = (<Date>actual).getTime();
-		}
-		if (expected instanceof Date) {
-			expected = (<Date>expected).getTime();
-		}
+		actual = toComparableValue(actual);
+		expected = toComparableValue(expected);
+
 		if (operator === '==' && _.isPlainObject(expected)) {
 			return _.isEqual(actual, expected);
 		}
@@ -330,6 +331,12 @@ const check = (field, operator: Operator, expected) => {
 		throw new Error(`Unsupported operator ${operator}`);
 	}
 };
+
+function toComparableValue(val) {
+	if (val instanceof Date) return val.getTime();
+	if (val instanceof Timestamp) return val.toMillis();
+	return val;
+}
 
 export class Collection {
 
