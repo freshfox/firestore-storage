@@ -1,5 +1,7 @@
 import {TestFactory, User, UserRepository} from '../index';
 import * as should from 'should';
+import * as admin from "firebase-admin";
+import Timestamp = admin.firestore.Timestamp;
 
 describe('UserRepository', function () {
 
@@ -69,7 +71,7 @@ describe('UserRepository', function () {
 			start.setDate(start.getDate() + 1);
 			return {
 				name: 'n' + index,
-				last_login: new Date(start)
+				last_login: Timestamp.fromDate(start)
 			}
 		});
 
@@ -81,7 +83,7 @@ describe('UserRepository', function () {
 		should(users).length(6);
 		for (let i = 0; i < users.length; i++) {
 			const user = users[i];
-			should(user.last_login.getTime() > queryDate.getTime()).true();
+			should(user.last_login.toDate().getTime() > queryDate.getTime()).true();
 		}
 
 	});

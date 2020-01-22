@@ -1,6 +1,8 @@
 import {getFirestoreTestPath, TestCase} from "../index";
 import * as should from 'should'
 import {FirestoreStorage, MemoryStorage} from "../../lib";
+import * as admin from "firebase-admin";
+import Timestamp = admin.firestore.Timestamp;
 
 describe('Storage', function () {
 
@@ -68,7 +70,7 @@ describe('Storage', function () {
 
 			const rev = await storage.save(`${restaurantPath}/${r1.id}/reviews`, {
 				rating: 5,
-				date: new Date()
+				date: Timestamp.now()
 			});
 			const parts = getFirestoreTestPath().split('/');
 			if (parts.length !== 2) {
@@ -85,7 +87,7 @@ describe('Storage', function () {
 			mem.setData(exportData);
 
 			const rev2 = await mem.findById(`${restaurantPath}/${r1.id}/reviews`, rev.id);
-			should(rev2.date).instanceOf(Date);
+			should(rev2.date).instanceOf(Timestamp);
 
 		});
 	}

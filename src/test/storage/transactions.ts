@@ -1,5 +1,7 @@
 import {TestFactory, User, UserRepository} from '../index';
 import * as should from 'should';
+import * as admin from "firebase-admin";
+import Timestamp = admin.firestore.Timestamp;
 
 describe('Transactions', function () {
 
@@ -32,7 +34,7 @@ describe('Transactions', function () {
 		await userRepo.transaction(async (trx) => {
 
 			const jane = await trx.get(u1.id);
-			jane.last_login = new Date();
+			jane.last_login = Timestamp.now();
 			trx.set(jane);
 
 			trx.create({
@@ -53,12 +55,12 @@ describe('Transactions', function () {
 
 	it('should update data using a transaction', async () => {
 
-		const u2 = await userRepo.save({last_login: new Date('2019-06-02')});
-		const u6 = await userRepo.save({last_login: new Date('2019-06-06')});
-		const u1 = await userRepo.save({last_login: new Date('2019-06-01')});
-		const u3 = await userRepo.save({last_login: new Date('2019-06-03')});
-		const u4 = await userRepo.save({last_login: new Date('2019-06-04')});
-		const u5 = await userRepo.save({last_login: new Date('2019-06-05')});
+		const u2 = await userRepo.save({last_login: Timestamp.fromDate(new Date('2019-06-02'))});
+		const u6 = await userRepo.save({last_login: Timestamp.fromDate(new Date('2019-06-06'))});
+		const u1 = await userRepo.save({last_login: Timestamp.fromDate(new Date('2019-06-01'))});
+		const u3 = await userRepo.save({last_login: Timestamp.fromDate(new Date('2019-06-03'))});
+		const u4 = await userRepo.save({last_login: Timestamp.fromDate(new Date('2019-06-04'))});
+		const u5 = await userRepo.save({last_login: Timestamp.fromDate(new Date('2019-06-05'))});
 
 		await userRepo.transaction(async (trx) => {
 
@@ -80,7 +82,7 @@ describe('Transactions', function () {
 
 	it('should make batch updates in a transaction', async () => {
 
-		let u1 = await userRepo.save({firstname: 'John', last_login: new Date('2019-06-02')});
+		let u1 = await userRepo.save({firstname: 'John', last_login: Timestamp.fromDate(new Date('2019-06-02'))});
 		await userRepo.transaction(async (trx) => {
 			trx.update({
 				id: u1.id,
@@ -100,7 +102,7 @@ describe('Transactions', function () {
 
 		let u1 = await userRepo.save({
 			firstname: 'John',
-			last_login: new Date('2019-06-02'),
+			last_login: Timestamp.fromDate(new Date('2019-06-02')),
 			address: {
 				city: 'Vienna',
 				postal: 1234

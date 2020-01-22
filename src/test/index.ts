@@ -7,6 +7,7 @@ import {BaseModel, ReferenceMap} from '../lib/storage/base_model';
 import * as admin from 'firebase-admin';
 import * as env from 'node-env-file';
 import * as fs from 'fs';
+import Timestamp = admin.firestore.Timestamp;
 
 const path = __dirname + '/../../.env';
 if(fs.existsSync(path)){
@@ -81,7 +82,7 @@ export interface User extends BaseModel {
 	/** @deprecated */firstname?: string;
 	/** @deprecated */lastname?: string;
 	email?: string;
-	last_login?: Date;
+	last_login?: Timestamp;
 	address?: {
 		street?: string;
 		postal?: number;
