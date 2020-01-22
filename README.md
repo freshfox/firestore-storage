@@ -192,7 +192,7 @@ class UserRepository extends BaseRepository<User> {
   getCollectionPath(...documentIds: string[]): string {
     return 'users';
   }
-	
+
   listAllActive() {
     return this.list({active: true});
   }
@@ -202,7 +202,7 @@ const repo = new UserRepository();
 ```
 
 ### Inversify
-This library fully supports [Inversify][inversify] To use it you have load the `FirestoreStorageModule` module 
+This library fully supports [Inversify][inversify] To use it you have load the `FirestoreStorageModule` module
 into your container and add the `@injectable()` decorator to each repository class. This will automatically
 inject the correct storage implementation (Firestore or In-Memory) into your repositories
 
@@ -265,35 +265,35 @@ const todo = await todoRepo.findById(userId, todoId);
 ### find
 Queries the collection to match the given arguments, returns the first result or `null` if none is found.
 ```typescript
-const doneTodo = await todoRepo.find({
-  done: true
-}, userId);
+const review = await reviewRepo.find({
+  rating: 5
+}, restaurantId);
 ```
 
 ### getById
-Works exactly like [findById](#findbyid) but throws an error if no document was found
+Works exactly like [findById](#findbyid) but [throws an error](#custom-error) if no document was found
 
 ### get
-Works exactly like [find](#find) but throws an error if no document was found
+Works exactly like [find](#find) but [throws an error](#custom-error) if no document was found
 
 ### list
 Query a list of documents with a set of given arguments. This function always returns an array. If no results were found
 the array will be empty
 
 ```typescript
-const allDoneTodos = await todoRepo.list({
-  done: true
-}, userId);
+const allOneStarRatings = await reviewRepo.list({
+  rating: 1
+}, restaurantId);
 ```
 
 ### query
 Do more complex queries like `greater than` and `lower than` comparisons.
 ```typescript
-const passedDeadlineTodos = await todoRepo.query(() => {
+const reviews = await reviewRepo.query(() => {
   return qb
-    .where('done', '==', false)
-    .where('deadlineDate', '<', new Date());
-});
+    .where('rating', '==', 2)
+    .where('submitDate', '<', new Date('2019-12-31'));
+}, restaurantId);
 ```
 Valid operators are `==` | `<` | `<=` | `>` | `>=`
 
@@ -332,7 +332,7 @@ By default this will create the document with this id if it doesn't exist
 or merge the properties into the existing document. If you want to write a document
 and instead of don't merge use the [write()][write] function
 
-### write 
+### write
 Sets the passed data. If the document exists it will be overwritten.
 ```typescript
 const user = await userRepo.write({
@@ -345,7 +345,7 @@ const user = await userRepo.write({
 Deletes a document by a given id
 ```typescript
 // For a nested collection
-await todoRepo.delete(userId, todoId);
+await reviewRepo.delete(restaurantId, reviewId);
 // For a root level collection
 await userRepo.delete(userId);
 ```
@@ -377,22 +377,22 @@ When creating repositories for nested collection it's always a good idea to chec
 `getCollectionPath(...)`.
 
 ```typescript
-export class TodoRepository<T> extends BaseRepository<Todo> {
+export class ReviewRepository<T> extends BaseRepository<Review> {
 
   getCollectionPath(...documentIds): string {
     const id = documentIds.shift();
     if (!id) {
-      throw new Error('User id is missing');
+      throw new Error('RestaurantId id is missing');
     }
-    return `users/${id}/todos`;
+    return `restaurants/${id}/reviews`;
   }
 }
 ```
 
 This will throw an error when trying to save or query without passing the user id.
 ```typescript
-await todoRepo.save({...}); // Throws and error
-await todoRepo.save({...}, '<userId>'); // Succeeds
+await reviewRepo.save({...}); // Throws and error
+await reviewRepo.save({...}, '<restaurantId>'); // Succeeds
 ```
 
 ## Migrations
