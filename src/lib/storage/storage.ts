@@ -1,24 +1,24 @@
 
 export interface IStorageDriver {
 
-	findById(collection: string, id: string): Promise<any>;
+	findById<T = any>(collection: string, id: string): Promise<T>;
 
-	find<T>(collection: string, query: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<any>;
+	find<T = any>(collection: string, query: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<T>;
 
-	save(collection: string, data: any, options?: SaveOptions): Promise<any>;
+	save<T = any>(collection: string, data: T, options?: SaveOptions): Promise<T>;
 
-	query<T>(collection: string, query?: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<any>;
+	query<T = any>(collection: string, query?: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<T[]>;
 
-	batchGet(collection: string, ids: string[]): Promise<any>;
+	batchGet<T = any>(collection: string, ids: string[]): Promise<T[]>;
 
 	delete(collection: string, id: string): Promise<void>;
 
 	clear(collection: string): Promise<any>;
 
-	listen<T>(collection: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>,
+	listen<T = any>(collection: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>,
 		   onNext: (snapshot: any) => void, onError?: (error: Error) => void): () => void;
 
-	transaction<T>(updateFunction: (transaction: IFirestoreTransaction) => Promise<T>,
+	transaction<T = any>(updateFunction: (transaction: IFirestoreTransaction) => Promise<T>,
 				   transactionOptions?:{maxAttempts?: number}): Promise<T>;
 
 	generateId(): string;

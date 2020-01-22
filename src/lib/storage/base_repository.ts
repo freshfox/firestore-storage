@@ -67,7 +67,7 @@ export abstract class BaseRepository<T extends BaseModel> {
 	}
 
 	save(data: T | PatchUpdate<T>, ...ids: string[]): Promise<T> {
-		return this.storage.save(this.getCollectionPath(...ids), data)
+		return this.storage.save<any>(this.getCollectionPath(...ids), data)
 	}
 
 	write(data: T | PatchUpdate<T>, ...ids: string[]) {
