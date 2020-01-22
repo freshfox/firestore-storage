@@ -47,9 +47,10 @@ export class MemoryStorage implements IStorageDriver {
 		}
 	}
 
-	query<T>(collection: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<any[]> {
+	query<T>(collection: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<any[]> {
 		const items = this.getAsArray(collection);
-		const query = cb(new MemoryQueryBuilder(items));
+		const builder = new MemoryQueryBuilder(items);
+		const query = cb ? cb(builder) : builder;
 		return query.get();
 	}
 

@@ -7,7 +7,7 @@ export interface IStorageDriver {
 
 	save(collection: string, data: any, options?: SaveOptions): Promise<any>;
 
-	query<T>(collection: string, query: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<any>;
+	query<T>(collection: string, query?: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<any>;
 
 	batchGet(collection: string, ids: string[]): Promise<any>;
 
