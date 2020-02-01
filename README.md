@@ -25,7 +25,7 @@ storage implementation for running blazing fast tests
 
 Firestore Storage provides a thin layer of abstraction to accessing data in Firestore.
 It follows the repository pattern, for more information about it you can read this
-[short article][repo-article]
+[short article](https://medium.com/@pererikbergman/repository-design-pattern-e28c0f3e4a30)
 
 ## Example
 
@@ -435,5 +435,4 @@ class RestaurantRepository extends BaseRepository<Restaurant> {
 ```
 
 [inversify]: http://inversify.io/
-[repo-article]: [https://medium.com/@pererikbergman/repository-design-pattern-e28c0f3e4a30]
 [transaction-doc]: https://firebase.google.com/docs/firestore/manage-data/transactions
