@@ -87,7 +87,7 @@ export abstract class BaseRepository<T extends BaseModel> {
 		return this.storage.listen(this.getCollectionPath(...ids), cb, onNext, onError);
 	}
 
-	transaction<R>(updateFunction: (transaction: RepositoryTransaction<T>) => Promise<R>, ...ids: string[]): Promise<R> {
+	transaction<R>(updateFunction: RepositoryTransactionCallback<T, R>, ...ids: string[]): Promise<R> {
 		return this.storage.transaction<R>((trx) => {
 			return updateFunction(new RepositoryTransaction(this.getCollectionPath(...ids), trx))
 		});
@@ -103,6 +103,8 @@ export abstract class BaseRepository<T extends BaseModel> {
 	}
 
 }
+
+export type RepositoryTransactionCallback<T, R> = (transaction: RepositoryTransaction<T>) => Promise<R>
 
 export class RepositoryTransaction<T> {
 
