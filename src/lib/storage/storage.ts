@@ -64,7 +64,7 @@ export interface Transaction {
 }
 
 export type OrderDirection = 'desc' | 'asc';
-export type Operator = '==' | '<' | '<=' | '>' | '>=';
+export type Operator = '==' | '<' | '<=' | '>' | '>=' | 'in';
 
 export const Storage = Symbol('Storage');
 export const FirestoreInstance = Symbol('FirestoreInstance');

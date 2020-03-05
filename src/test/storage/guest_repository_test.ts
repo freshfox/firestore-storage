@@ -258,5 +258,34 @@ describe('GuestRepository', function () {
 
 	});
 
+	describe('#query', function () {
+
+		it('should query documents using in operator', async () => {
+
+			const save = (locale) => {
+			  return guestRepo.save({locale}, accountId)
+			};
+
+			const g1 = await save('de');
+			const g2 = await save('de');
+			const g3 = await save('en');
+			const g4 = await save('fr');
+
+			const q1 = await guestRepo.query((qb) => {
+				return qb.where('locale', 'in', ['en', 'fr']);
+			}, accountId);
+			should(q1.map(g => g.id).sort()).eql([g3.id, g4.id].sort());
+
+			const q2 = await guestRepo.query((qb) => {
+				return qb.where('locale', 'in', ['de', 'at']);
+			}, accountId);
+			should(q2.map(g => g.id).sort()).eql([g1.id, g2.id].sort());
+
+
+
+		});
+
+	});
+
 
 });

@@ -327,6 +327,8 @@ const check = (field, operator: Operator, expected) => {
 			case '<': return actual < expected;
 			case '<=': return actual <= expected;
 			case '==': return actual === expected;
+			case 'in':
+				return (expected as string[]).indexOf(actual) !== -1;
 		}
 		throw new Error(`Unsupported operator ${operator}`);
 	}

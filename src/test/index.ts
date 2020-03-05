@@ -123,9 +123,7 @@ export interface Guest extends BaseModel {
 	notes?: string;
 	tagIds?: ReferenceMap;
 	deleted?: boolean;
-
 	protelId?: string;
-
 }
 
 export class GuestRepository extends BaseRepository<Guest> {
