@@ -1,13 +1,50 @@
-import {QueryBuilder, IStorageDriver, SaveOptions, FirestoreInstance, IFirestoreTransaction} from './storage';
+import {FirestoreInstance, IFirestoreTransaction, IStorageDriver, QueryBuilder, SaveOptions} from './storage';
 import {inject, injectable} from 'inversify';
 import * as admin from 'firebase-admin';
 import {MemoryStorage} from "./memory_storage";
 import DocumentReference = admin.firestore.DocumentReference;
 
+export interface FirestoreStorageExportOptions {
+	parallelCollections?: number;
+	parallelDocuments?: number;
+}
+
 @injectable()
 export class FirestoreStorage implements IStorageDriver {
 
-	constructor(@inject(FirestoreInstance) protected firestore: admin.firestore.Firestore) {
+	private static readonly EXPORT_OPTIONS: FirestoreStorageExportOptions = {
+		parallelCollections: 20,
+		parallelDocuments: 500
+	}
+
+	constructor(@inject(FirestoreInstance) protected firestore: admin.firestore.Firestore, ) {
+	}
+
+	static clone(data): { id: string, data } {
+		const clone = Object.assign({}, data);
+		const id = data.id;
+		delete clone.id;
+		delete clone.createdAt;
+		delete clone.updatedAt;
+		return {
+			id: id,
+			data: clone
+		};
+	}
+
+	static format(snapshot: FirebaseFirestore.DocumentSnapshot) {
+		if (!snapshot.exists) {
+			return null;
+		}
+		return Object.assign({
+			id: snapshot.id,
+			createdAt: new Date(snapshot.createTime.toMillis()),
+			updatedAt: new Date(snapshot.updateTime.toMillis())
+		}, snapshot.data()) as any;
+	}
+
+	private static getPath(collection: string, id: string) {
+		return `${collection}/${id}`;
 	}
 
 	async findById(collection: string, id: string) {
@@ -89,7 +126,7 @@ export class FirestoreStorage implements IStorageDriver {
 	}
 
 	async transaction<T>(updateFunction: (firestoreTrx: IFirestoreTransaction) => Promise<T>,
-					  transactionOptions?:{maxAttempts?: number}) {
+						 transactionOptions?: { maxAttempts?: number }) {
 		return this.firestore.runTransaction((transaction) => {
 			const trx = new FirestoreTransaction(this.firestore, transaction);
 			return updateFunction(trx);
@@ -111,7 +148,12 @@ export class FirestoreStorage implements IStorageDriver {
 		return this.firestore.collection('').doc().id;
 	}
 
-	async export(rootDoc?: string) {
+	async export(rootDoc?: string, options?: FirestoreStorageExportOptions) {
+		const opts = {
+			...FirestoreStorage.EXPORT_OPTIONS,
+			...(options || {})
+		};
+		console.log(`Exporting ${opts.parallelCollections} collections in parallel and ${opts.parallelDocuments} documents in parallel`);
 		const storage = new MemoryStorage();
 		let root: DocumentReference | admin.firestore.Firestore;
 		if (rootDoc) {
@@ -124,22 +166,25 @@ export class FirestoreStorage implements IStorageDriver {
 		} else {
 			root = this.firestore;
 		}
-		await this.exportDocument(storage, root);
+		await this.exportDocument(storage, root, opts);
 		return storage.data.toJson();
 	}
 
-	private async exportDocument(storage: MemoryStorage, root: DocumentReference | admin.firestore.Firestore) {
+	private async exportDocument(storage: MemoryStorage, root: DocumentReference | admin.firestore.Firestore, opts: FirestoreStorageExportOptions) {
 		const docStart = Date.now();
 		const collections = await root.listCollections();
-		for (const coll of collections) {
+		const exportColl = async (coll: admin.firestore.CollectionReference<admin.firestore.DocumentData>) => {
 			const collStart = Date.now();
 			const query = await coll.get();
-			for (const doc of query.docs) {
+			await FirestoreStorage.processPromisesParallel(query.docs, opts.parallelDocuments, async (doc) => {
 				await storage.save(coll.path, FirestoreStorage.format(doc));
-				await this.exportDocument(storage, doc.ref);
-			}
+				await this.exportDocument(storage, doc.ref, opts);
+			})
 			console.log('Exported', coll.path, 'in', time(Date.now() - collStart));
 		}
+		await FirestoreStorage.processPromisesParallel(collections, opts.parallelCollections, async (coll) => {
+			await exportColl(coll);
+		})
 		let path = 'database';
 		if (root instanceof DocumentReference) {
 			path = root.path;
@@ -165,7 +210,7 @@ export class FirestoreStorage implements IStorageDriver {
 
 	private deleteCollection(collectionPath, batchSize) {
 		const collectionRef = this.firestore.collection(collectionPath);
-		const query = collectionRef.orderBy('__name__', ).limit(batchSize);
+		const query = collectionRef.orderBy('__name__',).limit(batchSize);
 
 		return new Promise((resolve, reject) => {
 			this.deleteQueryBatch(query, batchSize, resolve, reject);
@@ -204,31 +249,51 @@ export class FirestoreStorage implements IStorageDriver {
 			.catch(reject);
 	}
 
-	static clone(data): {id: string, data} {
-		const clone = Object.assign({}, data);
-		const id = data.id;
-		delete clone.id;
-		delete clone.createdAt;
-		delete clone.updatedAt;
-		return {
-			id: id,
-			data: clone
-		};
-	}
+	private static async processPromisesParallel<T, K>(items: T[], batchSize: number,
+													   handler: (item: T) => Promise<K>,
+													   onUpdate?: (status: {
+														   running: number,
+														   done: number,
+														   total: number,
+														   queued: number
+													   }) => void): Promise<K[]> {
+		items = [...items];
+		const all: K[] = [];
 
-	private static getPath(collection: string, id: string) {
-		return `${collection}/${id}`;
-	}
+		const total = items.length;
+		let done = 0;
+		let running = 0;
 
-	static format(snapshot: FirebaseFirestore.DocumentSnapshot) {
-		if (!snapshot.exists) {
-			return null;
+		function update() {
+			if (onUpdate) onUpdate({
+				running,
+				done,
+				total: total,
+				queued: total - (done + running)
+			});
 		}
-		return Object.assign({
-			id: snapshot.id,
-			createdAt: new Date(snapshot.createTime.toMillis()),
-			updatedAt: new Date(snapshot.updateTime.toMillis())
-		}, snapshot.data()) as any;
+		async function executeNext() {
+			const item = items.shift();
+			if (!item) {
+				return;
+			}
+			running++;
+			update();
+			const result = await handler(item);
+			all.push(result);
+			running--;
+			done++;
+			update();
+			if (items.length > 0) {
+				await executeNext();
+			}
+		}
+		const promises = [];
+		for (let i = 0; i < batchSize; i++) {
+			promises.push(executeNext());
+		}
+		await Promise.all(promises);
+		return all;
 	}
 }
 
