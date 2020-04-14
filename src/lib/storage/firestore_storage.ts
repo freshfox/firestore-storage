@@ -3,18 +3,21 @@ import {inject, injectable} from 'inversify';
 import * as admin from 'firebase-admin';
 import {MemoryStorage} from "./memory_storage";
 import DocumentReference = admin.firestore.DocumentReference;
+import {processPromisesParallel, processPromisesParallelWithRetries} from "ff-utils";
 
 export interface FirestoreStorageExportOptions {
 	parallelCollections?: number;
 	parallelDocuments?: number;
+	tries?: number;
 }
 
 @injectable()
 export class FirestoreStorage implements IStorageDriver {
 
-	private static readonly EXPORT_OPTIONS: FirestoreStorageExportOptions = {
+	private static readonly EXPORT_OPTIONS: Required<FirestoreStorageExportOptions> = {
 		parallelCollections: 20,
-		parallelDocuments: 500
+		parallelDocuments: 500,
+		tries: 3
 	}
 
 	constructor(@inject(FirestoreInstance) protected firestore: admin.firestore.Firestore, ) {
@@ -176,13 +179,13 @@ export class FirestoreStorage implements IStorageDriver {
 		const exportColl = async (coll: admin.firestore.CollectionReference<admin.firestore.DocumentData>) => {
 			const collStart = Date.now();
 			const query = await coll.get();
-			await FirestoreStorage.processPromisesParallel(query.docs, opts.parallelDocuments, async (doc) => {
+			await processPromisesParallelWithRetries(query.docs, opts.parallelDocuments, opts.tries, async (doc) => {
 				await storage.save(coll.path, FirestoreStorage.format(doc));
 				await this.exportDocument(storage, doc.ref, opts);
 			})
 			console.log('Exported', coll.path, 'in', time(Date.now() - collStart));
 		}
-		await FirestoreStorage.processPromisesParallel(collections, opts.parallelCollections, async (coll) => {
+		await processPromisesParallelWithRetries(collections, opts.parallelCollections, opts.tries, async (coll) => {
 			await exportColl(coll);
 		})
 		let path = 'database';
@@ -247,53 +250,6 @@ export class FirestoreStorage implements IStorageDriver {
 			});
 		})
 			.catch(reject);
-	}
-
-	private static async processPromisesParallel<T, K>(items: T[], batchSize: number,
-													   handler: (item: T) => Promise<K>,
-													   onUpdate?: (status: {
-														   running: number,
-														   done: number,
-														   total: number,
-														   queued: number
-													   }) => void): Promise<K[]> {
-		items = [...items];
-		const all: K[] = [];
-
-		const total = items.length;
-		let done = 0;
-		let running = 0;
-
-		function update() {
-			if (onUpdate) onUpdate({
-				running,
-				done,
-				total: total,
-				queued: total - (done + running)
-			});
-		}
-		async function executeNext() {
-			const item = items.shift();
-			if (!item) {
-				return;
-			}
-			running++;
-			update();
-			const result = await handler(item);
-			all.push(result);
-			running--;
-			done++;
-			update();
-			if (items.length > 0) {
-				await executeNext();
-			}
-		}
-		const promises = [];
-		for (let i = 0; i < batchSize; i++) {
-			promises.push(executeNext());
-		}
-		await Promise.all(promises);
-		return all;
 	}
 }
 

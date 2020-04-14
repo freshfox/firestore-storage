@@ -39,6 +39,7 @@
   "license": "MIT",
   "homepage": "https://github.com/freshfox/firestore-storage",
   "dependencies": {
+    "ff-utils": "^1.0.0",
     "inversify": "^5.0.1",
     "lodash": "^4.17.15",
     "reflect-metadata": "^0.1.13"

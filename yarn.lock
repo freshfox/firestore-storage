@@ -1862,6 +1862,11 @@ faye-websocket@0.11.3:
   dependencies:
     websocket-driver ">=0.5.1"
 
+ff-utils@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/ff-utils/-/ff-utils-1.0.0.tgz#991519d294276c2d784b3fdf7fb85afa1b95484b"
+  integrity sha512-9BQu/FKu4Aqomr76SL0UwqUc6APqzJB/6eQMTwOZC9vLoAjVjnIJy4VdEz0tRScnSZlSKztYMKVqpbFSvn7Mkw==
+
 figures@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/figures/-/figures-2.0.0.tgz#3ab1a2d2a62c8bfb431a0c94cb797a2fce27c962"
