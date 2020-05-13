@@ -1,4 +1,11 @@
-import {FirestoreInstance, IFirestoreTransaction, IStorageDriver, QueryBuilder, SaveOptions} from './storage';
+import {
+	FirestoreInstance,
+	IDocument,
+	IFirestoreTransaction,
+	IStorageDriver,
+	QueryBuilder,
+	SaveOptions
+} from './storage';
 import {inject, injectable} from 'inversify';
 import * as admin from 'firebase-admin';
 import {Collection, Document, MemoryStorage} from "./memory_storage";
@@ -173,9 +180,9 @@ export class FirestoreStorage implements IStorageDriver {
 		return storage.data.toJson();
 	}
 
-	async import(data) {
+	async import(data: IDocument) {
 		const storage = new MemoryStorage();
-		storage.setData(data);
+		await storage.import(data);
 		const collectionNames = Object.keys(storage.data.collections);
 		for (const collectionName of collectionNames) {
 			await this.importCollection(collectionName, storage.data.collections[collectionName])

@@ -1,4 +1,12 @@
-import {OrderDirection, QueryBuilder, IStorageDriver, SaveOptions, IFirestoreTransaction, Operator} from './storage';
+import {
+	OrderDirection,
+	QueryBuilder,
+	IStorageDriver,
+	SaveOptions,
+	IFirestoreTransaction,
+	Operator,
+	IDocument, ICollection
+} from './storage';
 import * as uuid from 'uuid/v4';
 import {injectable} from 'inversify';
 import * as _ from 'lodash';
@@ -93,8 +101,13 @@ export class MemoryStorage implements IStorageDriver {
 		return uuid();
 	}
 
-	setData(data: IDocument) {
+	import(data: IDocument) {
 		this.data = new Document(data);
+		return Promise.resolve();
+	}
+
+	setData(data: IDocument) {
+		return this.import(data)
 	}
 
 	private getAsArray(collection: string) {
@@ -498,17 +511,3 @@ function mapObjects(obj: object, mapper: (data) => any) {
 	}, {})
 }
 
-export interface IDocument {
-	collections: {
-		[name: string]: ICollection
-	};
-	createdAt: Date;
-	updatedAt: Date;
-	data: any;
-}
-
-export interface ICollection {
-	documents: {
-		[id: string]: IDocument
-	};
-}

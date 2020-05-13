@@ -23,7 +23,10 @@ export interface IStorageDriver {
 
 	generateId(): string;
 
-	export(base?: string): any;
+	export(base?: string): Promise<IDocument>;
+
+	import(data: IDocument): Promise<void>
+
 }
 
 export interface QueryBuilder<T> {
@@ -76,5 +79,19 @@ export interface SaveOptions {
 
 export type IErrorFactory = (message: string) => Error;
 
+export interface IDocument {
+	collections: {
+		[name: string]: ICollection
+	};
+	createdAt: Date;
+	updatedAt: Date;
+	data: any;
+}
+
+export interface ICollection {
+	documents: {
+		[id: string]: IDocument
+	};
+}
 
 
