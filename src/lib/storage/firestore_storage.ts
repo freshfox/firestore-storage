@@ -1,7 +1,7 @@
 import {FirestoreInstance, IFirestoreTransaction, IStorageDriver, QueryBuilder, SaveOptions} from './storage';
 import {inject, injectable} from 'inversify';
 import * as admin from 'firebase-admin';
-import {MemoryStorage} from "./memory_storage";
+import {Collection, Document, MemoryStorage} from "./memory_storage";
 import DocumentReference = admin.firestore.DocumentReference;
 import {processPromisesParallel, processPromisesParallelWithRetries} from "ff-utils";
 
@@ -171,6 +171,35 @@ export class FirestoreStorage implements IStorageDriver {
 		}
 		await this.exportDocument(storage, root, opts);
 		return storage.data.toJson();
+	}
+
+	async import(data) {
+		const storage = new MemoryStorage();
+		storage.setData(data);
+		const collectionNames = Object.keys(storage.data.collections);
+		for (const collectionName of collectionNames) {
+			await this.importCollection(collectionName, storage.data.collections[collectionName])
+		}
+	}
+
+	private async importDocument(collectionPath: string, id: string, doc: Document) {
+		await this.save(collectionPath, {
+			...doc.data,
+			id: id
+		});
+		const collectionNames = Object.keys(doc.collections);
+		for (const collectionName of collectionNames) {
+			const collection = doc.collections[collectionName];
+			await this.importCollection(`${collectionPath}/${id}/${collectionName}`, collection)
+		}
+	}
+
+	private async importCollection(path: string, collection: Collection) {
+		const docIds = Object.keys(collection.documents);
+		for (const docId of docIds) {
+			const doc = collection.documents[docId];
+			await this.importDocument(path, docId, doc);
+		}
 	}
 
 	private async exportDocument(storage: MemoryStorage, root: DocumentReference | admin.firestore.Firestore, opts: FirestoreStorageExportOptions) {

@@ -91,13 +91,19 @@ export interface User extends BaseModel {
 	tags?: string[]
 }
 
-const testRun = `tests/${Date.now()}`;
-
+const testRunId = Date.now();
+export function getFirestoreTestCollection() {
+	return 'tests';
+}
+export function getFirestoreTestRunId() {
+	return `${testRunId}`;
+}
 export function getFirestoreTestPath(path?: string) {
+	const parts = [getFirestoreTestCollection(), getFirestoreTestRunId()]
 	if (path) {
-		return `${testRun}/${path}`;
+		parts.push(path);
 	}
-	return testRun;
+	return parts.join('/');
 }
 
 export class UserRepository extends BaseRepository<User> {
@@ -132,7 +138,7 @@ export class GuestRepository extends BaseRepository<Guest> {
 		if (!ids[0]) {
 			throw new Error('account id missing');
 		}
-		return `${testRun}/accounts/${ids[0]}/guests`;
+		return getFirestoreTestPath(`/accounts/${ids[0]}/guests`);
 	}
 
 }

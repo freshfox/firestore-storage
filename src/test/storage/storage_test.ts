@@ -1,4 +1,4 @@
-import {getFirestoreTestPath, TestCase} from "../index";
+import {getFirestoreTestCollection, getFirestoreTestPath, getFirestoreTestRunId, TestCase} from "../index";
 import * as should from 'should'
 import {FirestoreStorage, MemoryStorage} from "../../lib";
 import * as admin from "firebase-admin";
@@ -6,7 +6,7 @@ import Timestamp = admin.firestore.Timestamp;
 
 describe('Storage', function () {
 
-	const tc = new TestCase();
+	const tc = new TestCase(null, true);
 	const storage = tc.getStorage();
 
 	it('should save a document and override a sub-array', async () => {
@@ -72,23 +72,30 @@ describe('Storage', function () {
 				rating: 5,
 				date: Timestamp.now()
 			});
-			const parts = getFirestoreTestPath().split('/');
-			if (parts.length !== 2) {
-				throw new Error('Test collection has changed');
-			}
-			await storage.save(parts[0], {
-				id: parts[1],
+			await storage.save(getFirestoreTestCollection(), {
+				id: getFirestoreTestRunId(),
 				testData: 123
 			});
 
 			const exportData = await (storage as FirestoreStorage).export(getFirestoreTestPath());
 
+			const rest = await storage.query(restaurantPath);
+			for (const res of rest) {
+			}
+			await storage.delete(getFirestoreTestCollection(), getFirestoreTestRunId());
+
+			// Set data to memory storage
 			const mem = new MemoryStorage();
 			mem.setData(exportData);
 
 			const rev2 = await mem.findById(`${restaurantPath}/${r1.id}/reviews`, rev.id);
 			should(rev2.date).instanceOf(Timestamp);
 
+			// Import data to firestore
+			await storage.import(exportData);
+
+			const restaurant = await mem.findById(restaurantPath, r2.id);
+			should(restaurant).property('id', r2.id);
 		});
 	}
 
