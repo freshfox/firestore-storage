@@ -138,7 +138,7 @@ export class GuestRepository extends BaseRepository<Guest> {
 		if (!ids[0]) {
 			throw new Error('account id missing');
 		}
-		return getFirestoreTestPath(`/accounts/${ids[0]}/guests`);
+		return getFirestoreTestPath(`accounts/${ids[0]}/guests`);
 	}
 
 }
