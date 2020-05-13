@@ -6,7 +6,7 @@ import Timestamp = admin.firestore.Timestamp;
 
 describe('Storage', function () {
 
-	const tc = new TestCase(null, true);
+	const tc = new TestCase();
 	const storage = tc.getStorage();
 
 	it('should save a document and override a sub-array', async () => {
