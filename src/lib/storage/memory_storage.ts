@@ -471,18 +471,24 @@ export class Document {
 		};
 	}
 
-	private static parseData(data) {
+	static parseData(data) {
 		if (data) {
 			return mapObjects(data, (value) => {
 				if (_.isPlainObject(value)) {
-					if (value.__instance && value.__instance === 'date') {
+					if (value.__instance === 'date') {
 						return new Date(value.value);
+					} else if (this.isTimestamp(value)) {
+						return new Timestamp(value._seconds, value._nanoseconds)
 					}
-					return this.parseData(value)
+					return this.parseData(value);
 				}
 				return value;
 			});
 		}
+	}
+
+	private static isTimestamp(value: any) {
+		return (value.hasOwnProperty('_seconds') && value.hasOwnProperty('_nanoseconds'));
 	}
 
 	private static formatData(data) {
