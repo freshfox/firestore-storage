@@ -64,7 +64,7 @@ describe('Storage', function () {
 
 			const restaurantPath = getFirestoreTestPath('restaurants');
 
-			const r1 = await storage.save(restaurantPath, {name: 'Ebi'});
+			const r1 = await storage.save(restaurantPath, {name: 'Ebi', dates: [{date: Timestamp.now()}]});
 			const r2 = await storage.save(restaurantPath, {name: 'Hiro'});
 			const r3 = await storage.save(restaurantPath, {name: 'McDonalds'});
 
@@ -86,7 +86,7 @@ describe('Storage', function () {
 
 			// Set data to memory storage
 			const mem = new MemoryStorage();
-			mem.setData(exportData);
+			await mem.setData(exportData);
 
 			const rev2 = await mem.findById(`${restaurantPath}/${r1.id}/reviews`, rev.id);
 			should(rev2.date).instanceOf(Timestamp);

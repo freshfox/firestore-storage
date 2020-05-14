@@ -361,7 +361,7 @@ export class Collection {
 
 	constructor(collection?: ICollection) {
 		if (collection && collection.documents) {
-			this.documents = mapObjects(collection.documents, (doc: IDocument) => {
+			this.documents = mapValues(collection.documents, (doc: IDocument) => {
 				return new Document(doc);
 			});
 		}
@@ -398,7 +398,7 @@ export class Collection {
 
 	toJson(): ICollection {
 		return {
-			documents: mapObjects(this.documents, (doc: Document) => {
+			documents: mapValues(this.documents, (doc: Document) => {
 				return doc.toJson();
 			})
 		}
@@ -420,7 +420,7 @@ export class Document {
 			this.createdAt = new Date(data.createdAt);
 			this.updatedAt = new Date(data.updatedAt);
 			if (data.collections) {
-				this.collections = mapObjects(data.collections, (collection: ICollection) => {
+				this.collections = mapValues(data.collections, (collection: ICollection) => {
 					return new Collection(collection);
 				});
 			}
@@ -449,23 +449,11 @@ export class Document {
 	}
 
 	toJson(): IDocument {
-		let data = null;
-		if (this.data) {
-			data = mapObjects(this.data, (value) => {
-				if (value instanceof Date) {
-					value = {
-						instance: 'date',
-						value: value.toISOString()
-					};
-				}
-				return value;
-			})
-		}
 		return {
 			data: Document.formatData(this.data),
 			createdAt: this.createdAt,
 			updatedAt: this.updatedAt,
-			collections: mapObjects(this.collections, (collection: Collection) => {
+			collections: mapValues(this.collections, (collection: Collection) => {
 				return collection.toJson();
 			})
 		};
@@ -473,7 +461,7 @@ export class Document {
 
 	static parseData(data) {
 		if (data) {
-			return mapObjects(data, (value) => {
+			return mapValues(data, (value) => {
 				if (_.isPlainObject(value)) {
 					if (value.__instance === 'date') {
 						return new Date(value.value);
@@ -481,6 +469,11 @@ export class Document {
 						return new Timestamp(value._seconds, value._nanoseconds)
 					}
 					return this.parseData(value);
+				}
+				if (Array.isArray(value)) {
+					return value.map((item) => {
+						return this.parseData(item);
+					})
 				}
 				return value;
 			});
@@ -495,7 +488,7 @@ export class Document {
 		if (!data) {
 			return;
 		}
-		return mapObjects(data, (value) => {
+		return mapValues(data, (value) => {
 			if (value instanceof Date) {
 				return {
 					__instance: 'date',
@@ -505,12 +498,17 @@ export class Document {
 			if (_.isPlainObject(value)) {
 				return this.formatData(value)
 			}
+			if (Array.isArray(value)) {
+				return value.map((item) => {
+					return this.formatData(item);
+				});
+			}
 			return value;
 		});
 	}
 }
 
-function mapObjects(obj: object, mapper: (data) => any) {
+function mapValues(obj: object, mapper: (data) => any) {
 	return Object.keys(obj).reduce((result, id) => {
 	    result[id] = mapper(obj[id]);
 		return result;
