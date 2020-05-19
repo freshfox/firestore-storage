@@ -6,7 +6,7 @@ import Timestamp = admin.firestore.Timestamp;
 
 describe('Storage', function () {
 
-	const tc = new TestCase();
+	const tc = new TestCase(null, true);
 	const storage = tc.getStorage();
 
 	it('should save a document and override a sub-array', async () => {
@@ -74,7 +74,12 @@ describe('Storage', function () {
 			});
 			await storage.save(getFirestoreTestCollection(), {
 				id: getFirestoreTestRunId(),
-				testData: 123
+				testData: 123,
+				someIds: [
+					'test-1',
+					'test-2',
+					'test-3',
+				]
 			});
 
 			const exportData = await (storage as FirestoreStorage).export(getFirestoreTestPath());
@@ -86,13 +91,20 @@ describe('Storage', function () {
 
 			// Set data to memory storage
 			const mem = new MemoryStorage();
-			await mem.setData(exportData);
+			await mem.import(exportData);
 
 			const rev2 = await mem.findById(`${restaurantPath}/${r1.id}/reviews`, rev.id);
 			should(rev2.date).instanceOf(Timestamp);
 
 			// Import data to firestore
 			await storage.import(exportData);
+
+			const testRun = await storage.findById(getFirestoreTestCollection(), getFirestoreTestRunId());
+			should(testRun.someIds).eql([
+				'test-1',
+				'test-2',
+				'test-3',
+			]);
 
 			const restaurant = await mem.findById(restaurantPath, r2.id);
 			should(restaurant).property('id', r2.id);

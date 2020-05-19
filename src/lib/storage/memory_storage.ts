@@ -461,22 +461,22 @@ export class Document {
 
 	static parseData(data) {
 		if (data) {
-			return mapValues(data, (value) => {
-				if (_.isPlainObject(value)) {
-					if (value.__instance === 'date') {
-						return new Date(value.value);
-					} else if (this.isTimestamp(value)) {
-						return new Timestamp(value._seconds, value._nanoseconds)
-					}
+			if (_.isPlainObject(data)) {
+				if (data.__instance === 'date') {
+					return new Date(data.value);
+				} else if (this.isTimestamp(data)) {
+					return new Timestamp(data._seconds, data._nanoseconds)
+				}
+				return mapValues(data, (value) => {
 					return this.parseData(value);
-				}
-				if (Array.isArray(value)) {
-					return value.map((item) => {
-						return this.parseData(item);
-					})
-				}
-				return value;
-			});
+				});
+			}
+			if (Array.isArray(data)) {
+				return data.map((item) => {
+					return this.parseData(item);
+				})
+			}
+			return data;
 		}
 	}
 
@@ -488,23 +488,23 @@ export class Document {
 		if (!data) {
 			return;
 		}
-		return mapValues(data, (value) => {
-			if (value instanceof Date) {
-				return {
-					__instance: 'date',
-					value: value.toISOString()
-				};
+		if (data instanceof Date) {
+			return {
+				__instance: 'date',
+				value: data.toISOString()
 			}
-			if (_.isPlainObject(value)) {
-				return this.formatData(value)
-			}
-			if (Array.isArray(value)) {
-				return value.map((item) => {
-					return this.formatData(item);
-				});
-			}
-			return value;
-		});
+		}
+		if (_.isPlainObject(data)) {
+			return mapValues(data, (value) => {
+				return this.formatData(value);
+			})
+		}
+		if (Array.isArray(data)) {
+			return data.map((value) => {
+				return this.formatData(value);
+			});
+		}
+		return data;
 	}
 }
 
