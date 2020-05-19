@@ -29,7 +29,7 @@
     "test:all": "yarn test && yarn test:firestore",
     "build": "rm -rf dist && tsc",
     "preversion": "git pull && yarn build && yarn test:all",
-    "postversion": "git push && git push --tags && npm publish"
+    "postversion": "git push --follow-tags && npm publish"
   },
   "repository": {
     "type": "git",
