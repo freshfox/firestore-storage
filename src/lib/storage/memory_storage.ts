@@ -460,24 +460,25 @@ export class Document {
 	}
 
 	static parseData(data) {
-		if (data) {
-			if (_.isPlainObject(data)) {
-				if (data.__instance === 'date') {
-					return new Date(data.value);
-				} else if (this.isTimestamp(data)) {
-					return new Timestamp(data._seconds, data._nanoseconds)
-				}
-				return mapValues(data, (value) => {
-					return this.parseData(value);
-				});
-			}
-			if (Array.isArray(data)) {
-				return data.map((item) => {
-					return this.parseData(item);
-				})
-			}
-			return data;
+		if (!data) {
+			return null;
 		}
+		if (_.isPlainObject(data)) {
+			if (data.__instance === 'date') {
+				return new Date(data.value);
+			} else if (this.isTimestamp(data)) {
+				return new Timestamp(data._seconds, data._nanoseconds)
+			}
+			return mapValues(data, (value) => {
+				return this.parseData(value);
+			});
+		}
+		if (Array.isArray(data)) {
+			return data.map((item) => {
+				return this.parseData(item);
+			})
+		}
+		return data;
 	}
 
 	private static isTimestamp(value: any) {
@@ -486,7 +487,7 @@ export class Document {
 
 	private static formatData(data) {
 		if (!data) {
-			return;
+			return null;
 		}
 		if (data instanceof Date) {
 			return {
