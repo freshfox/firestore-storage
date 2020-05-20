@@ -1,9 +1,12 @@
-export type PathFunction = { (...ids: string[]): string; path: string; }
+
+type Tuple<TItem, TLength extends number> = [TItem, ...TItem[]] & { length: TLength };
+export type IdTuple<NumOfIds extends number> = Tuple<string, NumOfIds>
+export type PathFunction<NumOfIds extends number> = { (...ids: IdTuple<NumOfIds>): string; path: string; }
 
 export class CollectionUtils {
-	static createPath(path: string): PathFunction {
+	static createPath<NumOfIds extends number>(path: string): PathFunction<NumOfIds> {
 		return (() => {
-			const _f: PathFunction = (...ids: string[]) => {
+			const _f: PathFunction<NumOfIds> = (...ids: IdTuple<NumOfIds>) => {
 				return this.replacePathSegments(path, ...ids);
 			};
 			_f.path = path;

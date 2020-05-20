@@ -8,6 +8,7 @@ import * as admin from 'firebase-admin';
 import * as env from 'node-env-file';
 import * as fs from 'fs';
 import Timestamp = admin.firestore.Timestamp;
+import {CollectionUtils} from "../lib";
 
 const path = __dirname + '/../../.env';
 if(fs.existsSync(path)){
@@ -16,7 +17,7 @@ if(fs.existsSync(path)){
 
 export class TestFactory {
 
-	static createWithRepository<T extends BaseRepository<any>>(context, repoConstructor: interfaces.Newable<T>,
+	static createWithRepository<T extends BaseRepository<any, any>>(context, repoConstructor: interfaces.Newable<T>,
 															   errorFactory?: IErrorFactory,
 															   forceFirebaseStorage?: boolean, ...ids: string[]) {
 		const tc = new TestCase(errorFactory, forceFirebaseStorage);
@@ -106,10 +107,11 @@ export function getFirestoreTestPath(path?: string) {
 	return parts.join('/');
 }
 
-export class UserRepository extends BaseRepository<User> {
+export class UserRepository extends BaseRepository<User, 1> {
 
-	getCollectionPath(...documentIds: string[]): string {
-		return getFirestoreTestPath(`users`);
+	getCollectionPath() {
+		const path = getFirestoreTestPath(`users`);
+		return CollectionUtils.createPath(path);
 	}
 
 }
@@ -132,13 +134,14 @@ export interface Guest extends BaseModel {
 	protelId?: string;
 }
 
-export class GuestRepository extends BaseRepository<Guest> {
+export class GuestRepository extends BaseRepository<Guest, 1> {
 
 	getCollectionPath(...ids: string[]) {
 		if (!ids[0]) {
 			throw new Error('account id missing');
 		}
-		return getFirestoreTestPath(`accounts/${ids[0]}/guests`);
+		const path = getFirestoreTestPath(`accounts/${ids[0]}/guests`);
+		return CollectionUtils.createPath(path);
 	}
 
 }
