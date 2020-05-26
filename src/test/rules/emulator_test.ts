@@ -4,6 +4,8 @@ import * as should from 'should';
 
 describe('Emulator', function () {
 
+	this.timeout(10000)
+
 	it('should start and stop the emulator', async () => {
 
 		await FirestoreRuleTest.start();
