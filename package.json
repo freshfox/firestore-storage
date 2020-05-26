@@ -21,7 +21,7 @@
     "README.md"
   ],
   "engines": {
-    "node": "^8.13.0 || >=10.10.0"
+    "node": ">=10.10.0"
   },
   "scripts": {
     "test": "NODE_ENV=test mocha dist/test",
