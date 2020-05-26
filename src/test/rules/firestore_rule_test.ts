@@ -1,6 +1,8 @@
 import * as firebase from "@firebase/testing";
 import * as fs from "fs";
-import {start, stop} from 'firebase-tools/lib/serve/firestore';
+import * as FirestoreEmulator from 'firebase-tools/lib/emulator/firestoreEmulator';
+
+const emu = new FirestoreEmulator.FirestoreEmulator({});
 
 export class FirestoreRuleTest {
 
@@ -24,14 +26,14 @@ export class FirestoreRuleTest {
 	}
 
 	static async start() {
-		await start();
+		await emu.start();
 		console.log('Starting local Firestore Emulator');
 		await FirestoreRuleTest.wait(3000);
 	}
 
 	static async stop() {
 		try {
-			await stop();
+			await emu.stop();
 		} catch (ignored) {}
 		await FirestoreRuleTest.wait(1000);
 		console.log('Stopped local Firestore Emulator');
