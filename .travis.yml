@@ -2,6 +2,7 @@ language: node_js
 node_js:
   - "10"
 before_script:
+  - yarn firebase setup:emulators:firestore
   - yarn build
 cache: yarn
 notifications:
