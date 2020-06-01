@@ -7,7 +7,7 @@ import {
 	Operator,
 	IDocument, ICollection
 } from './storage';
-import * as uuid from 'uuid/v4';
+import {v4 as uuid} from 'uuid';
 import {injectable} from 'inversify';
 import * as _ from 'lodash';
 import * as admin from "firebase-admin";
