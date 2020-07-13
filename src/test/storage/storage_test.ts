@@ -57,6 +57,60 @@ describe('Storage', function () {
 		});
 	});
 
+	it('should clear a collection', async () => {
+
+		const restaurantPath = getFirestoreTestPath('restaurants');
+		const r1 = await storage.save(restaurantPath, {name: 'R1'});
+		const r2 = await storage.save(restaurantPath, {name: 'R2'});
+
+		const userPath = getFirestoreTestPath('users');
+		const u1 = await storage.save(userPath, {name: 'U1'});
+		const u2 = await storage.save(userPath, {name: 'U2'});
+
+		should(await storage.query(restaurantPath)).length(2);
+
+		await storage.clear(restaurantPath);
+
+		should(await storage.query(restaurantPath)).length(0);
+		should(await storage.query(userPath)).length(2);
+
+	});
+
+	xit('should import selected collections', async () => {
+
+		const ts = Date.now();
+		function coll(name: string) {
+			return `${ts}_${name}`;
+		}
+
+		const memoryStorage = new MemoryStorage();
+
+		const restaurantPath = coll('restaurants');
+		const r1 = await storage.save(restaurantPath, {name: 'R1'});
+		const r2 = await storage.save(restaurantPath, {name: 'R2'});
+
+		const userPath = coll('users');
+		const u1 = await storage.save(userPath, {name: 'U1'});
+		const u2 = await storage.save(userPath, {name: 'U2'});
+
+		const accountPath = coll('accounts');
+		const a1 = await storage.save(accountPath, {name: 'A1'});
+		const a2 = await storage.save(accountPath, {name: 'A2'});
+
+		const exportData = await storage.export(getFirestoreTestPath());
+
+		await storage.clear(restaurantPath);
+		await storage.clear(userPath);
+		await storage.clear(accountPath);
+
+		await storage.import(exportData/*,[restaurantPath, accountPath]*/);
+
+		should(await storage.query(restaurantPath)).length(2);
+		should(await storage.query(userPath)).length(0);
+		should(await storage.query(accountPath)).length(2);
+
+	});
+
 	if (storage instanceof FirestoreStorage) {
 		it('should export data', async function () {
 

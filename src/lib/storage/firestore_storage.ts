@@ -185,7 +185,7 @@ export class FirestoreStorage implements IStorageDriver {
 		await storage.import(data);
 		const collectionNames = Object.keys(storage.data.collections);
 		for (const collectionName of collectionNames) {
-			await this.importCollection(collectionName, storage.data.collections[collectionName])
+			await this.importCollection(collectionName, storage.data.collections[collectionName]);
 		}
 	}
 

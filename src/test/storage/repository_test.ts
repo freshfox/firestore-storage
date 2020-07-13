@@ -3,15 +3,19 @@ import {BaseModel, BaseRepository} from "../../lib";
 import {getFirestoreTestPath, TestFactory, UserRepository} from "../index";
 import {injectable} from "inversify";
 import * as should from 'should';
+import * as admin from "firebase-admin";
+import Timestamp = admin.firestore.Timestamp;
 
 interface Model extends BaseModel {
-	details: {
+	details?: {
 		field1?: {
 			subField1?: string;
 			subField2?: string;
 		},
 		field2?: string
-	}
+	},
+	startTime?: Timestamp,
+	endTime?: Timestamp
 }
 
 @injectable()
@@ -65,6 +69,35 @@ describe('Repository', function () {
 			}
 		});
 		should(m4).null()
+	});
+
+	// Not supported by Firestore
+	xit('should query between dates', async () => {
+
+		function inDays(days: number) {
+			const date = new Date();
+			date.setDate(date.getDate() + days);
+			return Timestamp.fromDate(date)
+		}
+
+		const m1 = await modelRepo.save({
+			startTime: inDays(-1),
+			endTime: inDays(1)
+		});
+
+		const m2 = await modelRepo.save({
+			startTime: inDays(1),
+			endTime: inDays(2)
+		});
+
+		const models = await modelRepo.query((qb) => {
+			const now = new Date();
+			return qb
+				.where('startTime', '<=', now)
+				.where('endTime', '>', now);
+		});
+		should(models).length(1);
+		should(models[0]).property('id', m1.id);
 	});
 
 });

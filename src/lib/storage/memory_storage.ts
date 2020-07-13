@@ -403,7 +403,6 @@ export class Collection {
 			})
 		}
 	}
-
 }
 
 export class Document {
@@ -509,10 +508,13 @@ export class Document {
 	}
 }
 
-function mapValues(obj: object, mapper: (data) => any) {
+function mapValues<T extends object>(obj: T, mapper: (data, key: string) => any, filter?: (key: string, value) => boolean) {
 	return Object.keys(obj).reduce((result, id) => {
-	    result[id] = mapper(obj[id]);
+		const value = obj[id];
+		if (!filter || filter(id, value)) {
+			result[id] = mapper(value, id);
+		}
 		return result;
-	}, {})
+	}, {});
 }
 
