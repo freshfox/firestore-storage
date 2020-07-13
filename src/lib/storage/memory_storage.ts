@@ -485,7 +485,7 @@ export class Document {
 	}
 
 	private static formatData(data) {
-		if (!data) {
+		if (data === null || data === undefined) {
 			return null;
 		}
 		if (data instanceof Date) {
