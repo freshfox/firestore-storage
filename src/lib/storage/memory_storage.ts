@@ -459,7 +459,7 @@ export class Document {
 	}
 
 	static parseData(data) {
-		if (!data) {
+		if (data === null || data === undefined) {
 			return null;
 		}
 		if (_.isPlainObject(data)) {
