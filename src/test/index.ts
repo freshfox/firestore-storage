@@ -37,10 +37,10 @@ export class TestCase {
 
 	constructor(errorFactory?: IErrorFactory, forceFirebaseStorage?: boolean) {
 		const runWithFirestore = process.argv.indexOf('--firestore') >= 0;
-		const credentialsFile = process.env.FIREBASE_CREDENTIALS;
+		const credentialsFile = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 		if (runWithFirestore || forceFirebaseStorage) {
 			if (!credentialsFile) {
-				throw new Error('FIREBASE_CREDENTIALS env variable not set');
+				throw new Error('GOOGLE_APPLICATION_CREDENTIALS env variable not set');
 			}
 			TestCase.initWithFirestore(this, credentialsFile, errorFactory);
 		} else {

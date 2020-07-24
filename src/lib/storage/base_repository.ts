@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import {inject, injectable} from 'inversify';
 import {QueryBuilder, IStorageDriver, Storage, ErrorFactory, IErrorFactory, IFirestoreTransaction} from './storage';
 import {BaseModel, PatchUpdate} from './base_model';

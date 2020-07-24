@@ -10,7 +10,7 @@ import {inject, injectable} from 'inversify';
 import * as admin from 'firebase-admin';
 import {Collection, Document, MemoryStorage} from "./memory_storage";
 import DocumentReference = admin.firestore.DocumentReference;
-import {processPromisesParallel, processPromisesParallelWithRetries} from "ff-utils";
+import {processPromisesParallelWithRetries} from "ff-utils";
 
 export interface FirestoreStorageExportOptions {
 	parallelCollections?: number;
