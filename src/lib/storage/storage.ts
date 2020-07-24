@@ -1,5 +1,3 @@
-import {QueryStream} from "./query_stream";
-
 export interface IStorageDriver {
 
 	findById<T = any>(collection: string, id: string): Promise<T>;

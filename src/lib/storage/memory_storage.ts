@@ -12,7 +12,6 @@ import {injectable} from 'inversify';
 import * as _ from 'lodash';
 import * as admin from "firebase-admin";
 import Timestamp = admin.firestore.Timestamp;
-import {QueryStream} from "./query_stream";
 
 @injectable()
 export class MemoryStorage implements IStorageDriver {
@@ -161,8 +160,8 @@ export class MemoryStorage implements IStorageDriver {
 		return null;
 	}
 
-	stream<T = any>(collection: string, query?: (qb: QueryBuilder<T>) => QueryBuilder<T>): QueryStream<T> {
-		throw new Error('Stream not implemented')
+	stream<T = any>(collection: string, query?: (qb: QueryBuilder<T>) => QueryBuilder<T>): NodeJS.ReadableStream {
+		throw new Error('Streaming not implemented')
 	}
 
 }

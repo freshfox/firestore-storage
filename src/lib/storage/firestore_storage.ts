@@ -11,6 +11,7 @@ import * as admin from 'firebase-admin';
 import {Collection, Document, MemoryStorage} from "./memory_storage";
 import DocumentReference = admin.firestore.DocumentReference;
 import {processPromisesParallelWithRetries} from "ff-utils";
+import {Transform} from "stream";
 
 export interface FirestoreStorageExportOptions {
 	parallelCollections?: number;
@@ -108,7 +109,13 @@ export class FirestoreStorage implements IStorageDriver {
 	stream<T>(collection: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>): NodeJS.ReadableStream {
 		const qb = this.firestore.collection(collection);
 		const query = cb ? cb(qb) : qb;
-		return query.stream();
+		return query.stream().pipe(new Transform({
+			objectMode: true,
+			transform(chunk, encoding, callback) {
+				this.push(FirestoreStorage.format(chunk));
+				callback();
+			}
+		}));
 	}
 
 	async batchGet(collection: string, ids: string[]): Promise<any> {

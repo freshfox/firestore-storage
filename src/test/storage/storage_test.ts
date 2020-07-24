@@ -9,19 +9,6 @@ describe('Storage', function () {
 	const tc = new TestCase();
 	const storage = tc.getStorage();
 
-	xit('should stream', async () => {
-		let count = 0;
-		const stream = storage.stream('posts');
-		return new Promise((resolve, reject) => {
-			stream
-				.on('error', reject)
-				.on('data', (documentSnapshot) => {
-					++count;
-				})
-				.on('end', resolve);
-		})
-	});
-
 	it('should save a document and override a sub-array', async () => {
 
 		let data: Post = await storage.save('posts', <Post>{
@@ -176,6 +163,29 @@ describe('Storage', function () {
 
 			const restaurant = await mem.findById(restaurantPath, r2.id);
 			should(restaurant).property('id', r2.id);
+		});
+
+		it('should stream', async () => {
+			const collection = getFirestoreTestPath('posts')
+			for (let i = 0; i < 10; i++) {
+				await storage.save(collection, {
+					i: i
+				});
+			}
+
+			let count = 0;
+			const stream = storage.stream(collection);
+			await new Promise((resolve, reject) => {
+				stream
+					.on('error', reject)
+					.on('data', (doc) => {
+						should(doc.id).type('string');
+						should(doc.i).type('number');
+						count++;
+					})
+					.on('end', resolve);
+			});
+			should(count).eql(10);
 		});
 	}
 
