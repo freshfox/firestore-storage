@@ -1,6 +1,6 @@
 import {exportFirestore} from "../../lib";
 
-describe('Export', function () {
+xdescribe('Export', function () {
 
 	it('should export data', async () => {
 
