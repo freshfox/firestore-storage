@@ -12,6 +12,7 @@ import {injectable} from 'inversify';
 import * as _ from 'lodash';
 import * as admin from "firebase-admin";
 import Timestamp = admin.firestore.Timestamp;
+import {QueryStream} from "./query_stream";
 
 @injectable()
 export class MemoryStorage implements IStorageDriver {
@@ -73,10 +74,6 @@ export class MemoryStorage implements IStorageDriver {
 			return null;
 		});
 		return Promise.resolve(items);
-	}
-
-	listen<T>(collection: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>, onNext: (snapshot: any) => void, onError?: (error: Error) => void): () => void {
-		throw new Error('not supported');
 	}
 
 	async clear(collection: string) {
@@ -164,6 +161,10 @@ export class MemoryStorage implements IStorageDriver {
 		return null;
 	}
 
+	stream<T = any>(collection: string, query?: (qb: QueryBuilder<T>) => QueryBuilder<T>): QueryStream<T> {
+		throw new Error('Stream not implemented')
+	}
+
 }
 
 export class MemoryQueryBuilder<T> implements QueryBuilder<T> {
@@ -243,6 +244,10 @@ export class MemoryQueryBuilder<T> implements QueryBuilder<T> {
 
 	onSnapshot(onNext: (snapshot: any) => void, onError?: (error: Error) => void): () => void {
 		throw new Error('not supported');
+	}
+
+	stream(): NodeJS.ReadableStream {
+		return null;
 	}
 
 }

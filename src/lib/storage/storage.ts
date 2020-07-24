@@ -1,3 +1,4 @@
+import {QueryStream} from "./query_stream";
 
 export interface IStorageDriver {
 
@@ -9,14 +10,13 @@ export interface IStorageDriver {
 
 	query<T = any>(collection: string, query?: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<T[]>;
 
+	stream<T = any>(collection: string, query?: (qb: QueryBuilder<T>) => QueryBuilder<T>): NodeJS.ReadableStream;
+
 	batchGet<T = any>(collection: string, ids: string[]): Promise<T[]>;
 
 	delete(collection: string, id: string): Promise<void>;
 
 	clear(collection: string): Promise<any>;
-
-	listen<T = any>(collection: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>,
-		   onNext: (snapshot: any) => void, onError?: (error: Error) => void): () => void;
 
 	transaction<T = any>(updateFunction: (transaction: IFirestoreTransaction) => Promise<T>,
 				   transactionOptions?:{maxAttempts?: number}): Promise<T>;
@@ -30,12 +30,7 @@ export interface IStorageDriver {
 }
 
 export interface QueryBuilder<T> {
-
 	where(field: string, operator: Operator, value: any): QueryBuilder<T>
-
-	limit(limit: number): QueryBuilder<T>;
-
-	offset(offset: number): QueryBuilder<T>;
 
 	orderBy(property: string, direction?: OrderDirection): QueryBuilder<T>;
 
@@ -43,6 +38,11 @@ export interface QueryBuilder<T> {
 
 	onSnapshot(onNext: (snapshot: any) => void, onError?: (error: Error) => void) : () => void;
 
+	stream(): NodeJS.ReadableStream;
+
+	limit(limit: number): QueryBuilder<T>;
+
+	offset(offset: number): QueryBuilder<T>;
 }
 
 export interface IFirestoreTransaction {

@@ -9,6 +9,26 @@ describe('Storage', function () {
 	const tc = new TestCase();
 	const storage = tc.getStorage();
 
+	it('should stream', async () => {
+		for (let j = 0; j < 10;)
+			for (let i = 0; i < 100; i++) {
+				await storage.save('posts', <Post>{
+					comments: [{id: '1'}]
+				});
+			}
+		console.log('Saved', 100);
+		let count = 0;
+		const stream = storage.stream('posts');
+		return new Promise((resolve, reject) => {
+			stream
+				.on('error', reject)
+				.on('data', (documentSnapshot) => {
+					++count;
+				})
+				.on('end', resolve);
+		})
+	});
+
 	it('should save a document and override a sub-array', async () => {
 
 		let data: Post = await storage.save('posts', <Post>{
@@ -79,6 +99,7 @@ describe('Storage', function () {
 	xit('should import selected collections', async () => {
 
 		const ts = Date.now();
+
 		function coll(name: string) {
 			return `${ts}_${name}`;
 		}
@@ -173,6 +194,6 @@ interface Post {
 		html?: string,
 		text?: string;
 	},
-	comments?: {id: string}[]
+	comments?: { id: string }[]
 
 }

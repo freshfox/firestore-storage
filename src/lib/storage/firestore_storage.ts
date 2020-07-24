@@ -105,19 +105,10 @@ export class FirestoreStorage implements IStorageDriver {
 		});
 	}
 
-	listen<T>(collection: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>,
-			  onNext: (snapshot: any) => void, onError?: (error: Error) => void): () => void {
+	stream<T>(collection: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>): NodeJS.ReadableStream {
 		const qb = this.firestore.collection(collection);
-		const query = cb(qb);
-		return query.onSnapshot((snapshot: FirebaseFirestore.QuerySnapshot) => {
-			let result = [];
-			if (!snapshot.empty) {
-				result = snapshot.docs.map((document) => {
-					return FirestoreStorage.format(document);
-				});
-				onNext(result);
-			}
-		}, onError) as () => void;
+		const query = cb ? cb(qb) : qb;
+		return query.stream();
 	}
 
 	async batchGet(collection: string, ids: string[]): Promise<any> {

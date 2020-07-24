@@ -84,10 +84,6 @@ export abstract class BaseRepository<T extends BaseModel> {
 		return this.storage.delete(this.getCollectionPath(...ids), docId);
 	}
 
-	listen(cb: (qb: QueryBuilder<T>) => QueryBuilder<T>, onNext, onError, ...ids: string[]) {
-		return this.storage.listen(this.getCollectionPath(...ids), cb, onNext, onError);
-	}
-
 	transaction<R>(updateFunction: RepositoryTransactionCallback<T, R>, ...ids: string[]): Promise<R> {
 		return this.storage.transaction<R>((trx) => {
 			return updateFunction(new RepositoryTransaction(this.getCollectionPath(...ids), trx))
