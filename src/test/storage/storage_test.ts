@@ -9,14 +9,7 @@ describe('Storage', function () {
 	const tc = new TestCase();
 	const storage = tc.getStorage();
 
-	it('should stream', async () => {
-		for (let j = 0; j < 10;)
-			for (let i = 0; i < 100; i++) {
-				await storage.save('posts', <Post>{
-					comments: [{id: '1'}]
-				});
-			}
-		console.log('Saved', 100);
+	xit('should stream', async () => {
 		let count = 0;
 		const stream = storage.stream('posts');
 		return new Promise((resolve, reject) => {
