@@ -58,6 +58,10 @@ export abstract class BaseRepository<T extends BaseModel> {
 		return this.storage.query(this.getCollectionPath(...ids), cb);
 	}
 
+	stream(cb: (qb: QueryBuilder<T>) => QueryBuilder<T>, ...ids: string[]) {
+		return this.storage.stream<T>(this.getCollectionPath(...ids), cb);
+	}
+
 	batchGet(documentIds: string[], ...ids: string[]): Promise<T[]> {
 		return this.storage.batchGet(this.getCollectionPath(...ids), documentIds);
 	}
