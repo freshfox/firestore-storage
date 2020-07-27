@@ -27,7 +27,7 @@ class ModelRepository extends BaseRepository<Model> {
 
 describe('Repository', function () {
 
-	const tc = TestFactory.createWithRepository(this, ModelRepository);
+	const tc = TestFactory.createWithRepository(this, ModelRepository, null);
 	const modelRepo = tc.resolve(ModelRepository);
 
 	it('should query a nested object field', async () => {
@@ -98,6 +98,14 @@ describe('Repository', function () {
 		});
 		should(models).length(1);
 		should(models[0]).property('id', m1.id);
+	});
+
+	xit('should create ReadStreams', async () => {
+
+		const stream1 = modelRepo.stream(null, 'id1', 'id2');
+		const stream2 = modelRepo.stream(null, {size: 10}, 'id1');
+		const stream3 = modelRepo.stream(null, {size: 10});
+
 	});
 
 });

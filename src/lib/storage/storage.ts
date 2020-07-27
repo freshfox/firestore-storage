@@ -8,7 +8,7 @@ export interface IStorageDriver {
 
 	query<T = any>(collection: string, query?: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<T[]>;
 
-	stream<T = any>(collection: string, query?: (qb: QueryBuilder<T>) => QueryBuilder<T>): NodeJS.ReadableStream;
+	stream<T = any>(collection: string, query?: (qb: QueryBuilder<T>) => QueryBuilder<T>, options?: StreamOptions): NodeJS.ReadableStream;
 
 	batchGet<T = any>(collection: string, ids: string[]): Promise<T[]>;
 
@@ -60,8 +60,8 @@ export interface IFirestoreTransaction {
 	delete(collectionPath: string, docId: string): IFirestoreTransaction;
 }
 
-export interface Transaction {
-
+export interface StreamOptions {
+	size?: number
 }
 
 export type OrderDirection = 'desc' | 'asc';

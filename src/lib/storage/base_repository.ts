@@ -1,7 +1,16 @@
 import 'reflect-metadata';
 import {inject, injectable} from 'inversify';
-import {QueryBuilder, IStorageDriver, Storage, ErrorFactory, IErrorFactory, IFirestoreTransaction} from './storage';
+import {
+	QueryBuilder,
+	IStorageDriver,
+	Storage,
+	ErrorFactory,
+	IErrorFactory,
+	IFirestoreTransaction,
+	StreamOptions
+} from './storage';
 import {BaseModel, PatchUpdate} from './base_model';
+import {Stream} from "stream";
 
 @injectable()
 export abstract class BaseRepository<T extends BaseModel> {
@@ -58,8 +67,15 @@ export abstract class BaseRepository<T extends BaseModel> {
 		return this.storage.query(this.getCollectionPath(...ids), cb);
 	}
 
-	stream(cb: (qb: QueryBuilder<T>) => QueryBuilder<T>, ...ids: string[]) {
-		return this.storage.stream<T>(this.getCollectionPath(...ids), cb);
+	stream(cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>, ...ids: string[])
+	stream(cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>, options?: StreamOptions, ...ids: string[])
+	stream(cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>, optionsOrId?: StreamOptions|string, ...ids: string[]) {
+		const pathIds: string[] = ids || [];
+		if (typeof optionsOrId === 'string') {
+			pathIds.unshift(optionsOrId);
+			optionsOrId = null;
+		}
+		return this.storage.stream<T>(this.getCollectionPath(...pathIds), cb, optionsOrId as StreamOptions);
 	}
 
 	batchGet(documentIds: string[], ...ids: string[]): Promise<T[]> {
