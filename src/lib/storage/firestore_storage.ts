@@ -11,7 +11,7 @@ import * as admin from 'firebase-admin';
 import {Collection, Document, MemoryStorage} from "./memory_storage";
 import DocumentReference = admin.firestore.DocumentReference;
 import {processPromisesParallelWithRetries} from "ff-utils";
-import {Readable, Transform} from "stream";
+import {Readable} from "stream";
 
 export interface FirestoreStorageExportOptions {
 	parallelCollections?: number;
