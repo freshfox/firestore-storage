@@ -44,20 +44,20 @@
     "inversify": "^5.0.1",
     "lodash": "^4.17.15",
     "reflect-metadata": "^0.1.13",
-    "uuid": "^8.1.0"
+    "uuid": "^8.3.0"
   },
   "devDependencies": {
-    "@firebase/testing": "^0.16.6",
+    "@firebase/testing": "^0.20.11",
     "@types/mocha": "^5.2.7",
     "@types/node": "^13.1.8",
     "@types/should": "^13.0.0",
     "firebase-admin": "^8.12.1",
-    "firebase-tools": "^8.4.0",
+    "firebase-tools": "^8.7.0",
     "mocha": "^7.0.0",
     "node-env-file": "^0.1.8",
     "should": "^13.2.3",
-    "ts-node": "^8.6.2",
-    "typescript": "^3.7.5"
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.7"
   },
   "peerDependencies": {
     "firebase-admin": "^8.8.0",
