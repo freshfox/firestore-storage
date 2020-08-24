@@ -1,8 +1,12 @@
+import * as admin from "firebase-admin";
+
+
 export interface BaseModel {
 	id?: string;
 	createdAt?: Date;
 	updatedAt?: Date;
 }
+
 export interface ReferenceMap {
 	[id: string]: boolean;
 }
@@ -35,4 +39,5 @@ export function isSameReferenceMap(r1: ReferenceMap, r2: ReferenceMap) {
 	return true;
 }
 
-export type PatchUpdate<T> = {id: string} & Partial<T>;
+
+export type PatchUpdate<T> = { id: string } & Partial<T>;
