@@ -4,7 +4,7 @@ import * as should from 'should';
 
 describe('Emulator', function () {
 
-	this.timeout(60 * 1000)
+	this.timeout(2 * 60 * 1000)
 
 	it('should start and stop the emulator', async () => {
 
