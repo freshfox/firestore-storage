@@ -41,5 +41,29 @@ describe('Utils', function () {
 			should(result.ids.userId).eql(userId);
 		});
 
+		it('should parse change when document has been created', async () => {
+
+			const change = firebaseTest.makeChange(null, s1);
+			const result = parseFirestoreChange(change, {
+				params: {accountId, userId},
+			} as any, 'accountId', 'userId');
+
+			should(result.before).null();
+			should(result.after.id).eql(userId);
+
+		});
+
+		it('should parse change when document has been deleted', async () => {
+
+			const change = firebaseTest.makeChange(s1, null);
+			const result = parseFirestoreChange(change, {
+				params: {accountId, userId},
+			} as any, 'accountId', 'userId');
+
+			should(result.before.id).eql(userId);
+			should(result.after).null();
+
+		});
+
 	});
 });
