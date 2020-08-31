@@ -1,4 +1,4 @@
-import {parseFirestoreChange, parseFirestoreSnapshot} from "../../lib/storage/utils";
+import {DocumentChange, parseFirestoreChange, parseFirestoreSnapshot} from "../../lib/storage/utils";
 import * as _firebaseFunctionsTest from 'firebase-functions-test';
 import {BaseModel} from '../../lib/storage/base_model';
 import * as admin from "firebase-admin";
@@ -10,6 +10,10 @@ describe('Utils', function () {
 
 	interface User extends BaseModel {
 		email: string;
+		address?: {
+			street: string,
+			city: string;
+		}
 	}
 
 	const accountId = 'acc-id';
@@ -74,5 +78,42 @@ describe('Utils', function () {
 			should(ids.accountId).eql(accountId);
 			should(ids.userId).eql(userId);
 		});
+	});
+
+	describe('DocumentChange', function () {
+
+		function u(id: string, email: string, address?: {street: string, city: string}): User {
+			return {
+				id, email, address
+			};
+		}
+
+		it('should set changeKeys to empty array when nothing changes', async () => {
+			const change = new DocumentChange({
+				before: u('id1', 'test1@example.com', {street: 'Street1', city: 'Vienna'}),
+				after: u('id1', 'test1@example.com', {street: 'Street1', city: 'Vienna'}),
+				ids: {}
+			});
+			should(change.changedKeys).eql([]);
+		});
+
+		it('should set changedKeys when only primitive values change', async () => {
+			const change = new DocumentChange({
+				before: u('id1', 'test1@example.com', {street: 'Street1', city: 'Vienna'}),
+				after: u('id1', 'test2@example.com', {street: 'Street1', city: 'Vienna'}),
+				ids: {}
+			});
+			should(change.changedKeys).eql(['email'])
+		});
+
+		it('should set changedKeys when an root level object value changes', async () => {
+			const change = new DocumentChange({
+				before: u('id1', 'test1@example.com', {street: 'Street1', city: 'Vienna'}),
+				after: u('id1', 'test1@example.com', {street: 'Street2', city: 'Vienna'}),
+				ids: {}
+			});
+			should(change.changedKeys).eql(['address'])
+		});
+
 	});
 });

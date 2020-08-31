@@ -12,6 +12,7 @@ import {injectable} from 'inversify';
 import * as _ from 'lodash';
 import * as admin from "firebase-admin";
 import Timestamp = admin.firestore.Timestamp;
+import {toComparableValue} from "./utils";
 
 @injectable()
 export class MemoryStorage implements IStorageDriver {
@@ -350,12 +351,6 @@ const check = (field, operator: Operator, expected) => {
 		throw new Error(`Unsupported operator ${operator}`);
 	}
 };
-
-function toComparableValue(val) {
-	if (val instanceof Date) return val.getTime();
-	if (val instanceof Timestamp) return val.toMillis();
-	return val;
-}
 
 export class Collection {
 

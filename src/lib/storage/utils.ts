@@ -1,8 +1,10 @@
 import {BaseModel} from "./base_model";
 import * as admin from "firebase-admin";
 import {Change, EventContext} from 'firebase-functions';
+import * as _ from 'lodash';
 import QueryDocumentSnapshot = admin.firestore.QueryDocumentSnapshot;
 import DocumentSnapshot = admin.firestore.DocumentSnapshot;
+import Timestamp = admin.firestore.Timestamp;
 
 type AnyKeys<K extends keyof any> = Partial<Pick<any, K>>
 
@@ -15,6 +17,46 @@ type ParsedChange<T, K extends keyof any> = {
 type ParsedSnapshot<T, K extends keyof any> = {
 	data: T;
 	ids: AnyKeys<K>
+}
+
+export class DocumentChange<T, K extends keyof any> {
+
+	readonly changedKeys: string[];
+
+	constructor(private change: ParsedChange<T, K>) {
+		if (change.after) {
+			const allKeys = Object.keys(change.after);
+			if (change.before) {
+				this.changedKeys = allKeys.filter((key) => {
+					return !DocumentChange.eql(change.before[key], change.after[key]);
+				});
+			} else {
+				this.changedKeys = allKeys;
+			}
+		} else {
+			this.changedKeys = [];
+		}
+	}
+
+	get before() {
+		return this.change.before;
+	}
+
+	get after() {
+		return this.change.after;
+	}
+
+	get ids() {
+		return this.change.ids;
+	}
+
+	private static eql(v1: any, v2: any) {
+		if (_.isPlainObject(v1) && _.isPlainObject(v2)) {
+			return _.isEqual(v1, v2);
+		}
+		return toComparableValue(v1) === toComparableValue(v2);
+	}
+
 }
 
 /**
@@ -72,4 +114,10 @@ function getIdMap<K>(context: EventContext, firstId: string, idNames: string[]):
 	return {
 		lastId, ids
 	}
+}
+
+export function toComparableValue(val: any) {
+	if (val instanceof Date) return val.getTime();
+	if (val instanceof Timestamp) return val.toMillis();
+	return val;
 }
