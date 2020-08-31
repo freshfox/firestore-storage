@@ -8,13 +8,13 @@ import Timestamp = admin.firestore.Timestamp;
 
 type AnyKeys<K extends keyof any> = Partial<Pick<any, K>>
 
-type ParsedChange<T, K extends keyof any> = {
+export type ParsedChange<T, K extends keyof any> = {
 	before: T;
 	after: T;
 	ids: AnyKeys<K>
 }
 
-type ParsedSnapshot<T, K extends keyof any> = {
+export type ParsedSnapshot<T, K extends keyof any> = {
 	data: T;
 	ids: AnyKeys<K>
 }
