@@ -95,6 +95,7 @@ describe('Utils', function () {
 				ids: {}
 			});
 			should(change.changedKeys).eql([]);
+			should(change.hasChanged('address', 'email')).false();
 		});
 
 		it('should set changedKeys when only primitive values change', async () => {
@@ -104,6 +105,9 @@ describe('Utils', function () {
 				ids: {}
 			});
 			should(change.changedKeys).eql(['email'])
+			should(change.hasChanged('address', 'email')).true();
+			should(change.hasChanged('address')).false();
+			should(change.hasChanged('email')).true();
 		});
 
 		it('should set changedKeys when an root level object value changes', async () => {
@@ -112,7 +116,10 @@ describe('Utils', function () {
 				after: u('id1', 'test1@example.com', {street: 'Street2', city: 'Vienna'}),
 				ids: {}
 			});
-			should(change.changedKeys).eql(['address'])
+			should(change.changedKeys).eql(['address']);
+			should(change.hasChanged('address', 'email')).true();
+			should(change.hasChanged('address')).true();
+			should(change.hasChanged('email')).false();
 		});
 
 	});

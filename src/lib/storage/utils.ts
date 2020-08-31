@@ -50,6 +50,15 @@ export class DocumentChange<T, K extends keyof any> {
 		return this.change.ids;
 	}
 
+	hasChanged(...keys: (keyof T)[]) {
+		for (const key of keys) {
+			if (this.changedKeys.includes(key as string)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private static eql(v1: any, v2: any) {
 		if (_.isPlainObject(v1) && _.isPlainObject(v2)) {
 			return _.isEqual(v1, v2);
