@@ -2,6 +2,7 @@ import {BaseModel} from "./base_model";
 import * as admin from "firebase-admin";
 import {Change, EventContext} from 'firebase-functions';
 import QueryDocumentSnapshot = admin.firestore.QueryDocumentSnapshot;
+import DocumentSnapshot = admin.firestore.DocumentSnapshot;
 
 type AnyKeys<K extends keyof any> = Partial<Pick<any, K>>
 
@@ -25,7 +26,7 @@ type ParsedSnapshot<T, K extends keyof any> = {
  * @param idNames - Additional path ids
  */
 export function parseFirestoreChange<T extends BaseModel, K extends keyof any>(
-	change: Change<QueryDocumentSnapshot<T>>,
+	change: Change<QueryDocumentSnapshot<T> | DocumentSnapshot<T>>,
 	context: EventContext,
 	firstId: K, ...idNames: K[]): ParsedChange<T, K> {
 
