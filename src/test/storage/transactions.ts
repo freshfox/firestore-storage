@@ -131,4 +131,37 @@ describe('Transactions', function () {
 		});
 	});
 
+	it('should query and update nested objects', async () => {
+
+		let u1 = await userRepo.save({
+			firstname: 'John',
+			address: {
+				city: 'Vienna',
+				postal: 1234
+			}
+		});
+
+		await userRepo.transaction(async (trx) => {
+			const users = await trx.query((qb) => {
+				return qb.where('address.city', '==', 'Vienna');
+			});
+			for (const user of users) {
+				trx.set({
+					id: user.id,
+					address: {
+						city: 'Vienna',
+						postal: 1111
+					}
+				});
+			}
+		});
+
+		u1 = await userRepo.getById(u1.id);
+		should(u1.address).properties({
+			city: 'Vienna',
+			postal: 1111
+		});
+
+	});
+
 });
