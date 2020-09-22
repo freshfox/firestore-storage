@@ -2080,10 +2080,10 @@ fecha@^2.3.3:
   resolved "https://registry.yarnpkg.com/fecha/-/fecha-2.3.3.tgz#948e74157df1a32fd1b12c3a3c3cdcb6ec9d96cd"
   integrity sha512-lUGBnIamTAwk4znq5BcqsDaxSmZ9nDVJaij6NvRt/Tg4R69gERA+otPKbS86ROw9nxVMw2/mp1fnaiWqbs6Sdg==
 
-ff-utils@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/ff-utils/-/ff-utils-1.1.1.tgz#900b2dc931e66d1765a070267687274c980c0a7a"
-  integrity sha512-hUNS+3GVutFAZ+qSrHsmBonkNJuolVNSRBVH+9KxpUzqvWuEYtjs7RxbSN+QeP5+iNtjkckyotk7AlYdE9Y35w==
+ff-utils@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/ff-utils/-/ff-utils-1.2.0.tgz#16ec619ca9d3c71dec4fe01add50b38406adef2f"
+  integrity sha512-wQBXZ9WbX5OuAissuFA0eiHSTVgtSGdNempL3e/omgoPUNW03I+Ff0vkYTrQNixxZ/8K2FpzuwSBQbmDPFcCKg==
 
 figures@^2.0.0:
   version "2.0.0"
@@ -3552,7 +3552,7 @@ lodash@^4.17.14, lodash@^4.17.15:
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
   integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
 
-lodash@^4.17.19:
+lodash@^4.17.19, lodash@^4.17.20:
   version "4.17.20"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.20.tgz#b44a9b6297bcb698f1c51a3545a2b3b368d59c52"
   integrity sha512-PlhdFcillOINfeV7Ni6oF1TAEayyZBoZ8bcshTHqOYJYlrqzRK5hagpagky5o4HfCzzd1TRkXPMFq6cKk9rGmA==
