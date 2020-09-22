@@ -30,7 +30,8 @@
     "build": "rm -rf dist && tsc",
     "preversion": "git pull && yarn build && yarn test:all",
     "postversion": "git push --follow-tags && npm publish",
-    "firebase": "firebase"
+    "firebase": "firebase",
+    "fss": "fss"
   },
   "repository": {
     "type": "git",
@@ -45,6 +46,9 @@
     "lodash": "^4.17.15",
     "reflect-metadata": "^0.1.13",
     "uuid": "^8.3.0"
+  },
+  "bin": {
+    "fss": "./bin/fss.js"
   },
   "devDependencies": {
     "@firebase/testing": "^0.20.11",

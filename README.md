@@ -16,6 +16,7 @@
 * [Transactions](#transactions)
 * [Repository](#repositories)
 * [Migrations](#migrations)
+* [Typing indexes](#typing-indexes)
 * [Throwing custom errors](#custom-error)
 
 ## Overview
@@ -408,6 +409,15 @@ await reviewRepo.save({...}, '<restaurantId>'); // Succeeds
 
 This package provides a base class to migrate data in Firestore.
 For more info look at [this example](src/test/storage/migrations_test.ts)
+
+## Typing indexes
+Use the `IndexManager` class to build your index structure and the provided `fss`
+script to generate the `firestore.indexes.json`. Look at `src/test/storage/index_manager_example.ts`
+to see how to use the `IndexManager`. Then run:
+```bash
+$ fss generate:index <input-path-to-js> <output-path-to-json>
+```
+The `fss` script gets added as a script to your `node_modules`
 
 ## Custom error
 The query functions [get](#get) and [getById](#getbyid) will throw an error if the document doesn't exist.

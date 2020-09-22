@@ -1,4 +1,4 @@
-export type PathFunction = { (...ids: string[]): string; path: string; }
+export type PathFunction = { (...ids: string[]): string; path: string; collectionGroup: string }
 
 export class CollectionUtils {
 	static createPath(path: string): PathFunction {
@@ -7,6 +7,8 @@ export class CollectionUtils {
 				return this.replacePathSegments(path, ...ids);
 			};
 			_f.path = path;
+			const parts = path.split('/');
+			_f.collectionGroup = parts[parts.length - 2];
 			return _f;
 		})();
 	}

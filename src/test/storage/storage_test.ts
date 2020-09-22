@@ -1,6 +1,6 @@
 import {getFirestoreTestCollection, getFirestoreTestPath, getFirestoreTestRunId, TestCase} from "../index";
 import * as should from 'should'
-import {FirestoreStorage, MemoryStorage} from "../../lib";
+import {BaseModel, FirestoreStorage, MemoryStorage} from "../../lib";
 import * as admin from "firebase-admin";
 import Timestamp = admin.firestore.Timestamp;
 
@@ -113,17 +113,23 @@ describe('Storage', function () {
 	});
 
 	if (storage instanceof FirestoreStorage) {
+
+		interface Restaurant extends BaseModel {
+			name: string;
+			dates: { date: Date }[];
+		}
+
 		it('should export data', async function () {
 
 			this.timeout(100000);
 
 			const restaurantPath = getFirestoreTestPath('restaurants');
 
-			const r1 = await storage.save(restaurantPath, {name: 'Ebi', dates: [{date: Timestamp.now()}]});
-			const r2 = await storage.save(restaurantPath, {name: 'Hiro'});
+			const r1 = await storage.save<Restaurant>(restaurantPath, {name: 'Ebi', dates: [{date: Timestamp.now()}]});
+			const r2 = await storage.save<Restaurant>(restaurantPath, {name: 'Hiro'});
 			const r3 = await storage.save(restaurantPath, {name: 'McDonalds'});
 
-			const rev = await storage.save(`${restaurantPath}/${r1.id}/reviews`, {
+			const rev = await storage.save<Restaurant>(`${restaurantPath}/${r1.id}/reviews`, {
 				rating: 5,
 				date: Timestamp.now()
 			});

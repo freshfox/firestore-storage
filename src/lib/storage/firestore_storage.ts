@@ -71,7 +71,7 @@ export class FirestoreStorage implements IStorageDriver {
 		return result[0] || null;
 	}
 
-	async save(collection: string, data: any, options?: SaveOptions) {
+	async save<T>(collection: string, data: any, options?: SaveOptions): Promise<T> {
 		const model = FirestoreStorage.clone(data);
 		if (!model.id) {
 			return this.add(collection, model.data)

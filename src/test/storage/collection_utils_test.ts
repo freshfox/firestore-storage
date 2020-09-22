@@ -11,4 +11,18 @@ describe('Collection Paths', function () {
 		CollectionUtils.replacePathSegments('workoutPrograms/{programId}/workouts/{workoutId}', 'id1', 'id2').should.eql('workoutPrograms/id1/workouts/id2');
 	});
 
+	describe('#createPath()', function () {
+		it('should check collectionGroup on a path on a root level collection', async () => {
+			CollectionUtils.createPath('/users/{userId}').collectionGroup.should.eql('users');
+		});
+
+		it('should check collectionGroup on a path on a first level collection', async () => {
+			CollectionUtils.createPath('/users/{userId}/posts/{postId}').collectionGroup.should.eql('posts');
+		});
+
+		it('should check collectionGroup on a path on a second level collection', async () => {
+			CollectionUtils.createPath('/users/{userId}/posts/{postId}/comments/{commentId}').collectionGroup.should.eql('comments');
+		});
+	});
+
 });
