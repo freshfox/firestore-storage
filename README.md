@@ -28,11 +28,11 @@ Firestore Storage provides a thin layer of abstraction to accessing data in Fire
 It follows the repository pattern, for more information about it you can read this
 [short article](https://medium.com/@pererikbergman/repository-design-pattern-e28c0f3e4a30)
 
-### Naming conventions for methods
+### Return value conventions for methods
 
 - `find*()` methods return the document or null when no result was found
 - `get*()` methods always return the document and will [throw an error](#custom-error) when no result was found
-- `list*()` methods always returns an array and never null. When no result is found the array is empty
+- `list*()` methods always return an array and never null. When no result is found the array is empty
 
 ## Example
 
