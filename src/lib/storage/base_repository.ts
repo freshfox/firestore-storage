@@ -11,6 +11,7 @@ import {
 } from './storage';
 import {BaseModel, PatchUpdate} from './base_model';
 import {Stream} from "stream";
+import {PathFunction} from "./collection_utils";
 
 @injectable()
 export abstract class BaseRepository<T extends BaseModel> {
@@ -18,15 +19,15 @@ export abstract class BaseRepository<T extends BaseModel> {
 	constructor(@inject(Storage) protected storage: IStorageDriver,
 				@inject(ErrorFactory) protected errorFactory: IErrorFactory) {}
 
-	abstract getCollectionPath(...documentIds: string[]): string;
+	abstract getCollectionPath(...documentIds: string[]): string | PathFunction;
 
 	findById(...ids: string[]): Promise<T> {
 		const docId = ids.pop();
-		return this.storage.findById(this.getCollectionPath(...ids), docId);
+		return this.storage.findById(this.getStringCollectionPath(...ids), docId);
 	}
 
 	find(attributes: Partial<T>, ...ids: string[]): Promise<T> {
-		return this.storage.find(this.getCollectionPath(...ids), (qb) => {
+		return this.storage.find(this.getStringCollectionPath(...ids), (qb) => {
 			return this.mapToWhereClause(qb, attributes);
 		})
 	}
@@ -64,7 +65,22 @@ export abstract class BaseRepository<T extends BaseModel> {
 	}
 
 	query(cb: (qb: QueryBuilder<T>) => QueryBuilder<T>, ...ids: string[]): Promise<T[]> {
-		return this.storage.query(this.getCollectionPath(...ids), cb);
+		return this.storage.query(this.getStringCollectionPath(...ids), cb);
+	}
+
+	groupQuery(cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<T[]> {
+		let collectionId = this.getCollectionId();
+		return this.storage.groupQuery(collectionId, cb);
+	}
+
+	private getCollectionId(): string {
+		try {
+			const path = this.getCollectionPath();
+			if (path instanceof Function) {
+				return path.collectionGroup;
+			}
+		} catch (err) {}
+		throw new Error('Unable to get collection id, getCollectionPath() must return a PathFunction')
 	}
 
 	stream(cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>, ...ids: string[])
@@ -75,11 +91,11 @@ export abstract class BaseRepository<T extends BaseModel> {
 			pathIds.unshift(optionsOrId);
 			optionsOrId = null;
 		}
-		return this.storage.stream<T>(this.getCollectionPath(...pathIds), cb, optionsOrId as StreamOptions);
+		return this.storage.stream<T>(this.getStringCollectionPath(...pathIds), cb, optionsOrId as StreamOptions);
 	}
 
 	batchGet(documentIds: string[], ...ids: string[]): Promise<T[]> {
-		return this.storage.batchGet(this.getCollectionPath(...ids), documentIds);
+		return this.storage.batchGet(this.getStringCollectionPath(...ids), documentIds);
 	}
 
 	async batchGetNoNulls(documentIds: string[], ...ids: string[]) {
@@ -88,25 +104,25 @@ export abstract class BaseRepository<T extends BaseModel> {
 	}
 
 	save(data: T | PatchUpdate<T>, ...ids: string[]): Promise<T> {
-		return this.storage.save<any>(this.getCollectionPath(...ids), data)
+		return this.storage.save<any>(this.getStringCollectionPath(...ids), data)
 	}
 
 	write(data: T | PatchUpdate<T>, ...ids: string[]) {
-		return this.storage.save(this.getCollectionPath(...ids), data, {avoidMerge: true});
+		return this.storage.save(this.getStringCollectionPath(...ids), data, {avoidMerge: true});
 	}
 
 	clear(...ids: string[]): Promise<void> {
-		return this.storage.clear(this.getCollectionPath(...ids))
+		return this.storage.clear(this.getStringCollectionPath(...ids))
 	}
 
 	delete(...ids: string[]): Promise<void> {
 		const docId = ids.pop();
-		return this.storage.delete(this.getCollectionPath(...ids), docId);
+		return this.storage.delete(this.getStringCollectionPath(...ids), docId);
 	}
 
 	transaction<R>(updateFunction: RepositoryTransactionCallback<T, R>, ...ids: string[]): Promise<R> {
 		return this.storage.transaction<R>((trx) => {
-			return updateFunction(new RepositoryTransaction(this.getCollectionPath(...ids), trx))
+			return updateFunction(new RepositoryTransaction(this.getStringCollectionPath(...ids), trx))
 		});
 	}
 
@@ -114,9 +130,17 @@ export abstract class BaseRepository<T extends BaseModel> {
 		return this.storage.generateId();
 	}
 
+	private getStringCollectionPath(...docIds: string[]) {
+		const path = this.getCollectionPath(...docIds);
+		if (typeof path === 'string') {
+			return path;
+		}
+		return path(...docIds);
+	}
+
 	private createError(attributes: Partial<T>, ids: string[]) {
 			const id = attributes.id ? ` (${attributes.id})` : '';
-			return this.errorFactory(`Unable to get document${id} from ${this.getCollectionPath(...ids)}`);
+			return this.errorFactory(`Unable to get document${id} from ${this.getStringCollectionPath(...ids)}`);
 	}
 
 }
