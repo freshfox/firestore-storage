@@ -3,6 +3,18 @@ import {CollectionUtils} from "../../lib/storage/collection_utils";
 
 describe('Collection Paths', function () {
 
+	it('should generate a path', function () {
+
+		const Restaurants_Reviews = CollectionUtils.createPath('restaurants/{resId}/reviews/{reviewId}');
+
+		const collectionPath = Restaurants_Reviews('starbucks');
+		console.log(collectionPath);
+
+		const docPath = Restaurants_Reviews('starbucks', 'review123');
+		console.log(docPath);
+
+	});
+
 	it('should replace path segments', async () => {
 
 		CollectionUtils.replacePathSegments('workoutPrograms/{programId}').should.eql('workoutPrograms');

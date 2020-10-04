@@ -8,6 +8,8 @@ export interface IStorageDriver {
 
 	query<T = any>(collection: string, query?: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<T[]>;
 
+	groupQuery<T>(collectionId: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<T[]>
+
 	stream<T = any>(collection: string, query?: (qb: QueryBuilder<T>) => QueryBuilder<T>, options?: StreamOptions): NodeJS.ReadableStream;
 
 	batchGet<T = any>(collection: string, ids: string[]): Promise<T[]>;

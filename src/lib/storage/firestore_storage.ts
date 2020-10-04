@@ -106,6 +106,18 @@ export class FirestoreStorage implements IStorageDriver {
 		});
 	}
 
+	async groupQuery<T>(collectionId: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>) {
+		const qb = this.firestore.collectionGroup(collectionId);
+		const query = cb ? cb(qb) : qb;
+		const result: FirebaseFirestore.QuerySnapshot = await query.get();
+		if (result.empty) {
+			return [];
+		}
+		return result.docs.map((document) => {
+			return FirestoreStorage.format(document);
+		});
+	}
+
 	stream<T>(collection: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>, options?: {size: number}): NodeJS.ReadableStream {
 		const qb = this.firestore.collection(collection);
 		const query = cb ? cb(qb) : qb;

@@ -76,6 +76,44 @@ describe('Storage', function () {
 
 	});
 
+	it('should query a subcollection', async () => {
+
+		const reviewPath = getFirestoreTestPath('restaurants/r1/locations');
+		const r1 = await storage.save(getFirestoreTestPath('restaurants/r1/locations'), {
+			id: null,
+			settings: {
+				enabled: true
+			}
+		});
+		const r2 = await storage.save(getFirestoreTestPath('restaurants/r1/locations'),  {
+			id: null,
+			settings: {
+				enabled: false
+			}
+		});
+		const r3 = await storage.save(getFirestoreTestPath('restaurants/r2/locations'),  {
+			id: null,
+			settings: {
+				enabled: true
+			}
+		});
+
+		const locations = await storage.groupQuery('locations', (qb) => {
+			return qb.where('settings.enabled', '==', true);
+		});
+
+		if (storage instanceof MemoryStorage) {
+			locations.should.length(2);
+			locations[0].should.property('id', r1.id);
+			locations[1].should.property('id', r3.id);
+		}
+
+		for (const location of locations) {
+			location.should.property('settings').property('enabled', true);
+		}
+
+	});
+
 	xit('should import selected collections', async () => {
 
 		const ts = Date.now();

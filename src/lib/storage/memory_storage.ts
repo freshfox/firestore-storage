@@ -165,6 +165,38 @@ export class MemoryStorage implements IStorageDriver {
 		throw new Error('Streaming not implemented')
 	}
 
+	groupQuery<T>(collectionId: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<T[]> {
+		const documents = [];
+		this.loopOverCollections(this.data.collections, (name, docs) => {
+			if (name !== collectionId) {
+				return;
+			}
+			const docsWithId = Object.keys(docs).map((id) => {
+				return MemoryStorage.mapWithId(id, docs[id]);
+			});
+			documents.push(...docsWithId);
+		});
+		const builder = new MemoryQueryBuilder(documents);
+		const query = cb ? cb(builder) : builder;
+		return query.get();
+	}
+
+	loopOverCollections(collectionMap: CollectionMap, cb: (name: string, documents: DocumentMap) => void) {
+		const names = Object.keys(collectionMap);
+		for (const name of names) {
+			const collection = collectionMap[name];
+			const docIds = Object.keys(collection.documents);
+			cb(name, collection.documents);
+			for (const docId of docIds) {
+				const doc = collection.documents[docId];
+				if (doc.collections) {
+					this.loopOverCollections(doc.collections, cb)
+				}
+			}
+		}
+	}
+
+
 }
 
 export class MemoryQueryBuilder<T> implements QueryBuilder<T> {
@@ -352,11 +384,13 @@ const check = (field, operator: Operator, expected) => {
 	}
 };
 
+interface DocumentMap {
+	[id: string]: Document;
+}
+
 export class Collection {
 
-	documents: {
-		[id: string]: Document
-	} = {};
+	documents: DocumentMap = {};
 
 	constructor(collection?: ICollection) {
 		if (collection && collection.documents) {
@@ -404,10 +438,12 @@ export class Collection {
 	}
 }
 
+interface CollectionMap {
+	[name: string]: Collection
+}
+
 export class Document {
-	collections: {
-		[name: string]: Collection
-	} = {};
+	collections: CollectionMap = {};
 	createdAt: Date;
 	updatedAt: Date;
 	data: any;
