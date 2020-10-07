@@ -6,7 +6,9 @@ import QueryDocumentSnapshot = admin.firestore.QueryDocumentSnapshot;
 import DocumentSnapshot = admin.firestore.DocumentSnapshot;
 import Timestamp = admin.firestore.Timestamp;
 
-type AnyKeys<K extends keyof any> = Partial<Pick<any, K>>
+type AnyKeys<K extends keyof any> = {
+	[P in keyof Pick<any, K>]?: string;
+}
 
 export type ParsedChange<T, K extends keyof any> = {
 	before: T;
