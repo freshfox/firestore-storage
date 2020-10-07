@@ -10,8 +10,9 @@ import {
 	StreamOptions
 } from './storage';
 import {BaseModel, PatchUpdate} from './base_model';
-import {Stream} from "stream";
 import {PathFunction} from "./collection_utils";
+
+type ModelQuery<T extends BaseModel> = Partial<Omit<T, keyof BaseModel>>;
 
 @injectable()
 export abstract class BaseRepository<T extends BaseModel> {
@@ -26,7 +27,7 @@ export abstract class BaseRepository<T extends BaseModel> {
 		return this.storage.findById(this.getStringCollectionPath(...ids), docId);
 	}
 
-	find(attributes: Partial<T>, ...ids: string[]): Promise<T> {
+	find(attributes: ModelQuery<T>, ...ids: string[]): Promise<T> {
 		return this.storage.find(this.getStringCollectionPath(...ids), (qb) => {
 			return this.mapToWhereClause(qb, attributes);
 		})
@@ -48,13 +49,13 @@ export abstract class BaseRepository<T extends BaseModel> {
 		throw this.createError({id: ids.pop()} as any, ids);
 	}
 
-	list(attributes?: Partial<T>, ...ids: string[]): Promise<T[]> {
+	list(attributes?: ModelQuery<T>, ...ids: string[]): Promise<T[]> {
 		return this.query((qb) => {
 			return this.mapToWhereClause(qb, attributes);
 		}, ...ids);
 	}
 
-	protected mapToWhereClause(query: QueryBuilder<T>, attributes?: Partial<T>): QueryBuilder<T> {
+	protected mapToWhereClause(query: QueryBuilder<T>, attributes?: ModelQuery<T>): QueryBuilder<T> {
 		if (!attributes) {
 			return query;
 		}
