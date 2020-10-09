@@ -1,6 +1,6 @@
 import * as should from 'should';
 import {Guest, GuestRepository, TestFactory} from '../index';
-import {OrderDirection} from '../../lib';
+import {OrderDirection} from "firestore-storage-core";
 
 describe('GuestRepository', function () {
 

@@ -1,10 +1,11 @@
 import 'reflect-metadata';
-import {BaseModel, BaseRepository} from "../../lib";
-import {getFirestoreTestPath, TestFactory, UserRepository} from "../index";
+import {BaseRepository} from "../../lib";
+import {getFirestoreTestPath, TestFactory} from "../index";
 import {injectable} from "inversify";
 import * as should from 'should';
 import * as admin from "firebase-admin";
 import Timestamp = admin.firestore.Timestamp;
+import {BaseModel} from "firestore-storage-core";
 
 interface Model extends BaseModel {
 	details?: {

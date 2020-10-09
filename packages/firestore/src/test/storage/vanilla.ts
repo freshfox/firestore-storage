@@ -1,7 +1,7 @@
-import {BaseRepository} from '../../lib/storage/base_repository';
 import {User} from '../index';
-import {MemoryStorage} from '../../lib/storage/memory_storage';
 import * as should from 'should';
+import {BaseRepository} from "../../lib";
+import {MemoryStorage} from "firestore-storage-core";
 
 describe('Usage without Inversify (MemoryStorage only)', function () {
 

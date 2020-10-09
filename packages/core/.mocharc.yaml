@@ -1,0 +1,3 @@
+recursive: true
+timeout: 20000
+exit: true

@@ -11,7 +11,9 @@ jspm_packages/
 # dotenv environment variables file
 .env
 
+# Typescript build
 dist/
+tsconfig.tsbuildinfo
 
 ### IDEs ###
 .idea/

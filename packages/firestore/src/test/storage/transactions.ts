@@ -1,4 +1,4 @@
-import {TestFactory, User, UserRepository} from '../index';
+import {TestFactory, UserRepository} from '../index';
 import * as should from 'should';
 import * as admin from "firebase-admin";
 import Timestamp = admin.firestore.Timestamp;

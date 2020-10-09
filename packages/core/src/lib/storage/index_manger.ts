@@ -1,4 +1,3 @@
-
 export class IndexManager {
 
 	indexes: IIndexEntry[] = [];

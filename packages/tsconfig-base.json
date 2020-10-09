@@ -2,22 +2,25 @@
 	"compilerOptions": {
 		"module": "commonjs",
 		"target": "es6",
-
-		"declaration": true,
-		"lib": [
-			"es6", "dom"
-		],
-		"types": [
-			"node",
-			"mocha",
-			"reflect-metadata"
-		],
-		"sourceMap": true,
+		"lib": ["es6", "dom"],
+    "types": [
+      "node",
+      "mocha",
+      "reflect-metadata"
+    ],
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
 		"experimentalDecorators": true,
-		"emitDecoratorMetadata": true
-	},
+		"emitDecoratorMetadata": true,
+    "composite": true
+  },
 	"exclude": [
 		"node_modules",
 		"dist"
-	]
+	],
+  "references": [
+    {"path": "./core" },
+    {"path": "./firestore" }
+  ]
 }

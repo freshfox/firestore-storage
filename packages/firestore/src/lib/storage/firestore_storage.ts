@@ -1,17 +1,15 @@
-import {
-	FirestoreInstance,
-	IDocument,
-	IFirestoreTransaction,
-	IStorageDriver,
-	QueryBuilder,
-	SaveOptions
-} from './storage';
 import {inject, injectable} from 'inversify';
 import * as admin from 'firebase-admin';
-import {Collection, Document, MemoryStorage} from "./memory_storage";
 import DocumentReference = admin.firestore.DocumentReference;
 import {processPromisesParallelWithRetries} from "ff-utils";
 import {Readable} from "stream";
+import {
+	IStorageDriver,
+	FirestoreInstance,
+	QueryBuilder,
+	SaveOptions,
+	IFirestoreTransaction, MemoryStorage, IDocument, Document, Collection
+} from "firestore-storage-core";
 
 export interface FirestoreStorageExportOptions {
 	parallelCollections?: number;

@@ -1,5 +1,5 @@
 import * as should from 'should';
-import {MemoryStorage} from '../../lib';
+import {MemoryStorage} from "../lib";
 
 describe('MemoryStorage', function () {
 

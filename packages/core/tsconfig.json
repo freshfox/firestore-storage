@@ -4,11 +4,8 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "baseUrl": "./",
-    "paths": {
-      "firestore-storage-core": ["../core"]
-    }
-  },
-  "references": [
-    {"path": "../core" }
-  ]
+    "lib": [
+      "es6", "dom"
+    ]
+  }
 }

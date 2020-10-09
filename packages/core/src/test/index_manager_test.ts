@@ -1,4 +1,4 @@
-import {IndexManager, QueryScope} from "../../lib/storage/index_manger";
+import {IndexManager, QueryScope} from "../lib";
 
 describe('IndexManager', function () {
 

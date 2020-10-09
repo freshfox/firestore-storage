@@ -5,12 +5,16 @@
   "engines": {
     "node": ">=10.10.0"
   },
+  "private": true,
   "scripts": {
     "test": "lerna run --stream test",
     "build": "lerna run --stream build",
     "preversion": "git pull && yarn build && yarn test:all",
     "postversion": "git push --follow-tags && npm publish",
     "lerna": "lerna"
+  },
+  "workspaces": {
+    "packages": ["packages/*"]
   },
   "repository": {
     "type": "git",

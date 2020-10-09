@@ -1,7 +1,8 @@
-import {FirestoreStorageModule, IStorageDriver, Migrations, Storage} from '../../lib';
 import {Container, inject, injectable} from 'inversify';
-import {User, UserRepository} from '../index';
 import * as should from 'should';
+import {IStorageDriver, Migrations} from "firestore-storage-core";
+import {User, UserRepository} from "../index";
+import {FirestoreStorageModule} from "../../lib";
 
 describe('Migrations', function () {
 

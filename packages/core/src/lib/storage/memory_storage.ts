@@ -1,17 +1,17 @@
-import {
-	OrderDirection,
-	QueryBuilder,
-	IStorageDriver,
-	SaveOptions,
-	IFirestoreTransaction,
-	Operator,
-	IDocument, ICollection
-} from './storage';
+import 'reflect-metadata';
 import {v4 as uuid} from 'uuid';
 import {injectable} from 'inversify';
 import * as _ from 'lodash';
-import * as admin from "firebase-admin";
-import Timestamp = admin.firestore.Timestamp;
+import {
+	ICollection,
+	IDocument,
+	IFirestoreTransaction,
+	IStorageDriver,
+	Operator,
+	OrderDirection,
+	QueryBuilder,
+	SaveOptions
+} from "./storage";
 import {toComparableValue} from "./utils";
 
 @injectable()
@@ -501,7 +501,7 @@ export class Document {
 			if (data.__instance === 'date') {
 				return new Date(data.value);
 			} else if (this.isTimestamp(data)) {
-				return new Timestamp(data._seconds, data._nanoseconds)
+				//return new Timestamp(data._seconds, data._nanoseconds)
 			}
 			return mapValues(data, (value) => {
 				return this.parseData(value);

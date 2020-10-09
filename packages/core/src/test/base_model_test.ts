@@ -1,6 +1,6 @@
 import 'reflect-metadata';
-import {isSameReferenceMap} from "../../lib";
 import * as should from 'should';
+import {isSameReferenceMap} from "../lib";
 
 describe('BaseModel', function () {
 

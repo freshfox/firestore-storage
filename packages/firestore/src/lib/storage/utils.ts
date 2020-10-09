@@ -1,74 +1,8 @@
-import {BaseModel} from "./base_model";
 import * as admin from "firebase-admin";
 import {Change, EventContext} from 'firebase-functions';
-import * as _ from 'lodash';
 import QueryDocumentSnapshot = admin.firestore.QueryDocumentSnapshot;
 import DocumentSnapshot = admin.firestore.DocumentSnapshot;
-import Timestamp = admin.firestore.Timestamp;
-
-type AnyKeys<K extends keyof any> = {
-	[P in keyof Pick<any, K>]?: string;
-}
-
-export type ParsedChange<T, K extends keyof any> = {
-	before: T;
-	after: T;
-	ids: AnyKeys<K>
-}
-
-export type ParsedSnapshot<T, K extends keyof any> = {
-	data: T;
-	ids: AnyKeys<K>
-}
-
-export class DocumentChange<T, K extends keyof any> {
-
-	readonly changedKeys: string[];
-
-	constructor(private change: ParsedChange<T, K>) {
-		if (change.after) {
-			const allKeys = Object.keys(change.after);
-			if (change.before) {
-				this.changedKeys = allKeys.filter((key) => {
-					return !DocumentChange.eql(change.before[key], change.after[key]);
-				});
-			} else {
-				this.changedKeys = allKeys;
-			}
-		} else {
-			this.changedKeys = [];
-		}
-	}
-
-	get before() {
-		return this.change.before;
-	}
-
-	get after() {
-		return this.change.after;
-	}
-
-	get ids() {
-		return this.change.ids;
-	}
-
-	hasChanged(...keys: (keyof T)[]) {
-		for (const key of keys) {
-			if (this.changedKeys.includes(key as string)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private static eql(v1: any, v2: any) {
-		if (_.isPlainObject(v1) && _.isPlainObject(v2)) {
-			return _.isEqual(v1, v2);
-		}
-		return toComparableValue(v1) === toComparableValue(v2);
-	}
-
-}
+import {AnyKeys, BaseModel, ParsedChange, ParsedSnapshot} from "firestore-storage-core";
 
 /**
  * Takes the Firestore change and event context of a Firestore function hook, parses the data and returns a typed result.
@@ -125,10 +59,4 @@ function getIdMap<K>(context: EventContext, firstId: string, idNames: string[]):
 	return {
 		lastId, ids
 	}
-}
-
-export function toComparableValue(val: any) {
-	if (val instanceof Date) return val.getTime();
-	if (val instanceof Timestamp) return val.toMillis();
-	return val;
 }

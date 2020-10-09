@@ -1,8 +1,9 @@
 import {getFirestoreTestCollection, getFirestoreTestPath, getFirestoreTestRunId, TestCase} from "../index";
 import * as should from 'should'
-import {BaseModel, FirestoreStorage, MemoryStorage} from "../../lib";
+import {FirestoreStorage} from "../../lib";
 import * as admin from "firebase-admin";
 import Timestamp = admin.firestore.Timestamp;
+import {BaseModel, MemoryStorage} from "firestore-storage-core";
 
 describe('Storage', function () {
 

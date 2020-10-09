@@ -1,9 +1,8 @@
 import {BaseRepository} from './base_repository';
 import {ContainerModule} from 'inversify';
 import {FirestoreStorage} from './firestore_storage';
-import {MemoryStorage} from './memory_storage';
 import * as admin from 'firebase-admin';
-import {ErrorFactory, FirestoreInstance, IErrorFactory, IStorageDriver, Storage} from './storage';
+import {ErrorFactory, FirestoreInstance, IErrorFactory, IStorageDriver, Storage, MemoryStorage} from 'firestore-storage-core';
 
 export class FirestoreStorageModule {
 

@@ -1,16 +1,13 @@
 import 'reflect-metadata';
 import {inject, injectable} from 'inversify';
 import {
-	QueryBuilder,
-	IStorageDriver,
-	Storage,
+	BaseModel,
 	ErrorFactory,
-	IErrorFactory,
-	IFirestoreTransaction,
-	StreamOptions
-} from './storage';
-import {BaseModel, PatchUpdate} from './base_model';
-import {PathFunction} from "./collection_utils";
+	IErrorFactory, IFirestoreTransaction,
+	IStorageDriver, PatchUpdate,
+	PathFunction,
+	QueryBuilder, StreamOptions
+} from "firestore-storage-core";
 
 type ModelQuery<T extends BaseModel> = Partial<Omit<T, keyof BaseModel>>;
 

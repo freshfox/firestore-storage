@@ -1,10 +1,10 @@
-import {DocumentChange, parseFirestoreChange, parseFirestoreSnapshot} from "../../lib/storage/utils";
+import {parseFirestoreChange, parseFirestoreSnapshot} from "../../lib/storage/utils";
 import * as _firebaseFunctionsTest from 'firebase-functions-test';
-import {BaseModel} from '../../lib/storage/base_model';
 import * as admin from "firebase-admin";
 import QueryDocumentSnapshot = admin.firestore.QueryDocumentSnapshot;
 const firebaseTest = _firebaseFunctionsTest();
 import * as should from 'should';
+import {BaseModel, DocumentChange} from "firestore-storage-core";
 
 describe('Utils', function () {
 

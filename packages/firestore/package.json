@@ -27,7 +27,7 @@
     "test": "yarn test:memory && yarn test:firestore",
     "test:firestore": "yarn test:memory --firestore",
     "test:memory": "NODE_ENV=test mocha dist/test",
-    "build": "rm -rf dist && tsc",
+    "build": "rm -rf dist && tsc --build",
     "preversion": "git pull && yarn build && yarn test:all",
     "postversion": "git push --follow-tags && npm publish",
     "firebase": "firebase",
@@ -42,19 +42,16 @@
   "homepage": "https://github.com/freshfox/firestore-storage",
   "dependencies": {
     "ff-utils": "^1.2.0",
+    "firestore-storage-core": "^3.15.1",
     "inversify": "^5.0.1",
     "lodash": "^4.17.20",
     "reflect-metadata": "^0.1.13",
     "uuid": "^8.3.1"
   },
-  "bin": {
-    "fss": "./bin/fss.js"
-  },
   "devDependencies": {
     "@firebase/testing": "^0.20.11",
     "@types/mocha": "^8.0.3",
     "@types/node": "^14.11.8",
-    "@types/should": "^13.0.0",
     "firebase-admin": "^9.2.0",
     "firebase-functions": "^3.11.0",
     "firebase-functions-test": "^0.2.2",

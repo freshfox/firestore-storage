@@ -1,5 +1,5 @@
 import {inject, injectable} from 'inversify';
-import {IStorageDriver, Storage} from './storage';
+import {IStorageDriver} from "./storage";
 
 @injectable()
 export abstract class Migrations {
