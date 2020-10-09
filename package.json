@@ -2,36 +2,15 @@
   "name": "firestore-storage",
   "version": "3.15.1",
   "description": "A typed wrapper around Firestore including a query-builder and an in-memory implementation for testing",
-  "main": "dist/lib/index.js",
-  "types": "dist/lib/index.d.ts",
-  "keywords": [
-    "firestore",
-    "typescript",
-    "memory",
-    "querybuilder"
-  ],
-  "directories": {
-    "test": "test",
-    "lib": "src"
-  },
-  "files": [
-    "src/lib",
-    "dist/lib",
-    "dist/test/rules",
-    "README.md"
-  ],
   "engines": {
     "node": ">=10.10.0"
   },
   "scripts": {
-    "test": "NODE_ENV=test mocha dist/test",
-    "test:firestore": "yarn test --firestore",
-    "test:all": "yarn test && yarn test:firestore",
-    "build": "rm -rf dist && tsc",
+    "test": "lerna run --stream test",
+    "build": "lerna run --stream build",
     "preversion": "git pull && yarn build && yarn test:all",
     "postversion": "git push --follow-tags && npm publish",
-    "firebase": "firebase",
-    "fss": "fss"
+    "lerna": "lerna"
   },
   "repository": {
     "type": "git",
@@ -40,33 +19,7 @@
   "author": "Dominic Bartl",
   "license": "MIT",
   "homepage": "https://github.com/freshfox/firestore-storage",
-  "dependencies": {
-    "ff-utils": "^1.2.0",
-    "inversify": "^5.0.1",
-    "lodash": "^4.17.20",
-    "reflect-metadata": "^0.1.13",
-    "uuid": "^8.3.1"
-  },
-  "bin": {
-    "fss": "./bin/fss.js"
-  },
   "devDependencies": {
-    "@firebase/testing": "^0.20.11",
-    "@types/mocha": "^8.0.3",
-    "@types/node": "^14.11.2",
-    "@types/should": "^13.0.0",
-    "firebase-admin": "^9.2.0",
-    "firebase-functions": "^3.11.0",
-    "firebase-functions-test": "^0.2.2",
-    "firebase-tools": "^8.11.2",
-    "mocha": "^8.1.3",
-    "node-env-file": "^0.1.8",
-    "should": "^13.2.3",
-    "ts-node": "^9.0.0",
-    "typescript": "^4.0.3"
-  },
-  "peerDependencies": {
-    "firebase-admin": "^8.8.0",
-    "firebase-tools": "^8.4.0"
+    "lerna": "^3.22.1"
   }
 }
