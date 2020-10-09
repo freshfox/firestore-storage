@@ -8,6 +8,8 @@
       "firestore-storage-core": ["../core"]
     }
   },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"],
   "references": [
     {"path": "../core" }
   ]
