@@ -70,8 +70,7 @@ export function isTimestamp(value: any) {
 		return false;
 	}
 	return value.hasOwnProperty('_seconds')
-		&& value.hasOwnProperty('_nanoseconds')
-		&& value.constructor?.name;
+		&& value.hasOwnProperty('_nanoseconds');
 }
 
 export function toComparableValue(val: any) {
