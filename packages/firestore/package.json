@@ -29,8 +29,6 @@
     "test:memory": "NODE_ENV=test mocha dist/test",
     "build": "yarn clean && tsc --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "preversion": "git pull && yarn build && yarn test:all",
-    "postversion": "git push --follow-tags && npm publish",
     "firebase": "firebase",
     "fss": "fss"
   },
