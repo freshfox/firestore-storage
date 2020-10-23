@@ -39,3 +39,23 @@ export function isSameReferenceMap(r1: ReferenceMap, r2: ReferenceMap) {
 
 
 export type PatchUpdate<T> = { id: string } & Partial<T>;
+
+
+/**
+ * This is a copy of the current Timestamp implementation from Firestore Admin to be used for typings
+ */
+export interface Timestamp {
+
+	constructor(seconds: number, nanoseconds: number);
+
+	readonly seconds: number;
+
+	readonly nanoseconds: number;
+
+	toDate(): Date;
+
+	toMillis(): number;
+
+	isEqual(other: Timestamp): boolean;
+
+}
