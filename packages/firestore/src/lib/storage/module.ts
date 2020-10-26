@@ -2,7 +2,7 @@ import {BaseRepository} from './base_repository';
 import {ContainerModule} from 'inversify';
 import {FirestoreStorage} from './firestore_storage';
 import * as admin from 'firebase-admin';
-import {ErrorFactory, FirestoreInstance, IErrorFactory, IStorageDriver, Storage, MemoryStorage} from 'firestore-storage-core';
+import {ErrorFactory, FirestoreInstance, IErrorFactory, IStorageDriver, StorageDriver, MemoryStorage} from 'firestore-storage-core';
 
 export class FirestoreStorageModule {
 
@@ -14,7 +14,7 @@ export class FirestoreStorageModule {
 			bind(FirestoreStorage).toSelf().inSingletonScope();
 			bind(MemoryStorage).toSelf().inSingletonScope();
 			bind(FirestoreInstance).toConstantValue(instance);
-			bind<IStorageDriver>(Storage).to(defaultStorageDriver).inSingletonScope();
+			bind<IStorageDriver>(StorageDriver).to(defaultStorageDriver).inSingletonScope();
 			bind<IErrorFactory>(ErrorFactory).toFactory<Error>(() => {
 				if (errorFactory) {
 					return errorFactory;

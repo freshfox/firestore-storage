@@ -1,13 +1,11 @@
 import 'reflect-metadata';
 import {Container, interfaces} from 'inversify';
-import {BaseRepository} from '../lib/storage/base_repository';
-import {FirestoreStorageModule} from '../lib/storage/module';
-import {IErrorFactory, IStorageDriver, Storage} from '../../../core/src/lib/storage/storage';
-import {BaseModel, ReferenceMap} from '../../../core/src/lib/storage/base_model';
+import {IErrorFactory, IStorageDriver, StorageDriver, BaseModel, ReferenceMap} from 'firestore-storage-core';
 import * as admin from 'firebase-admin';
 import * as env from 'node-env-file';
 import * as fs from 'fs';
 import Timestamp = admin.firestore.Timestamp;
+import {BaseRepository, FirestoreStorageModule} from "../lib";
 
 const path = __dirname + '/../../.env';
 if(fs.existsSync(path)){
@@ -53,7 +51,7 @@ export class TestCase {
 	}
 
 	getStorage(): IStorageDriver {
-		return this.container.get<IStorageDriver>(Storage);
+		return this.container.get<IStorageDriver>(StorageDriver);
 	}
 
 	private static initWithFirestore(tc: TestCase, credentials: string, errorFactory?: IErrorFactory) {

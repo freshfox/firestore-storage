@@ -6,7 +6,7 @@ import {
 	IErrorFactory, IFirestoreTransaction,
 	IStorageDriver, PatchUpdate,
 	PathFunction,
-	QueryBuilder, StreamOptions
+	QueryBuilder, StorageDriver, StreamOptions
 } from "firestore-storage-core";
 
 type ModelQuery<T extends BaseModel> = Partial<Omit<T, keyof BaseModel>>;
@@ -14,7 +14,7 @@ type ModelQuery<T extends BaseModel> = Partial<Omit<T, keyof BaseModel>>;
 @injectable()
 export abstract class BaseRepository<T extends BaseModel> {
 
-	constructor(@inject(Storage) protected storage: IStorageDriver,
+	constructor(@inject(StorageDriver) protected storage: IStorageDriver,
 				@inject(ErrorFactory) protected errorFactory: IErrorFactory) {}
 
 	abstract getCollectionPath(...documentIds: string[]): string | PathFunction;

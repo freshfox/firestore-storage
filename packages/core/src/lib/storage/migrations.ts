@@ -1,10 +1,10 @@
 import {inject, injectable} from 'inversify';
-import {IStorageDriver, Storage} from "./storage";
+import {IStorageDriver, StorageDriver} from "./storage";
 
 @injectable()
 export abstract class Migrations {
 
-	constructor(@inject(Storage) protected storage: IStorageDriver){}
+	constructor(@inject(StorageDriver) protected storage: IStorageDriver){}
 
 	abstract getVersion(): number;
 

@@ -1,6 +1,6 @@
 import {Container, inject, injectable} from 'inversify';
 import * as should from 'should';
-import {IStorageDriver, Migrations} from "firestore-storage-core";
+import {IStorageDriver, Migrations, StorageDriver} from "firestore-storage-core";
 import {User, UserRepository} from "../index";
 import {FirestoreStorageModule} from "../../lib";
 
@@ -10,7 +10,7 @@ describe('Migrations', function () {
 	class MyProjectMigrations extends Migrations {
 
 		constructor(private userRepo: UserRepository,
-					@inject(Storage) protected storage: IStorageDriver) {
+					@inject(StorageDriver) protected storage: IStorageDriver) {
 			super(storage);
 		}
 
