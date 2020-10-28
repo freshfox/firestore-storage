@@ -1,7 +1,9 @@
 import {inject, injectable} from 'inversify';
 import {IStorageDriver, StorageDriver} from "./storage";
+import {Injectable} from '@nestjs/common';
 
 @injectable()
+@Injectable()
 export abstract class Migrations {
 
 	constructor(@inject(StorageDriver) protected storage: IStorageDriver){}

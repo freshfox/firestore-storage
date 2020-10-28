@@ -13,8 +13,10 @@ import {
 	SaveOptions
 } from "./storage";
 import {toComparableValue} from "./utils";
+import {Injectable} from '@nestjs/common';
 
 @injectable()
+@Injectable()
 export class MemoryStorage implements IStorageDriver {
 
 	data: Document = new Document();

@@ -10,6 +10,7 @@ import {
 	SaveOptions,
 	IFirestoreTransaction, MemoryStorage, IDocument, Document, Collection
 } from "firestore-storage-core";
+import {Inject, Injectable} from "@nestjs/common";
 
 export interface FirestoreStorageExportOptions {
 	parallelCollections?: number;
@@ -18,6 +19,7 @@ export interface FirestoreStorageExportOptions {
 }
 
 @injectable()
+@Injectable()
 export class FirestoreStorage implements IStorageDriver {
 
 	private static readonly EXPORT_OPTIONS: Required<FirestoreStorageExportOptions> = {
@@ -26,7 +28,7 @@ export class FirestoreStorage implements IStorageDriver {
 		tries: 3
 	}
 
-	constructor(@inject(FirestoreInstance) protected firestore: admin.firestore.Firestore, ) {
+	constructor(@inject(FirestoreInstance) @Inject(FirestoreInstance) protected firestore: admin.firestore.Firestore) {
 	}
 
 	static clone(data): { id: string, data } {

@@ -8,14 +8,16 @@ import {
 	PathFunction,
 	QueryBuilder, StorageDriver, StreamOptions
 } from "firestore-storage-core";
+import {Inject, Injectable} from "@nestjs/common";
 
 type ModelQuery<T extends BaseModel> = Partial<Omit<T, keyof BaseModel>>;
 
 @injectable()
+@Injectable()
 export abstract class BaseRepository<T extends BaseModel> {
 
-	constructor(@inject(StorageDriver) protected storage: IStorageDriver,
-				@inject(ErrorFactory) protected errorFactory: IErrorFactory) {}
+	constructor(@inject(StorageDriver) @Inject(StorageDriver) protected storage: IStorageDriver,
+				@inject(ErrorFactory) @Inject(ErrorFactory) protected errorFactory: IErrorFactory) {}
 
 	abstract getCollectionPath(...documentIds: string[]): string | PathFunction;
 
