@@ -21,8 +21,7 @@ describe('FirestoreStorageNestModule', function () {
 			MyRepo
 		]
 	})
-	class TestModule {
-	}
+	class TestModule {}
 
 	it('should inject FirestoreStorage', async () => {
 
@@ -48,6 +47,26 @@ describe('FirestoreStorageNestModule', function () {
 		const service = moduleRef.createNestMicroservice({});
 		const storage = service.get<IStorageDriver>(StorageDriver);
 		storage.should.instanceOf(MemoryStorage);
+	});
+
+	it('should configure module using async providers', async () => {
+
+		const moduleRef = await Test.createTestingModule({
+			imports: [
+				FirestoreStorageNestModule.forRootAsync({
+					useFactory: () => {
+						return null
+					}
+				})
+			],
+			providers: [
+				MyRepo
+			]
+		}).compile();
+
+		const repo = moduleRef.get(MyRepo);
+		repo.should.instanceOf(MyRepo);
+
 	});
 
 });
