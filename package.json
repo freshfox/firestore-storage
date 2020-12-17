@@ -9,7 +9,7 @@
   "scripts": {
     "test": "lerna run --stream test",
     "build": "lerna run --stream build",
-    "preversion": "git pull && yarn build && yarn test:all",
+    "preversion": "git pull && yarn build && yarn test",
     "postversion": "git push --follow-tags && npm publish",
     "lerna": "lerna"
   },

@@ -102,7 +102,7 @@ $ yarn test:firestore
 
 To run tests using both `MemoryStorage` and `FirestoreStorage` run
 ```bash
-$ yarn test:all
+$ yarn test
 ```
 
 ### Running tests on your firestore.rules
