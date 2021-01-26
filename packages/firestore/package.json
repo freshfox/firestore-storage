@@ -71,5 +71,6 @@
   "peerDependencies": {
     "firebase-admin": ">=8.8.0",
     "firebase-tools": ">=8.4.0"
-  }
+  },
+  "gitHead": "a1f1f0ddbc96854b263f30768da698b1111dae6e"
 }
