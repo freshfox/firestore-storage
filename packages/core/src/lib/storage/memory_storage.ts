@@ -1,7 +1,10 @@
 import 'reflect-metadata';
 import {v4 as uuid} from 'uuid';
 import {injectable} from 'inversify';
-import * as _ from 'lodash';
+import * as isPlainObject from 'lodash.isplainobject';
+import * as isEqual from 'lodash.isequal';
+import * as merge from 'lodash.merge';
+
 import {
 	ICollection,
 	IDocument,
@@ -49,7 +52,7 @@ export class MemoryStorage implements IStorageDriver {
 			if (options && options.avoidMerge) {
 				doc.data = {...data};
 			} else {
-				_.merge(doc.data, data);
+				merge(doc.data, data);
 			}
 		} else {
 			doc.createdAt = now;
@@ -146,7 +149,7 @@ export class MemoryStorage implements IStorageDriver {
 			for (const item of data) {
 				this.checkForUndefined(item);
 			}
-		} else if(_.isPlainObject(data)) {
+		} else if(isPlainObject(data)) {
 			const keys = Object.keys(data);
 			for (const key of keys) {
 				this.checkForUndefined(data[key]);
@@ -368,8 +371,8 @@ const check = (field, operator: Operator, expected) => {
 		actual = toComparableValue(actual);
 		expected = toComparableValue(expected);
 
-		if (operator === '==' && _.isPlainObject(expected)) {
-			return _.isEqual(actual, expected);
+		if (operator === '==' && isPlainObject(expected)) {
+			return isEqual(actual, expected);
 		}
 		switch (operator) {
 			case '>': return actual > expected;
@@ -497,7 +500,7 @@ export class Document {
 		if (data === null || data === undefined) {
 			return null;
 		}
-		if (_.isPlainObject(data)) {
+		if (isPlainObject(data)) {
 			if (data.__instance === 'date') {
 				return new Date(data.value);
 			} else if (this.isTimestamp(data)) {
@@ -529,7 +532,7 @@ export class Document {
 				value: data.toISOString()
 			}
 		}
-		if (_.isPlainObject(data)) {
+		if (isPlainObject(data)) {
 			return mapValues(data, (value) => {
 				return this.formatData(value);
 			})
