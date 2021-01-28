@@ -69,9 +69,9 @@ export interface StreamOptions {
 export type OrderDirection = 'desc' | 'asc';
 export type Operator = '==' | '<' | '<=' | '>' | '>=' | 'in';
 
-export const StorageDriver = Symbol('StorageDriver');
-export const FirestoreInstance = Symbol('FirestoreInstance');
-export const ErrorFactory = Symbol('ErrorFactory');
+export const StorageDriver = Symbol.for('FirestoreStorage.StorageDriver');
+export const FirestoreInstance = Symbol.for('FirestoreStorage.FirestoreInstance');
+export const ErrorFactory = Symbol.for('FirestoreStorage.ErrorFactory');
 
 export interface SaveOptions {
 	avoidMerge?: boolean;
