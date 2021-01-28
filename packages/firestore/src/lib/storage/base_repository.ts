@@ -11,6 +11,7 @@ import {
 import {Inject, Injectable} from "@nestjs/common";
 
 type ModelQuery<T extends BaseModel> = Partial<Omit<T, keyof BaseModel>>;
+type ReadModel<T extends BaseModel> = T & Required<BaseModel>;
 
 @injectable()
 @Injectable()
@@ -21,18 +22,18 @@ export abstract class BaseRepository<T extends BaseModel> {
 
 	abstract getCollectionPath(...documentIds: string[]): string | PathFunction;
 
-	findById(...ids: string[]): Promise<T> {
+	findById(...ids: string[]): Promise<ReadModel<T>> {
 		const docId = ids.pop();
 		return this.storage.findById(this.getStringCollectionPath(...ids), docId);
 	}
 
-	find(attributes: ModelQuery<T>, ...ids: string[]): Promise<T> {
+	find(attributes: ModelQuery<T>, ...ids: string[]): Promise<ReadModel<T>> {
 		return this.storage.find(this.getStringCollectionPath(...ids), (qb) => {
 			return this.mapToWhereClause(qb, attributes);
 		})
 	}
 
-	async get(attributes: Partial<T>, ...ids: string[]) {
+	async get(attributes: Partial<T>, ...ids: string[]): Promise<ReadModel<T>> {
 		const doc = await this.find(attributes, ...ids);
 		if (doc) {
 			return doc;
@@ -40,7 +41,7 @@ export abstract class BaseRepository<T extends BaseModel> {
 		throw this.createError(attributes, ids);
 	}
 
-	async getById(...ids: string[]) {
+	async getById(...ids: string[]): Promise<ReadModel<T>> {
 		const doc = await this.findById(...ids);
 		if (doc) {
 			return doc;
@@ -48,7 +49,7 @@ export abstract class BaseRepository<T extends BaseModel> {
 		throw this.createError({id: ids.pop()} as any, ids);
 	}
 
-	list(attributes?: ModelQuery<T>, ...ids: string[]): Promise<T[]> {
+	list(attributes?: ModelQuery<T>, ...ids: string[]): Promise<ReadModel<T>[]> {
 		return this.query((qb) => {
 			return this.mapToWhereClause(qb, attributes);
 		}, ...ids);
@@ -64,13 +65,13 @@ export abstract class BaseRepository<T extends BaseModel> {
 			}, query);
 	}
 
-	query(cb: (qb: QueryBuilder<T>) => QueryBuilder<T>, ...ids: string[]): Promise<T[]> {
-		return this.storage.query(this.getStringCollectionPath(...ids), cb);
+	query(cb: (qb: QueryBuilder<T>) => QueryBuilder<T>, ...ids: string[]): Promise<ReadModel<T>[]> {
+		return this.storage.query<ReadModel<T>>(this.getStringCollectionPath(...ids), cb);
 	}
 
-	groupQuery(cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<T[]> {
+	groupQuery(cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<ReadModel<T>[]> {
 		let collectionId = this.getCollectionId();
-		return this.storage.groupQuery(collectionId, cb);
+		return this.storage.groupQuery<ReadModel<T>>(collectionId, cb);
 	}
 
 	private getCollectionId(): string {
@@ -94,21 +95,21 @@ export abstract class BaseRepository<T extends BaseModel> {
 		return this.storage.stream<T>(this.getStringCollectionPath(...pathIds), cb, optionsOrId as StreamOptions);
 	}
 
-	batchGet(documentIds: string[], ...ids: string[]): Promise<T[]> {
+	batchGet(documentIds: string[], ...ids: string[]): Promise<(ReadModel<T> | null)[]> {
 		return this.storage.batchGet(this.getStringCollectionPath(...ids), documentIds);
 	}
 
-	async batchGetNoNulls(documentIds: string[], ...ids: string[]) {
+	async batchGetNoNulls(documentIds: string[], ...ids: string[]): Promise<ReadModel<T>[]> {
 		const docs = await this.batchGet(documentIds, ...ids);
 		return docs.filter(d => d);
 	}
 
-	save(data: T | PatchUpdate<T>, ...ids: string[]): Promise<T> {
+	save(data: T | PatchUpdate<T>, ...ids: string[]): Promise<ReadModel<T>> {
 		return this.storage.save<any>(this.getStringCollectionPath(...ids), data)
 	}
 
-	write(data: T | PatchUpdate<T>, ...ids: string[]) {
-		return this.storage.save(this.getStringCollectionPath(...ids), data, {avoidMerge: true});
+	write(data: T | PatchUpdate<T>, ...ids: string[]): Promise<ReadModel<T>> {
+		return this.storage.save<any>(this.getStringCollectionPath(...ids), data, {avoidMerge: true});
 	}
 
 	clear(...ids: string[]): Promise<void> {
