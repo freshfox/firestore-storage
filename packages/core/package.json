@@ -8,6 +8,13 @@
   "engines": {
     "node": ">=10.10.0"
   },
+  "files": [
+    "bin",
+    "dist/lib",
+    "src/lib",
+    "../../README.md",
+    "package.json"
+  ],
   "scripts": {
     "test": "NODE_ENV=test mocha dist/test",
     "build": "yarn clean && tsc --build",

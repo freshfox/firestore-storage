@@ -18,7 +18,8 @@
     "src/lib",
     "dist/lib",
     "dist/test/rules",
-    "README.md"
+    "../../README.md",
+    "package.json"
   ],
   "engines": {
     "node": ">=10.10.0"
