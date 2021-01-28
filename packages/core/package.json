@@ -12,7 +12,7 @@
     "bin",
     "dist/lib",
     "src/lib",
-    "../../README.md",
+    "README.md",
     "package.json"
   ],
   "scripts": {
