@@ -4,14 +4,11 @@ import {
 	BaseModel,
 	ErrorFactory,
 	IErrorFactory, IFirestoreTransaction,
-	IStorageDriver, PatchUpdate,
+	IStorageDriver, ModelQuery, PatchUpdate,
 	PathFunction,
-	QueryBuilder, StorageDriver, StreamOptions
+	QueryBuilder, ReadModel, StorageDriver, StreamOptions
 } from "firestore-storage-core";
 import {Inject, Injectable} from "@nestjs/common";
-
-type ModelQuery<T extends BaseModel> = Partial<Omit<T, keyof BaseModel>>;
-type ReadModel<T extends BaseModel> = T & Required<BaseModel>;
 
 @injectable()
 @Injectable()

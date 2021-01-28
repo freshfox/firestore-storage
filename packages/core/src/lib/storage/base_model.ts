@@ -5,6 +5,9 @@ export interface BaseModel {
 	updatedAt?: Date;
 }
 
+export type ReadModel<T extends BaseModel> = T & Required<BaseModel>;
+export type ModelQuery<T extends BaseModel> = Partial<Omit<T, keyof BaseModel>>;
+
 export interface ReferenceMap {
 	[id: string]: boolean;
 }
