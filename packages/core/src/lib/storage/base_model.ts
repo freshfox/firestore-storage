@@ -3,6 +3,7 @@ export interface BaseModel {
 	id?: string;
 	createdAt?: Date;
 	updatedAt?: Date;
+	_rawPath?: string
 }
 
 export type ReadModel<T extends BaseModel> = T & Required<BaseModel>;

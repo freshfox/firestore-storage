@@ -58,6 +58,18 @@ describe('Storage', function () {
 		});
 	});
 
+	it('should group query documents and check _rawPath', async () => {
+
+		const review1: BaseModel = await storage.save('accounts/acc1/restaurants/res1/reviews', {});
+		const review2: BaseModel = await storage.save('accounts/acc1/restaurants/res2/reviews', {});
+
+		const reviews: BaseModel[] = await storage.groupQuery('reviews');
+
+		review1._rawPath.should.eql(reviews[0]._rawPath).type('string').not.empty();
+		review2._rawPath.should.eql(reviews[1]._rawPath).type('string').not.empty();
+
+	});
+
 	it('should clear a collection', async () => {
 
 		const restaurantPath = getFirestoreTestPath('restaurants');

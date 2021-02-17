@@ -8,7 +8,7 @@ import {
 	FirestoreInstance,
 	QueryBuilder,
 	SaveOptions,
-	IFirestoreTransaction, MemoryStorage, IDocument, Document, Collection
+	IFirestoreTransaction, MemoryStorage, IDocument, Document, Collection, BaseModel
 } from "firestore-storage-core";
 import {Inject, Injectable} from "@nestjs/common";
 
@@ -37,6 +37,7 @@ export class FirestoreStorage implements IStorageDriver {
 		delete clone.id;
 		delete clone.createdAt;
 		delete clone.updatedAt;
+		delete clone._rawPath;
 		return {
 			id: id,
 			data: clone
@@ -47,10 +48,12 @@ export class FirestoreStorage implements IStorageDriver {
 		if (!snapshot.exists) {
 			return null;
 		}
-		return Object.assign({
+
+		return Object.assign(<BaseModel>{
 			id: snapshot.id,
 			createdAt: new Date(snapshot.createTime.toMillis()),
-			updatedAt: new Date(snapshot.updateTime.toMillis())
+			updatedAt: new Date(snapshot.updateTime.toMillis()),
+			_rawPath: snapshot.ref.path
 		}, snapshot.data()) as any;
 	}
 

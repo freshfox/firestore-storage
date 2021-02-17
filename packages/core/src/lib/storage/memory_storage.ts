@@ -16,6 +16,7 @@ import {
 	SaveOptions
 } from "./storage";
 import {toComparableValue} from "./utils";
+import {BaseModel} from "./base_model";
 
 @injectable()
 export class MemoryStorage implements IStorageDriver {
@@ -25,7 +26,7 @@ export class MemoryStorage implements IStorageDriver {
 	findById(collection: string, id: string): Promise<any> {
 		const doc = this.data.getCollection(collection).getDocument(id, true);
 		if (doc) {
-			return Promise.resolve(MemoryStorage.mapWithId(id, doc));
+			return Promise.resolve(MemoryStorage.mapWithId(id, doc, `${collection}/${id}`));
 		}
 		return Promise.resolve(null);
 	}
@@ -72,7 +73,7 @@ export class MemoryStorage implements IStorageDriver {
 		const items = ids.map((id) => {
 			const doc = collectionRef.documents[id];
 			if (doc) {
-				return MemoryStorage.mapWithId(id, doc);
+				return MemoryStorage.mapWithId(id, doc, `${collection}/${id}`);
 			}
 			return null;
 		});
@@ -114,15 +115,16 @@ export class MemoryStorage implements IStorageDriver {
 		const collectionRef = this.data.getCollection(collection);
 		return Object.keys(collectionRef.documents)
 			.map((key) => {
-				return MemoryStorage.mapWithId(key, collectionRef.documents[key]);
+				return MemoryStorage.mapWithId(key, collectionRef.documents[key], `${collection}/${key}`);
 			});
 	}
 
-	private static mapWithId(id: string, doc: Document) {
-		return Object.assign({
+	private static mapWithId(id: string, doc: Document, rawPath: string) {
+		return Object.assign(<BaseModel>{
 			id,
 			createdAt: doc.createdAt,
-			updatedAt: doc.updatedAt
+			updatedAt: doc.updatedAt,
+			_rawPath: rawPath
 		}, doc.data);
 	}
 
@@ -170,12 +172,17 @@ export class MemoryStorage implements IStorageDriver {
 
 	groupQuery<T>(collectionId: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<T[]> {
 		const documents = [];
-		this.loopOverCollections(this.data.collections, (name, docs) => {
+		this.loopOverCollections(this.data.collections, (name, docs, parent) => {
 			if (name !== collectionId) {
 				return;
 			}
 			const docsWithId = Object.keys(docs).map((id) => {
-				return MemoryStorage.mapWithId(id, docs[id]);
+				const pathParts = [];
+				if (parent) {
+					pathParts.push(parent);
+				}
+				pathParts.push(name, id);
+				return MemoryStorage.mapWithId(id, docs[id], pathParts.join('/'));
 			});
 			documents.push(...docsWithId);
 		});
@@ -184,16 +191,21 @@ export class MemoryStorage implements IStorageDriver {
 		return query.get();
 	}
 
-	loopOverCollections(collectionMap: CollectionMap, cb: (name: string, documents: DocumentMap) => void) {
+	loopOverCollections(collectionMap: CollectionMap, cb: (name: string, documents: DocumentMap, fullCollectionPath: string) => void, parent?: string) {
 		const names = Object.keys(collectionMap);
 		for (const name of names) {
 			const collection = collectionMap[name];
 			const docIds = Object.keys(collection.documents);
-			cb(name, collection.documents);
+			cb(name, collection.documents, parent || name);
 			for (const docId of docIds) {
 				const doc = collection.documents[docId];
 				if (doc.collections) {
-					this.loopOverCollections(doc.collections, cb)
+					const parentParts = [];
+					if (parent) {
+						parentParts.push(parent)
+					}
+					parentParts.push(name, docId)
+					this.loopOverCollections(doc.collections, cb, parentParts.join('/'));
 				}
 			}
 		}
