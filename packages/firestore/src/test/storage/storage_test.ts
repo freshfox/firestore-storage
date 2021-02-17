@@ -65,8 +65,11 @@ describe('Storage', function () {
 
 		const reviews: BaseModel[] = await storage.groupQuery('reviews');
 
-		review1._rawPath.should.eql(reviews[0]._rawPath).type('string').not.empty();
-		review2._rawPath.should.eql(reviews[1]._rawPath).type('string').not.empty();
+		const r1 = reviews.find(r => r.id === review1.id);
+		const r2 = reviews.find(r => r.id === review2.id);
+
+		review1._rawPath.should.eql(r1._rawPath).type('string').not.empty();
+		review2._rawPath.should.eql(r2._rawPath).type('string').not.empty();
 
 	});
 
