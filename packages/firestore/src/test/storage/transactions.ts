@@ -127,7 +127,8 @@ describe('Transactions', function () {
 				city: 'Vienna'
 			},
 			createdAt: u1.createdAt,
-			updatedAt: u1.updatedAt
+			updatedAt: u1.updatedAt,
+			_rawPath: u1._rawPath
 		});
 	});
 
