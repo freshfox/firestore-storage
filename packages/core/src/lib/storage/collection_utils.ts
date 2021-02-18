@@ -1,4 +1,21 @@
-export type PathFunction = { (...ids: string[]): string; path: string; collectionGroup: string }
+import {parsePath} from "./utils";
+
+export type PathFunction = {
+	(...ids: string[]): string;
+
+	/**
+	 * The full raw path with id placeholders
+	 */
+	path: string;
+	/**
+	 * The name of the collection
+	 */
+	collectionGroup: string;
+	/**
+	 * A map containing the collection name as a key and the id placeholder name as a value
+	 */
+	collectionIdMap: Map<string, string>;
+}
 
 export class CollectionUtils {
 	static createPath(path: string): PathFunction {
@@ -9,6 +26,7 @@ export class CollectionUtils {
 			_f.path = path;
 			const parts = path.split('/');
 			_f.collectionGroup = parts[parts.length - 2];
+			_f.collectionIdMap = parsePath(path.replace(/\{|\}/g, ''));
 			return _f;
 		})();
 	}
