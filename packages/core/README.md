@@ -317,10 +317,17 @@ qb.offset(number)
 qb.limit(number)
 ```
 
-### batchGet
+### findAll
 Returns an array of documents for a given array of ids. The array will contain null values if some documents aren't found
 ```typescript
-const users = await restaurantRepo.batchGet([id1, id2]);
+const r = await restaurantRepo.findAll([id1, id2]);
+```
+
+### getAll
+Returns an array of documents for a given array of ids. The array won't contain null values. If a document doesn't exists,
+an error will be thrown
+```typescript
+const r = await restaurantRepo.getAll([id1, id2]);
 ```
 
 ### save

@@ -92,13 +92,29 @@ export abstract class BaseRepository<T extends BaseModel> {
 		return this.storage.stream<T>(this.getStringCollectionPath(...pathIds), cb, optionsOrId as StreamOptions);
 	}
 
+	/**@deprecated Has been replaced with findAll() */
 	batchGet(documentIds: string[], ...ids: string[]): Promise<(ReadModel<T> | null)[]> {
 		return this.storage.batchGet(this.getStringCollectionPath(...ids), documentIds);
 	}
 
+	/**@deprecated Will be removed in the future.*/
 	async batchGetNoNulls(documentIds: string[], ...ids: string[]): Promise<ReadModel<T>[]> {
-		const docs = await this.batchGet(documentIds, ...ids);
+		const docs = await this.findAll(documentIds, ...ids);
 		return docs.filter(d => d);
+	}
+
+	async findAll(documentIds: string[], ...ids: string[]) {
+		return this.storage.batchGet(this.getStringCollectionPath(...ids), documentIds);
+	}
+
+	async getAll(documentIds: string[], ...ids: string[]) {
+		const all = await this.findAll(documentIds, ...ids);
+		for (const id of documentIds) {
+			const doc = all.find(d => d.id === id);
+			if (!doc) {
+				throw this.createError({id: id} as T, ids);
+			}
+		}
 	}
 
 	save(data: T | PatchUpdate<T>, ...ids: string[]): Promise<ReadModel<T>> {
