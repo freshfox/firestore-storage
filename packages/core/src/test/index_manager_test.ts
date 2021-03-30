@@ -23,7 +23,7 @@ describe('IndexManager', function () {
 			/**/.field('address.zip')
 			/**/.add()
 			.toJSON();
-		indexJson.should.eql('{"indexes":[{"collectionGroup":"users","queryScope":"COLLECTION","fields":[{"fieldPath":"name","order":"ASCENDING"},{"fieldPath":"address.street","order":"ASCENDING"}]},{"collectionGroup":"users","queryScope":"COLLECTION","fields":[{"fieldPath":"address.city","order":"ASCENDING"},{"fieldPath":"address.zip","order":"ASCENDING"}]}]}');
+		indexJson.should.eql('{"indexes":[{"collectionGroup":"users","queryScope":"COLLECTION","fields":[{"fieldPath":"name","order":"ASCENDING"},{"fieldPath":"address.street","order":"ASCENDING"}]},{"collectionGroup":"users","queryScope":"COLLECTION","fields":[{"fieldPath":"address.city","order":"ASCENDING"},{"fieldPath":"address.zip","order":"ASCENDING"}]}],"fieldOverrides":[]}');
 	});
 
 	it('should create an index with a field override', async () => {
