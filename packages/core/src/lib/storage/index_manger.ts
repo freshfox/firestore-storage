@@ -1,14 +1,20 @@
 export class IndexManager {
 
 	indexes: IIndexEntry[] = [];
+	fieldOverrides: IFieldOverride[] = [];
 
 	addIndex<T>(collectionGroup: string, queryScope: QueryScope) {
 		return new IndexBuilder<T>(this, collectionGroup, queryScope);
 	}
 
+	addOverride<T>(collectionGroup: string, fieldPath: KeyOf<T>) {
+		return new FieldOverrideBuilder(this, collectionGroup, fieldPath);
+	}
+
 	toObject(): IFirestoreIndex {
 		return {
-			indexes: this.indexes
+			indexes: this.indexes,
+			fieldOverrides: this.fieldOverrides
 		}
 	}
 
@@ -47,22 +53,37 @@ class IndexBuilder<T> {
 
 }
 
-class FieldBuilder<T> {
+class FieldOverrideBuilder<T> {
 
-	fields: IIndexField<T>[] = [];
+	private readonly entry: IFieldOverride<T>;
 
-	add(fieldPath: keyof T | string, order?: IndexFieldOrder) {
-		this.fields.push({
-			fieldPath: fieldPath,
-			order: order || IndexFieldOrder.Asc
-		});
+	constructor(private parent: IndexManager, collectionGroup: string, fieldPath: KeyOf<T>) {
+		this.entry = {
+			collectionGroup, fieldPath,
+			indexes: []
+		}
+	}
+
+	order(queryScope: QueryScope, order: IndexFieldOrder) {
+		this.entry.indexes.push({queryScope, order});
 		return this;
+	}
+
+	array(queryScope: QueryScope, arrayConfig: 'contain') {
+		this.entry.indexes.push({queryScope, arrayConfig})
+		return this;
+	}
+
+	add() {
+		this.parent.fieldOverrides.push(this.entry);
+		return this.parent;
 	}
 
 }
 
 export interface IFirestoreIndex {
 	indexes: IIndexEntry[];
+	fieldOverrides: IFieldOverride[];
 }
 
 export interface IIndexEntry<T = any> {
@@ -72,9 +93,26 @@ export interface IIndexEntry<T = any> {
 }
 
 export interface IIndexField<T> {
-	fieldPath: keyof T | string;
+	fieldPath: KeyOf<T>
 	order?: IndexFieldOrder;
 }
+
+export interface IFieldOverride<T = any> {
+	collectionGroup: string;
+	fieldPath: KeyOf<T>;
+	indexes: IFieldOverrideIndex[];
+}
+
+export type IFieldOverrideIndex = {
+	queryScope: QueryScope;
+	order?: IndexFieldOrder;
+} | {
+	queryScope: QueryScope;
+	arrayConfig?: 'contain';
+}
+
+// TODO update to support nested object paths
+type KeyOf<T> = keyof T | string;
 
 export enum IndexFieldOrder {
 	Asc = 'ASCENDING',

@@ -1,4 +1,5 @@
 import {IndexManager, QueryScope} from "../lib";
+import 'should';
 
 describe('IndexManager', function () {
 
@@ -24,4 +25,14 @@ describe('IndexManager', function () {
 			.toJSON();
 		indexJson.should.eql('{"indexes":[{"collectionGroup":"users","queryScope":"COLLECTION","fields":[{"fieldPath":"name","order":"ASCENDING"},{"fieldPath":"address.street","order":"ASCENDING"}]},{"collectionGroup":"users","queryScope":"COLLECTION","fields":[{"fieldPath":"address.city","order":"ASCENDING"},{"fieldPath":"address.zip","order":"ASCENDING"}]}]}');
 	});
+
+	it('should create an index with a field override', async () => {
+
+		const indexJson = new IndexManager()
+			.addOverride('renderings', 'jobId')
+			.add()
+			.toJSON();
+		indexJson.should.eql('{"indexes":[],"fieldOverrides":[{"collectionGroup":"renderings","fieldPath":"jobId","indexes":[]}]}')
+	});
+
 });
