@@ -19,12 +19,12 @@ export abstract class BaseRepository<T extends BaseModel> {
 
 	abstract getCollectionPath(...documentIds: string[]): string | PathFunction;
 
-	findById(...ids: string[]): Promise<ReadModel<T>> {
+	findById(...ids: string[]): Promise<ReadModel<T> | null> {
 		const docId = ids.pop();
 		return this.storage.findById(this.getStringCollectionPath(...ids), docId);
 	}
 
-	find(attributes: ModelQuery<T>, ...ids: string[]): Promise<ReadModel<T>> {
+	find(attributes: ModelQuery<T>, ...ids: string[]): Promise<ReadModel<T> | null> {
 		return this.storage.find(this.getStringCollectionPath(...ids), (qb) => {
 			return this.mapToWhereClause(qb, attributes);
 		})
@@ -103,11 +103,11 @@ export abstract class BaseRepository<T extends BaseModel> {
 		return docs.filter(d => d);
 	}
 
-	async findAll(documentIds: string[], ...ids: string[]) {
+	async findAll(documentIds: string[], ...ids: string[]): Promise<(ReadModel<T> | null)[]> {
 		return this.storage.batchGet(this.getStringCollectionPath(...ids), documentIds);
 	}
 
-	async getAll(documentIds: string[], ...ids: string[]) {
+	async getAll(documentIds: string[], ...ids: string[]): Promise<ReadModel<T>[]> {
 		const all = await this.findAll(documentIds, ...ids);
 		for (const id of documentIds) {
 			const doc = all.find(d => d.id === id);
@@ -115,6 +115,7 @@ export abstract class BaseRepository<T extends BaseModel> {
 				throw this.createError({id: id} as T, ids);
 			}
 		}
+		return all;
 	}
 
 	save(data: T | PatchUpdate<T>, ...ids: string[]): Promise<ReadModel<T>> {
