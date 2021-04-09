@@ -41,8 +41,11 @@ export function isSameReferenceMap(r1: ReferenceMap, r2: ReferenceMap) {
 	return true;
 }
 
+type NestedPartial<T> = {
+	[K in keyof T]?: T[K] extends Array<infer R> ? Array<NestedPartial<R>> : NestedPartial<T[K]>
+};
 
-export type PatchUpdate<T> = { id: string } & Partial<T>;
+export type PatchUpdate<T> = { id: string } & NestedPartial<T>;
 
 
 /**
