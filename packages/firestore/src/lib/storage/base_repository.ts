@@ -30,12 +30,12 @@ export abstract class BaseRepository<T extends BaseModel> {
 		})
 	}
 
-	async get(attributes: Partial<T>, ...ids: string[]): Promise<ReadModel<T>> {
+	async get(attributes: ModelQuery<T>, ...ids: string[]): Promise<ReadModel<T>> {
 		const doc = await this.find(attributes, ...ids);
 		if (doc) {
 			return doc;
 		}
-		throw this.createError(attributes, ids);
+		throw this.createError(attributes as any, ids);
 	}
 
 	async getById(...ids: string[]): Promise<ReadModel<T>> {
@@ -46,7 +46,7 @@ export abstract class BaseRepository<T extends BaseModel> {
 		throw this.createError({id: ids.pop()} as any, ids);
 	}
 
-	list(attributes?: ModelQuery<T>, ...ids: string[]): Promise<ReadModel<T>[]> {
+	list(attributes?: ModelQuery<T> | null, ...ids: string[]): Promise<ReadModel<T>[]> {
 		return this.query((qb) => {
 			return this.mapToWhereClause(qb, attributes);
 		}, ...ids);
