@@ -1,5 +1,5 @@
 # Firestore Storage
-[![Build Status](https://travis-ci.com/freshfox/firestore-storage.svg?branch=master)](https://travis-ci.org/freshfox/firestore-storage)
+[![Build Status](https://travis-ci.com/freshfox/firestore-storage.svg?branch=master)](https://travis-ci.com/freshfox/firestore-storage)
 [![npm version](https://badge.fury.io/js/firestore-storage.svg)](https://badge.fury.io/js/firestore-storage)
 [![Dependencies](https://david-dm.org/freshfox/firestore-storage.svg)](https://david-dm.org/freshfox/firestore-storage#info=dependencies)
 [![img](https://david-dm.org/freshfox/firestore-storage/dev-status.svg)](https://david-dm.org/freshfox/firestore-storage/#info=devDependencies)
