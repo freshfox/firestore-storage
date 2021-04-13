@@ -197,7 +197,7 @@ export class FirestoreStorage implements IStorageDriver {
 		return this.firestore.collection('').doc().id;
 	}
 
-	async export(rootDoc?: string, options?: FirestoreStorageExportOptions) {
+	async export(rootDoc?: string, options?: FirestoreStorageExportOptions, collectionNames?: string[]) {
 		const opts = {
 			...FirestoreStorage.EXPORT_OPTIONS,
 			...(options || {})
@@ -215,7 +215,7 @@ export class FirestoreStorage implements IStorageDriver {
 		} else {
 			root = this.firestore;
 		}
-		await this.exportDocument(storage, root, opts);
+		await this.exportDocument(storage, root, opts, collectionNames);
 		return storage.data.toJson();
 	}
 
@@ -248,16 +248,24 @@ export class FirestoreStorage implements IStorageDriver {
 		}
 	}
 
-	private async exportDocument(storage: MemoryStorage, root: DocumentReference | admin.firestore.Firestore, opts: FirestoreStorageExportOptions) {
+	private async exportDocument(storage: MemoryStorage,
+								 root: DocumentReference | admin.firestore.Firestore,
+								 opts: FirestoreStorageExportOptions,
+								 collectionNames?: string[]) {
 		const docStart = Date.now();
 		const collections = await root.listCollections();
 		const exportColl = async (coll: admin.firestore.CollectionReference<admin.firestore.DocumentData>) => {
 			const collStart = Date.now();
 			const query = await coll.get();
+			const name = coll.path.substring(coll.path.lastIndexOf('/') + 1);
+			if (collectionNames && !collectionNames.includes(name)) {
+				console.debug('Skipping', name);
+				return;
+			}
 			await processPromisesParallelWithRetries(query.docs, opts.parallelDocuments, opts.tries, async (doc) => {
 				await storage.save(coll.path, FirestoreStorage.format(doc));
-				await this.exportDocument(storage, doc.ref, opts);
-			})
+				await this.exportDocument(storage, doc.ref, opts, collectionNames);
+			});
 			console.log('Exported', coll.path, 'in', time(Date.now() - collStart));
 		}
 		await processPromisesParallelWithRetries(collections, opts.parallelCollections, opts.tries, async (coll) => {
