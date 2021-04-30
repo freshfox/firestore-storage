@@ -110,7 +110,7 @@ export abstract class BaseRepository<T extends BaseModel> {
 	async getAll(documentIds: string[], ...ids: string[]): Promise<ReadModel<T>[]> {
 		const all = await this.findAll(documentIds, ...ids);
 		for (const id of documentIds) {
-			const doc = all.find(d => d.id === id);
+			const doc = all.find(d => d?.id === id);
 			if (!doc) {
 				throw this.createError({id: id} as T, ids);
 			}
