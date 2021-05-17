@@ -194,7 +194,7 @@ export class FirestoreStorage implements IStorageDriver {
 	}
 
 	generateId(): string {
-		return this.firestore.collection('').doc().id;
+		return this.firestore.collection('non-existing').doc().id;
 	}
 
 	async export(rootDoc?: string, options?: FirestoreStorageExportOptions, collectionNames?: string[]) {
