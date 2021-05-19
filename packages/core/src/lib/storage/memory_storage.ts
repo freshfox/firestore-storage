@@ -3,7 +3,7 @@ import {v4 as uuid} from 'uuid';
 import {injectable} from 'inversify';
 import * as isPlainObject from 'lodash.isplainobject';
 import * as isEqual from 'lodash.isequal';
-import * as merge from 'lodash.merge';
+import * as merge from 'lodash.mergewith';
 
 import {
 	ICollection,
@@ -53,7 +53,11 @@ export class MemoryStorage implements IStorageDriver {
 			if (options && options.avoidMerge) {
 				doc.data = {...data};
 			} else {
-				merge(doc.data, data);
+				merge(doc.data, data, (obj, src) => {
+					if (Array.isArray(src)) {
+						return src;
+					}
+				});
 			}
 		} else {
 			doc.createdAt = now;

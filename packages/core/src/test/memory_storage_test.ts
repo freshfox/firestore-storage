@@ -37,4 +37,23 @@ describe('MemoryStorage', function () {
 
 	});
 
+	it('should not merge values in an array', async () => {
+
+		const memoryStorage = new MemoryStorage();
+		let m = await memoryStorage.save('test', {
+			val1: 1,
+			arr: [{e: 1}]
+		});
+		m = await memoryStorage.save('test', {
+			id: m.id,
+			val2: 2,
+			arr: [{e: 2}]
+		});
+		should(m).properties({
+			val1: 1,
+			val2: 2,
+			arr: [{e: 2}]
+		});
+	});
+
 });
