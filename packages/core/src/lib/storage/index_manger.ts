@@ -117,7 +117,8 @@ type KeyOf<T> = keyof T | string;
 export enum IndexFieldOrder {
 	Asc = 'ASCENDING',
 	Desc = 'DESCENDING',
-	ArrayContains = 'ARRAY_CONTAINS'
+	ArrayContains = 'ARRAY_CONTAINS',
+	Array = 'ARRAY'
 }
 
 export enum QueryScope {
