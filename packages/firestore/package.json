@@ -1,6 +1,6 @@
 {
   "name": "firestore-storage",
-  "version": "4.5.3",
+  "version": "4.5.4",
   "description": "A typed wrapper around Firestore including a query-builder and an in-memory implementation for testing",
   "main": "dist/lib/index.js",
   "types": "dist/lib/index.d.ts",
@@ -44,7 +44,7 @@
     "@nestjs/common": "^7.4.4",
     "@nestjs/core": "^7.4.4",
     "ff-utils": "^1.3.1",
-    "firestore-storage-core": "^4.5.3",
+    "firestore-storage-core": "^4.5.4",
     "inversify": "^5.0.1",
     "lodash": "^4.17.20",
     "lodash.camelcase": "^4.3.0",
