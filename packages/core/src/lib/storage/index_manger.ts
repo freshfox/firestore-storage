@@ -43,6 +43,13 @@ class IndexBuilder<T> {
 		return this;
 	}
 
+	arrayField(fieldPath: keyof T | string, config: FieldArrayConfig) {
+		this.entry.fields.push({
+			fieldPath: fieldPath,
+			arrayConfig: config
+		})
+	}
+
 	add() {
 		if (this.entry.fields.length < 2) {
 			throw new Error(`Not enough fields provided to create an index for ${this.entry.collectionGroup}`);
@@ -69,7 +76,7 @@ class FieldOverrideBuilder<T> {
 		return this;
 	}
 
-	array(queryScope: QueryScope, arrayConfig: 'contain') {
+	array(queryScope: QueryScope, arrayConfig: FieldArrayConfig) {
 		this.entry.indexes.push({queryScope, arrayConfig})
 		return this;
 	}
@@ -92,9 +99,12 @@ export interface IIndexEntry<T = any> {
 	fields: IIndexField<T>[];
 }
 
-export interface IIndexField<T> {
+export type IIndexField<T> = {
 	fieldPath: KeyOf<T>
 	order?: IndexFieldOrder;
+} & {
+	fieldPath: KeyOf<T>;
+	arrayConfig?: FieldArrayConfig;
 }
 
 export interface IFieldOverride<T = any> {
@@ -108,7 +118,7 @@ export type IFieldOverrideIndex = {
 	order?: IndexFieldOrder;
 } | {
 	queryScope: QueryScope;
-	arrayConfig?: 'contain';
+	arrayConfig?: FieldArrayConfig;
 }
 
 // TODO update to support nested object paths
@@ -117,8 +127,10 @@ type KeyOf<T> = keyof T | string;
 export enum IndexFieldOrder {
 	Asc = 'ASCENDING',
 	Desc = 'DESCENDING',
-	ArrayContains = 'ARRAY_CONTAINS',
-	Array = 'ARRAY'
+}
+
+export enum FieldArrayConfig {
+	Contains = 'CONTAINS'
 }
 
 export enum QueryScope {
