@@ -47,7 +47,8 @@ class IndexBuilder<T> {
 		this.entry.fields.push({
 			fieldPath: fieldPath,
 			arrayConfig: config
-		})
+		});
+		return this;
 	}
 
 	add() {
