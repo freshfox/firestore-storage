@@ -398,6 +398,8 @@ const check = (field, operator: Operator, expected) => {
 			case '==': return actual === expected;
 			case 'in':
 				return (expected as string[]).indexOf(actual) !== -1;
+			case 'array-contains':
+				return Array.isArray(actual) && actual.includes(expected)
 		}
 		throw new Error(`Unsupported operator ${operator}`);
 	}

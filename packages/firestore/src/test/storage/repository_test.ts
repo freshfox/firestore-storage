@@ -5,7 +5,7 @@ import {injectable} from "inversify";
 import * as should from 'should';
 import * as admin from "firebase-admin";
 import Timestamp = admin.firestore.Timestamp;
-import {BaseModel} from "firestore-storage-core";
+import {BaseModel, MemoryStorage} from "firestore-storage-core";
 
 interface Model extends BaseModel {
 	details?: {
@@ -15,6 +15,7 @@ interface Model extends BaseModel {
 		},
 		field2?: string
 	},
+	someIds?: string[],
 	startTime?: Timestamp,
 	endTime?: Timestamp
 }
@@ -70,6 +71,25 @@ describe('Repository', function () {
 			}
 		});
 		should(m4).null()
+	});
+
+	it('should query with array-contains', async () => {
+		const m1 = await modelRepo.save({someIds: ['a', 'b', 'c']});
+		const m2 = await modelRepo.save({someIds: ['b', 'c']});
+		const m3 = await modelRepo.save({someIds: ['a', 'b', 'd']});
+		const m4 = await modelRepo.save({});
+
+		const q1 = await modelRepo.query((qb) => {
+			return qb.where('someIds', 'array-contains', 'a');
+		});
+		should(q1).length(2);
+		should(q1[0].id).oneOf([m1.id, m3.id]);
+		should(q1[1].id).oneOf([m1.id, m3.id]);
+
+		const q2 = await modelRepo.query((qb) => {
+			return qb.where('someIds', 'array-contains', 'e');
+		});
+		should(q2).length(0);
 	});
 
 	// Not supported by Firestore

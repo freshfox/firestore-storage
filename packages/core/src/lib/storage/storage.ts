@@ -67,7 +67,7 @@ export interface StreamOptions {
 }
 
 export type OrderDirection = 'desc' | 'asc';
-export type Operator = '==' | '<' | '<=' | '>' | '>=' | 'in';
+export type Operator = '==' | '<' | '<=' | '>' | '>=' | 'in' | 'array-contains';
 
 export const StorageDriver = Symbol.for('FirestoreStorage.StorageDriver');
 export const FirestoreInstance = Symbol.for('FirestoreStorage.FirestoreInstance');
