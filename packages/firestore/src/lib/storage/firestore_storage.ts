@@ -1,4 +1,4 @@
-import {inject, injectable} from 'inversify';
+import {decorate, inject, injectable} from 'inversify';
 import * as admin from 'firebase-admin';
 import DocumentReference = admin.firestore.DocumentReference;
 import {processPromisesParallelWithRetries} from "ff-utils";
@@ -11,6 +11,19 @@ import {
 	IFirestoreTransaction, MemoryStorage, IDocument, Document, Collection, BaseModel
 } from "firestore-storage-core";
 import {Inject, Injectable} from "@nestjs/common";
+import {EventEmitter} from "events";
+
+export enum StorageEventType {
+	Read = 'read',
+	Write = 'write',
+	Delete = 'delete'
+}
+
+export interface StorageEvent {
+	type: StorageEventType,
+	collection: string;
+	count: number;
+}
 
 export interface FirestoreStorageExportOptions {
 	parallelCollections?: number;
@@ -18,9 +31,11 @@ export interface FirestoreStorageExportOptions {
 	tries?: number;
 }
 
+decorate(injectable(), EventEmitter);
+
 @injectable()
 @Injectable()
-export class FirestoreStorage implements IStorageDriver {
+export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 
 	private static readonly EXPORT_OPTIONS: Required<FirestoreStorageExportOptions> = {
 		parallelCollections: 20,
@@ -29,6 +44,7 @@ export class FirestoreStorage implements IStorageDriver {
 	}
 
 	constructor(@inject(FirestoreInstance) @Inject(FirestoreInstance) protected firestore: admin.firestore.Firestore) {
+		super();
 	}
 
 	static clone(data): { id: string, data } {
@@ -64,10 +80,12 @@ export class FirestoreStorage implements IStorageDriver {
 	async findById(collection: string, id: string) {
 		const path = FirestoreStorage.getPath(collection, id);
 		const snapshot = await this.firestore.doc(path).get();
+		this.emitRead(collection, 1);
 		return FirestoreStorage.format(snapshot);
 	}
 
 	async find<T>(collection: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>) {
+		// Emits event via query
 		const result = await this.query(collection, (qb) => {
 			return cb(qb).limit(1);
 		});
@@ -75,14 +93,23 @@ export class FirestoreStorage implements IStorageDriver {
 	}
 
 	async save<T>(collection: string, data: any, options?: SaveOptions): Promise<T> {
+		this.emitWrite(collection, 1);
+		this.emitRead(collection, 1);
 		const model = FirestoreStorage.clone(data);
 		if (!model.id) {
 			return this.add(collection, model.data)
 		}
-		return this.internalUpdate(collection, model.id, model.data, options);
+		const path = FirestoreStorage.getPath(collection, model.id);
+		const docRef = await this.firestore.doc(path);
+		await docRef.set(data, {
+			merge: !(options && options.avoidMerge)
+		});
+		const doc = await docRef.get();
+		return FirestoreStorage.format(doc);
 	}
 
 	async update(collection: string, data: any, options?: SaveOptions) {
+		this.emitWrite(collection, 1);
 		const clone = FirestoreStorage.clone(data);
 		if (!clone.id) {
 			return this.add(collection, clone.data)
@@ -99,26 +126,29 @@ export class FirestoreStorage implements IStorageDriver {
 
 	async query<T>(collection: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>) {
 		const qb = this.firestore.collection(collection);
-		const query = cb ? cb(qb) : qb;
-		const result: FirebaseFirestore.QuerySnapshot = await query.get();
-		if (result.empty) {
-			return [];
-		}
-		return result.docs.map((document) => {
-			return FirestoreStorage.format(document);
-		});
+		return this.executeQuery<T>(collection, cb ? cb(qb) : qb);
 	}
 
 	async groupQuery<T>(collectionId: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>) {
 		const qb = this.firestore.collectionGroup(collectionId);
-		const query = cb ? cb(qb) : qb;
+		return this.executeQuery<T>(collectionId, cb ? cb(qb) : qb);
+	}
+
+	private async executeQuery<T>(collection: string, query: QueryBuilder<T>) {
 		const result: FirebaseFirestore.QuerySnapshot = await query.get();
 		if (result.empty) {
 			return [];
 		}
-		return result.docs.map((document) => {
-			return FirestoreStorage.format(document);
+		let count = 0;
+		const data = result.docs.map((document) => {
+			const data = FirestoreStorage.format(document);
+			if (data) {
+				count++;
+			}
+			return data;
 		});
+		this.emitRead(collection, count);
+		return data;
 	}
 
 	stream<T>(collection: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>, options?: {size: number}): NodeJS.ReadableStream {
@@ -169,13 +199,20 @@ export class FirestoreStorage implements IStorageDriver {
 		});
 		const restDocRefs = docRefs.slice(1);
 		const result = await this.firestore.getAll(docRefs[0], ...restDocRefs);
-		return result.map((document) => {
-			return FirestoreStorage.format(document);
+		let count = 0;
+		const data = result.map((document) => {
+			const data = FirestoreStorage.format(document);
+			if (data) {
+				count++;
+			}
+			return data;
 		});
+		this.emitRead(collection, count);
+		return data;
 	}
 
 	async transaction<T>(updateFunction: (firestoreTrx: IFirestoreTransaction) => Promise<T>,
-						 transactionOptions?: { maxAttempts?: number }) {
+						 transactionOptions?: { maxAttempts?: number; }) {
 		return this.firestore.runTransaction((transaction) => {
 			const trx = new FirestoreTransaction(this.firestore, transaction);
 			return updateFunction(trx);
@@ -184,7 +221,12 @@ export class FirestoreStorage implements IStorageDriver {
 
 	async delete(collection: string, id: string) {
 		const qb = this.firestore.collection(collection);
-		await qb.doc(id).delete()
+		await qb.doc(id).delete();
+		this.emit(StorageEventType.Delete, <StorageEvent>{
+			type: StorageEventType.Delete,
+			collection: collection,
+			count: 1
+		});
 	}
 
 	async clear(collection: string) {
@@ -284,16 +326,6 @@ export class FirestoreStorage implements IStorageDriver {
 		return FirestoreStorage.format(model);
 	}
 
-	private async internalUpdate(collection: string, id: string, data: any, options?: SaveOptions) {
-		const path = FirestoreStorage.getPath(collection, id);
-		const docRef = await this.firestore.doc(path);
-		await docRef.set(data, {
-			merge: !(options && options.avoidMerge)
-		});
-		const model = await docRef.get();
-		return FirestoreStorage.format(model);
-	}
-
 	private deleteCollection(collectionPath, batchSize) {
 		const collectionRef = this.firestore.collection(collectionPath);
 		const query = collectionRef.orderBy('__name__',).limit(batchSize);
@@ -334,6 +366,15 @@ export class FirestoreStorage implements IStorageDriver {
 		})
 			.catch(reject);
 	}
+
+	private emitRead(collection: string, count: number) {
+		return this.emit(StorageEventType.Read, <StorageEvent>{type: StorageEventType.Read, collection: collection, count: count})
+	}
+
+	private emitWrite(collection: string, count: number) {
+		return this.emit(StorageEventType.Write, <StorageEvent>{type: StorageEventType.Write, collection: collection, count: count})
+	}
+
 }
 
 export class FirestoreTransaction implements IFirestoreTransaction {
