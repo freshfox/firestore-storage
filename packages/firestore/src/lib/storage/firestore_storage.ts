@@ -101,7 +101,7 @@ export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 		}
 		const path = FirestoreStorage.getPath(collection, model.id);
 		const docRef = await this.firestore.doc(path);
-		await docRef.set(data, {
+		await docRef.set(model.data, {
 			merge: !(options && options.avoidMerge)
 		});
 		const doc = await docRef.get();
