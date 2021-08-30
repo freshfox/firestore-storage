@@ -1,21 +1,19 @@
 import 'reflect-metadata';
 import {inject, injectable} from 'inversify';
 import {
-	BaseModel,
-	ErrorFactory,
-	IErrorFactory, IFirestoreTransaction,
+	BaseModel, IFirestoreTransaction,
 	IStorageDriver, ModelQuery, PatchUpdate,
 	PathFunction,
 	QueryBuilder, ReadModel, StorageDriver, StreamOptions
 } from "firestore-storage-core";
 import {Inject, Injectable} from "@nestjs/common";
+import {FirestoreStorageError} from "firestore-storage-core/dist/lib/storage/error";
 
 @injectable()
 @Injectable()
 export abstract class BaseRepository<T extends BaseModel> {
 
-	constructor(@inject(StorageDriver) @Inject(StorageDriver) protected storage: IStorageDriver,
-				@inject(ErrorFactory) @Inject(ErrorFactory) protected errorFactory: IErrorFactory) {}
+	constructor(@inject(StorageDriver) @Inject(StorageDriver) protected storage: IStorageDriver) {}
 
 	abstract getCollectionPath(...documentIds: string[]): string | PathFunction;
 
@@ -154,8 +152,7 @@ export abstract class BaseRepository<T extends BaseModel> {
 	}
 
 	private createError(attributes: Partial<T>, ids: string[]) {
-			const id = attributes.id ? ` (${attributes.id})` : '';
-			return this.errorFactory(`Unable to get document${id} from ${this.getStringCollectionPath(...ids)}`);
+		return new FirestoreStorageError(attributes, this.getStringCollectionPath(...ids));
 	}
 
 }

@@ -71,13 +71,10 @@ export type Operator = '==' | '<' | '<=' | '>' | '>=' | 'in' | 'array-contains';
 
 export const StorageDriver = Symbol.for('FirestoreStorage.StorageDriver');
 export const FirestoreInstance = Symbol.for('FirestoreStorage.FirestoreInstance');
-export const ErrorFactory = Symbol.for('FirestoreStorage.ErrorFactory');
 
 export interface SaveOptions {
 	avoidMerge?: boolean;
 }
-
-export type IErrorFactory = (message: string) => Error;
 
 export interface IDocument {
 	collections: {
