@@ -2,24 +2,18 @@ import {BaseRepository} from './base_repository';
 import {ContainerModule} from 'inversify';
 import {FirestoreStorage} from './firestore_storage';
 import * as admin from 'firebase-admin';
-import {ErrorFactory, FirestoreInstance, IErrorFactory, IStorageDriver, StorageDriver, MemoryStorage} from 'firestore-storage-core';
+import {FirestoreInstance, IStorageDriver, StorageDriver, MemoryStorage} from 'firestore-storage-core';
 import {DynamicModule, FactoryProvider, Injectable, Module, ModuleMetadata, Provider, Type} from "@nestjs/common";
 
 Reflect.decorate([Injectable()], MemoryStorage);
 
-function getProviders(storage: (new (...args: any[]) => IStorageDriver), firestore?: admin.firestore.Firestore, errorFactory?: IErrorFactory): Provider[] {
+function getProviders(storage: (new (...args: any[]) => IStorageDriver), firestore?: admin.firestore.Firestore): Provider[] {
 	return [
 		FirestoreStorage,
 		MemoryStorage,
 		{
 			provide: StorageDriver,
 			useExisting: storage,
-		},
-		{
-			provide: ErrorFactory,
-			useValue: errorFactory || ((message: string) => {
-				return new Error(message);
-			})
 		},
 		{
 			provide: FirestoreInstance,
@@ -30,7 +24,7 @@ function getProviders(storage: (new (...args: any[]) => IStorageDriver), firesto
 
 export class FirestoreStorageNestModule {
 
-	static forRootAsync(options: FirestoreModuleAsyncOptions, errorFactory?: IErrorFactory): DynamicModule {
+	static forRootAsync(options: FirestoreModuleAsyncOptions): DynamicModule {
 		return {
 			imports: options.imports || [],
 			module: FirestoreStorageNestModule,
@@ -41,12 +35,6 @@ export class FirestoreStorageNestModule {
 					provide: StorageDriver,
 					useExisting: FirestoreStorage,
 				},
-				{
-					provide: ErrorFactory,
-					useValue: errorFactory || ((message: string) => {
-						return new Error(message);
-					})
-				},
 				...this.createConnectProviders(options)
 			],
 			exports: [
@@ -55,10 +43,6 @@ export class FirestoreStorageNestModule {
 				{
 					provide: StorageDriver,
 					useExisting: StorageDriver
-				},
-				{
-					provide: ErrorFactory,
-					useExisting: ErrorFactory
 				}
 			],
 		};
@@ -103,16 +87,16 @@ export class FirestoreStorageNestModule {
 		};
 	}
 
-	static withMemoryStorage(errorFactory?: IErrorFactory) {
-		return this.with(MemoryStorage, null, errorFactory);
+	static withMemoryStorage() {
+		return this.with(MemoryStorage, null);
 	}
 
-	static withFirestore(firestore: admin.firestore.Firestore, errorFactory?: IErrorFactory) {
-		return this.with(FirestoreStorage, firestore, errorFactory)
+	static withFirestore(firestore: admin.firestore.Firestore) {
+		return this.with(FirestoreStorage, firestore)
 	}
 
-	private static with(storage: (new (...args: any[]) => IStorageDriver), firestore?: admin.firestore.Firestore, errorFactory?: IErrorFactory): DynamicModule {
-		const providers = getProviders(storage, firestore, errorFactory);
+	private static with(storage: (new (...args: any[]) => IStorageDriver), firestore?: admin.firestore.Firestore): DynamicModule {
+		const providers = getProviders(storage, firestore);
 		return {
 			module: FirestoreStorageModule,
 			providers: providers,
@@ -154,29 +138,23 @@ export class FirestoreStorageModule {
 
 	module: ContainerModule;
 
-	constructor(instance: admin.firestore.Firestore, defaultStorageDriver: any, errorFactory?: IErrorFactory) {
+	constructor(instance: admin.firestore.Firestore, defaultStorageDriver: any) {
 		this.module = new ContainerModule((bind) => {
 			bind(BaseRepository).toSelf().inSingletonScope();
 			bind(FirestoreStorage).toSelf().inSingletonScope();
 			bind(MemoryStorage).toSelf().inSingletonScope();
 			bind(FirestoreInstance).toConstantValue(instance);
 			bind<IStorageDriver>(StorageDriver).to(defaultStorageDriver).inSingletonScope();
-			bind<IErrorFactory>(ErrorFactory).toFactory<Error>(() => {
-				if (errorFactory) {
-					return errorFactory;
-				}
-				return
-			});
 		});
 	}
 
-	static createWithMemoryStorage(errorFactory?: IErrorFactory): ContainerModule {
-		let md = new FirestoreStorageModule(null, MemoryStorage, errorFactory);
+	static createWithMemoryStorage(): ContainerModule {
+		let md = new FirestoreStorageModule(null, MemoryStorage);
 		return md.module;
 	}
 
-	static createWithFirestore(instance: admin.firestore.Firestore, errorFactory?: IErrorFactory): ContainerModule {
-		let md = new FirestoreStorageModule(instance, FirestoreStorage, errorFactory);
+	static createWithFirestore(instance: admin.firestore.Firestore): ContainerModule {
+		let md = new FirestoreStorageModule(instance, FirestoreStorage);
 		return md.module;
 	}
 
