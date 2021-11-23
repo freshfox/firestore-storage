@@ -1,5 +1,4 @@
-import * as isPlainObject from 'lodash.isplainobject';
-import * as isEqual from 'lodash.isequal';
+import {isPlainObject, isEqual} from 'lodash/fp';
 import {PathFunction} from "./collection_utils";
 
 export type AnyKeys<K extends keyof any> = {

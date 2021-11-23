@@ -1,9 +1,9 @@
-import {BaseRepository} from './base_repository';
-import {ContainerModule} from 'inversify';
-import {FirestoreStorage} from './firestore_storage';
+import { DynamicModule, FactoryProvider, Injectable, ModuleMetadata, Provider, Type } from "@nestjs/common";
 import * as admin from 'firebase-admin';
-import {FirestoreInstance, IStorageDriver, StorageDriver, MemoryStorage} from 'firestore-storage-core';
-import {DynamicModule, FactoryProvider, Injectable, Module, ModuleMetadata, Provider, Type} from "@nestjs/common";
+import { FirestoreInstance, IStorageDriver, MemoryStorage, StorageDriver } from 'firestore-storage-core';
+import { ContainerModule } from 'inversify';
+import { BaseRepository } from './base_repository';
+import { FirestoreStorage } from './firestore_storage';
 
 Reflect.decorate([Injectable()], MemoryStorage);
 

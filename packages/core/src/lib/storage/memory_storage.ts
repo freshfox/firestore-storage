@@ -1,9 +1,7 @@
 import 'reflect-metadata';
 import {v4 as uuid} from 'uuid';
 import {injectable} from 'inversify';
-import * as isPlainObject from 'lodash.isplainobject';
-import * as isEqual from 'lodash.isequal';
-import * as merge from 'lodash.mergewith';
+import {isPlainObject, isEqual, mergeWith} from 'lodash';
 
 import {
 	ICollection,
@@ -13,47 +11,52 @@ import {
 	Operator,
 	OrderDirection,
 	QueryBuilder,
-	SaveOptions
+	SaveOptions, StorageQueryOptions, TransactionOptions
 } from "./storage";
 import {toComparableValue} from "./utils";
-import {BaseModel} from "./base_model";
+import {BaseModel, PatchUpdate} from "./base_model";
+import {DEFAULT_DOCUMENT_TRANSFORMER, IDocumentTransformer} from "./transformer";
+import {ModelDataOnly} from "./base_model_v2";
 
 @injectable()
 export class MemoryStorage implements IStorageDriver {
 
 	data: Document = new Document();
 
-	findById(collection: string, id: string): Promise<any> {
+	constructor() {
+	}
+
+	findById<T>(collection: string, id: string, opts?: StorageQueryOptions<T>): Promise<T> {
 		const doc = this.data.getCollection(collection).getDocument(id, true);
 		if (doc) {
-			return Promise.resolve(MemoryStorage.mapWithId(id, doc, `${collection}/${id}`));
+			return Promise.resolve(MemoryStorage.mapWithId(id, doc, `${collection}/${id}`, opts?.transformer));
 		}
 		return Promise.resolve(null);
 	}
 
-	async find<T>(collection: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>) {
-		const items = this.getAsArray(collection);
+	async find<T>(collection: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>, opts?: StorageQueryOptions) {
+		const items = this.getAsArray(collection, opts?.transformer);
 		const query = cb(new MemoryQueryBuilder(items));
 		const result = await query.limit(1).get();
 		return result[0] || null;
 	}
 
-	save(collection: string, data: any, options?: SaveOptions): Promise<any> {
-		const model = MemoryStorage.clone(data);
+	save<T = any>(collection: string, data: T | PatchUpdate<ModelDataOnly<T>> | ModelDataOnly<T>, opts?: SaveOptions): Promise<T> {
+		const model = MemoryStorage.clone(data, opts?.transformer);
 		const id = model.id ? model.id : this.generateId();
-		this.addDocument(collection, id, model.data, options);
-		return this.findById(collection, id);
+		this.addDocument(collection, id, model.data, opts);
+		return this.findById(collection, id, opts);
 	}
 
-	addDocument(collection: string, id: string, data: any, options?: SaveOptions) {
+	addDocument(collection: string, id: string, data: any, options: SaveOptions) {
 		const doc = this.data.getCollection(collection).getDocument(id);
 		const now = new Date();
 		doc.updatedAt = now;
 		if (doc.data) {
-			if (options && options.avoidMerge) {
+			if (options?.avoidMerge) {
 				doc.data = {...data};
 			} else {
-				merge(doc.data, data, (obj, src) => {
+				mergeWith(doc.data, data, (obj, src) => {
 					if (Array.isArray(src)) {
 						return src;
 					}
@@ -65,19 +68,19 @@ export class MemoryStorage implements IStorageDriver {
 		}
 	}
 
-	query<T>(collection: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<any[]> {
-		const items = this.getAsArray(collection);
+	query<T>(collection: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>, opts?: StorageQueryOptions<T>): Promise<any[]> {
+		const items = this.getAsArray(collection, opts?.transformer);
 		const builder = new MemoryQueryBuilder(items);
 		const query = cb ? cb(builder) : builder;
 		return query.get();
 	}
 
-	batchGet(collection: string, ids: string[]) {
+	batchGet<T>(collection: string, ids: string[], opts?: StorageQueryOptions<T>) {
 		const collectionRef = this.data.getCollection(collection);
 		const items = ids.map((id) => {
 			const doc = collectionRef.documents[id];
 			if (doc) {
-				return MemoryStorage.mapWithId(id, doc, `${collection}/${id}`);
+				return MemoryStorage.mapWithId(id, doc, `${collection}/${id}`, opts?.transformer);
 			}
 			return null;
 		});
@@ -98,8 +101,8 @@ export class MemoryStorage implements IStorageDriver {
 	}
 
 	transaction<T>(updateFunction: (transaction: IFirestoreTransaction) => Promise<T>,
-				   transactionOptions?: { maxAttempts?: number }): Promise<T> {
-		return updateFunction(new MemoryTransaction(this));
+				   transactionOptions?: TransactionOptions<T>): Promise<T> {
+		return updateFunction(new MemoryTransaction(this, transactionOptions));
 	}
 
 	generateId(): string {
@@ -115,15 +118,24 @@ export class MemoryStorage implements IStorageDriver {
 		return this.import(data)
 	}
 
-	private getAsArray(collection: string) {
+	private getAsArray(collection: string, transformer: IDocumentTransformer<any>) {
 		const collectionRef = this.data.getCollection(collection);
 		return Object.keys(collectionRef.documents)
 			.map((key) => {
-				return MemoryStorage.mapWithId(key, collectionRef.documents[key], `${collection}/${key}`);
+				return MemoryStorage.mapWithId(key, collectionRef.documents[key], `${collection}/${key}`, transformer);
 			});
 	}
 
-	private static mapWithId(id: string, doc: Document, rawPath: string) {
+	private static mapWithId(id: string, doc: Document, rawPath: string, transformer: IDocumentTransformer<any>) {
+		transformer = transformer || DEFAULT_DOCUMENT_TRANSFORMER;
+		if (transformer) {
+			return transformer.fromFirestoreToObject(doc.data, {
+				id: id,
+				rawPath: rawPath,
+				createdAt: doc.createdAt,
+				updatedAt: doc.updatedAt
+			});
+		}
 		return Object.assign(<BaseModel>{
 			id,
 			createdAt: doc.createdAt,
@@ -132,22 +144,15 @@ export class MemoryStorage implements IStorageDriver {
 		}, doc.data);
 	}
 
-	static clone(data): {id: string, data} {
+	static clone<T = any>(data: T, transformer: IDocumentTransformer<T>): { id: string, data: ModelDataOnly<T> } {
+		transformer = transformer || DEFAULT_DOCUMENT_TRANSFORMER as any;
 		try {
 			this.checkForUndefined(data);
 		} catch (err) {
 			console.error(data);
 			throw err;
 		}
-		const clone = Object.assign({}, data);
-		const id = data.id;
-		delete clone.id;
-		delete clone.createdAt;
-		delete clone.updatedAt;
-		return {
-			id: id,
-			data: clone
-		};
+		return transformer.toFirestoreDocument(data);
 	}
 
 	private static checkForUndefined(data: any) {
@@ -174,7 +179,7 @@ export class MemoryStorage implements IStorageDriver {
 		throw new Error('Streaming not implemented')
 	}
 
-	groupQuery<T>(collectionId: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<T[]> {
+	groupQuery<T>(collectionId: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>, opts?: StorageQueryOptions<T>): Promise<T[]> {
 		const documents = [];
 		this.loopOverCollections(this.data.collections, (name, docs, parent) => {
 			if (name !== collectionId) {
@@ -186,7 +191,7 @@ export class MemoryStorage implements IStorageDriver {
 					pathParts.push(parent);
 				}
 				pathParts.push(name, id);
-				return MemoryStorage.mapWithId(id, docs[id], pathParts.join('/'));
+				return MemoryStorage.mapWithId(id, docs[id], pathParts.join('/'), opts?.transformer);
 			});
 			documents.push(...docsWithId);
 		});
@@ -307,14 +312,14 @@ export class MemoryTransaction implements IFirestoreTransaction {
 
 	private didWrite = false;
 
-	constructor(private storage: MemoryStorage) {
+	constructor(private storage: MemoryStorage, private opts: TransactionOptions) {
 
 	}
 
 	create<T>(collectionPath: string, data: T): IFirestoreTransaction {
 		this.didWrite = true;
-		const model = MemoryStorage.clone(data);
-		this.storage.addDocument(collectionPath, this.storage.generateId(), model.data);
+		const model = MemoryStorage.clone(data, this.opts.transformer);
+		this.storage.addDocument(collectionPath, this.storage.generateId(), model.data, this.opts);
 		return this;
 	}
 
@@ -340,15 +345,15 @@ export class MemoryTransaction implements IFirestoreTransaction {
 
 	set<T>(collectionPath: string, data: T): IFirestoreTransaction {
 		this.didWrite = true;
-		const model = MemoryStorage.clone(data);
+		const model = MemoryStorage.clone(data, this.opts.transformer);
 		const id = model.id ? model.id : this.storage.generateId();
-		this.storage.addDocument(collectionPath, id, model.data);
+		this.storage.addDocument(collectionPath, id, model.data, this.opts);
 		return this;
 	}
 
 	setAvoidMerge<T>(collectionPath: string, data: T): IFirestoreTransaction {
 		this.didWrite = true;
-		const model = MemoryStorage.clone(data);
+		const model = MemoryStorage.clone(data, this.opts.transformer);
 		const id = model.id ? model.id : this.storage.generateId();
 		this.storage.addDocument(collectionPath, id, model.data, {avoidMerge: true});
 		return this;
@@ -356,11 +361,11 @@ export class MemoryTransaction implements IFirestoreTransaction {
 
 	update<T>(collectionPath: string, data: T): IFirestoreTransaction {
 		this.didWrite = true;
-		const model = MemoryStorage.clone(data);
+		const model = MemoryStorage.clone(data, this.opts.transformer);
 		if (!model.id) {
 			throw new Error(`No document id found. Unable to update (${collectionPath}) ${JSON.stringify(model.data, null, 2)}`)
 		}
-		this.storage.addDocument(collectionPath, model.id, model.data);
+		this.storage.addDocument(collectionPath, model.id, model.data, this.opts);
 		return this;
 	}
 

@@ -1,25 +1,28 @@
+import {IDocumentTransformer} from "./transformer";
+
 export interface IStorageDriver {
 
-	findById<T = any>(collection: string, id: string): Promise<T>;
+	findById<T = any>(collection: string, id: string, opts?: StorageQueryOptions): Promise<T>;
 
-	find<T = any>(collection: string, query: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<T>;
+	find<T = any>(collection: string, query: (qb: QueryBuilder<T>) => QueryBuilder<T>, opts?: StorageQueryOptions): Promise<T>;
 
 	save<T = any>(collection: string, data: T, options?: SaveOptions): Promise<T>;
 
-	query<T = any>(collection: string, query?: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<T[]>;
+	query<T = any>(collection: string, query?: (qb: QueryBuilder<T>) => QueryBuilder<T>, opts?: StorageQueryOptions): Promise<T[]>;
 
-	groupQuery<T>(collectionId: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<T[]>
+	groupQuery<T>(collectionId: string, cb?: (qb: QueryBuilder<T>, opts?: StorageQueryOptions) => QueryBuilder<T>): Promise<T[]>
 
 	stream<T = any>(collection: string, query?: (qb: QueryBuilder<T>) => QueryBuilder<T>, options?: StreamOptions): NodeJS.ReadableStream;
 
-	batchGet<T = any>(collection: string, ids: string[]): Promise<T[]>;
+	batchGet<T = any>(collection: string, ids: string[], opts?: StorageQueryOptions): Promise<T[]>;
 
-	delete(collection: string, id: string): Promise<void>;
+	delete(collection: string, id: string, opts?: StorageQueryOptions): Promise<void>;
 
 	clear(collection: string): Promise<any>;
 
-	transaction<T = any>(updateFunction: (transaction: IFirestoreTransaction) => Promise<T>,
-				   transactionOptions?:{maxAttempts?: number}): Promise<T>;
+	transaction<T = any>(
+		updateFunction: (transaction: IFirestoreTransaction) => Promise<T>,
+		transactionOptions?: TransactionOptions): Promise<T>;
 
 	generateId(): string;
 
@@ -62,18 +65,26 @@ export interface IFirestoreTransaction {
 	delete(collectionPath: string, docId: string): IFirestoreTransaction;
 }
 
-export interface StreamOptions {
-	size?: number
-}
-
 export type OrderDirection = 'desc' | 'asc';
 export type Operator = '==' | '<' | '<=' | '>' | '>=' | 'in' | 'array-contains';
 
 export const StorageDriver = Symbol.for('FirestoreStorage.StorageDriver');
 export const FirestoreInstance = Symbol.for('FirestoreStorage.FirestoreInstance');
 
-export interface SaveOptions {
+export interface StorageQueryOptions<T = any> {
+	transformer?: IDocumentTransformer<T>;
+}
+
+export interface SaveOptions<T = any> extends StorageQueryOptions<T> {
 	avoidMerge?: boolean;
+}
+
+export interface StreamOptions<T = any> extends StorageQueryOptions<T> {
+	size?: number
+}
+
+export interface TransactionOptions<T = any> extends StorageQueryOptions<T> {
+	maxAttempts?: number
 }
 
 export interface IDocument {
