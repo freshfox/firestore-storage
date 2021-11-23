@@ -5,3 +5,5 @@ export * from './storage/memory_storage';
 export * from './storage/migrations';
 export * from './storage/storage';
 export * from './storage/utils';
+export * from './storage/transformer';
+export * from './storage/base_repository';

@@ -1,30 +1,45 @@
 import 'reflect-metadata';
 import {inject, injectable} from 'inversify';
 import {
-	BaseModel, IFirestoreTransaction,
-	IStorageDriver, ModelQuery, PatchUpdate,
+	BaseModel,
+	IDocumentTransformer,
+	IFirestoreTransaction,
+	IStorageDriver,
+	ModelQuery,
+	PatchUpdate,
 	PathFunction,
-	QueryBuilder, ReadModel, StorageDriver, StreamOptions
+	QueryBuilder,
+	ReadModel,
+	StorageDriver,
+	StreamOptions, TransformerRepository
 } from "firestore-storage-core";
 import {Inject, Injectable} from "@nestjs/common";
 import {FirestoreStorageError} from "firestore-storage-core/dist/lib/storage/error";
 
 @injectable()
 @Injectable()
-export abstract class BaseRepository<T extends BaseModel> {
+export abstract class BaseRepository<T extends BaseModel> extends TransformerRepository<T> {
 
-	constructor(@inject(StorageDriver) @Inject(StorageDriver) protected storage: IStorageDriver) {}
+	constructor(@inject(StorageDriver)
+				@Inject(StorageDriver)
+				protected storage: IStorageDriver) {
+		super();
+	}
 
 	abstract getCollectionPath(...documentIds: string[]): string | PathFunction;
 
 	findById(...ids: string[]): Promise<ReadModel<T> | null> {
 		const docId = ids.pop();
-		return this.storage.findById(this.getStringCollectionPath(...ids), docId);
+		return this.storage.findById(this.getStringCollectionPath(...ids), docId, {
+			transformer: this.transformer
+		});
 	}
 
 	find(attributes: ModelQuery<T>, ...ids: string[]): Promise<ReadModel<T> | null> {
 		return this.storage.find(this.getStringCollectionPath(...ids), (qb) => {
 			return this.mapToWhereClause(qb, attributes);
+		}, {
+			transformer: this.transformer
 		})
 	}
 
@@ -61,12 +76,16 @@ export abstract class BaseRepository<T extends BaseModel> {
 	}
 
 	query(cb: (qb: QueryBuilder<T>) => QueryBuilder<T>, ...ids: string[]): Promise<ReadModel<T>[]> {
-		return this.storage.query<ReadModel<T>>(this.getStringCollectionPath(...ids), cb);
+		return this.storage.query<ReadModel<T>>(this.getStringCollectionPath(...ids), cb, {
+			transformer: this.transformer
+		});
 	}
 
 	groupQuery(cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<ReadModel<T>[]> {
 		let collectionId = this.getCollectionId();
-		return this.storage.groupQuery<ReadModel<T>>(collectionId, cb);
+		return this.storage.groupQuery<ReadModel<T>>(collectionId, cb, {
+			transformer: this.transformer
+		});
 	}
 
 	private getCollectionId(): string {
@@ -90,19 +109,10 @@ export abstract class BaseRepository<T extends BaseModel> {
 		return this.storage.stream<T>(this.getStringCollectionPath(...pathIds), cb, optionsOrId as StreamOptions);
 	}
 
-	/**@deprecated Has been replaced with findAll() */
-	batchGet(documentIds: string[], ...ids: string[]): Promise<(ReadModel<T> | null)[]> {
-		return this.storage.batchGet(this.getStringCollectionPath(...ids), documentIds);
-	}
-
-	/**@deprecated Will be removed in the future.*/
-	async batchGetNoNulls(documentIds: string[], ...ids: string[]): Promise<ReadModel<T>[]> {
-		const docs = await this.findAll(documentIds, ...ids);
-		return docs.filter(d => d);
-	}
-
 	async findAll(documentIds: string[], ...ids: string[]): Promise<(ReadModel<T> | null)[]> {
-		return this.storage.batchGet(this.getStringCollectionPath(...ids), documentIds);
+		return this.storage.batchGet(this.getStringCollectionPath(...ids), documentIds, {
+			transformer: this.transformer
+		});
 	}
 
 	async getAll(documentIds: string[], ...ids: string[]): Promise<ReadModel<T>[]> {
@@ -117,11 +127,16 @@ export abstract class BaseRepository<T extends BaseModel> {
 	}
 
 	save(data: T | PatchUpdate<T>, ...ids: string[]): Promise<ReadModel<T>> {
-		return this.storage.save<any>(this.getStringCollectionPath(...ids), data)
+		return this.storage.save<any>(this.getStringCollectionPath(...ids), data, {
+			transformer: this.transformer
+		})
 	}
 
 	write(data: T | PatchUpdate<T>, ...ids: string[]): Promise<ReadModel<T>> {
-		return this.storage.save<any>(this.getStringCollectionPath(...ids), data, {avoidMerge: true});
+		return this.storage.save<any>(this.getStringCollectionPath(...ids), data, {
+			avoidMerge: true,
+			transformer: this.transformer
+		});
 	}
 
 	clear(...ids: string[]): Promise<void> {
@@ -136,6 +151,8 @@ export abstract class BaseRepository<T extends BaseModel> {
 	transaction<R>(updateFunction: RepositoryTransactionCallback<T, R>, ...ids: string[]): Promise<R> {
 		return this.storage.transaction<R>((trx) => {
 			return updateFunction(new RepositoryTransaction(this.getStringCollectionPath(...ids), trx))
+		}, {
+			transformer: this.transformer
 		});
 	}
 

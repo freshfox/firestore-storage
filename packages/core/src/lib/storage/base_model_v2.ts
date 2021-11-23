@@ -1,4 +1,4 @@
-import {PatchUpdate} from "./base_model";
+import {BaseModel, PatchUpdate} from "./base_model";
 import {classToPlain, Exclude, plainToClass, ClassConstructor, Transform, Type, plainToClassFromExist} from "class-transformer";
 
 type NonFunctionPropertyNames<T> = {
@@ -19,7 +19,7 @@ export interface ModelMeta {
 
 export type ModelDataOnly<T> = Omit<Clonable<T>, keyof ModelMeta>;
 
-export class BaseModelClass<T> {
+export class BaseModelClass<T> implements BaseModel {
 
 	@Exclude()
 	private __metadata: ModelMeta = {};

@@ -10,7 +10,7 @@ export interface IStorageDriver {
 
 	query<T = any>(collection: string, query?: (qb: QueryBuilder<T>) => QueryBuilder<T>, opts?: StorageQueryOptions): Promise<T[]>;
 
-	groupQuery<T>(collectionId: string, cb?: (qb: QueryBuilder<T>, opts?: StorageQueryOptions) => QueryBuilder<T>): Promise<T[]>
+	groupQuery<T>(collectionId: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>, opts?: StorageQueryOptions): Promise<T[]>
 
 	stream<T = any>(collection: string, query?: (qb: QueryBuilder<T>) => QueryBuilder<T>, options?: StreamOptions): NodeJS.ReadableStream;
 
