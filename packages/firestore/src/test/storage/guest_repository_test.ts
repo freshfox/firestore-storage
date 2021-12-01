@@ -107,7 +107,7 @@ describe('GuestRepository', function () {
 			}, accountId);
 		}));
 
-		const someGuests = await guestRepo.batchGet([
+		const someGuests = await guestRepo.findAll([
 			guests[0].id,
 			guests[4].id,
 		], accountId);
@@ -117,7 +117,7 @@ describe('GuestRepository', function () {
 		has(someGuests, guests[0].id);
 		has(someGuests, guests[4].id);
 
-		const withNulls = await guestRepo.batchGet([
+		const withNulls = await guestRepo.findAll([
 			guests[0].id,
 			'other'
 		], accountId);

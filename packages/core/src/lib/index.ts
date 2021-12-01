@@ -7,3 +7,4 @@ export * from './storage/storage';
 export * from './storage/utils';
 export * from './storage/transformer';
 export * from './storage/base_repository';
+export * from './storage/base_model_v2';

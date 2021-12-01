@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import {Container, interfaces} from 'inversify';
-import {IErrorFactory, IStorageDriver, StorageDriver, BaseModel, ReferenceMap} from 'firestore-storage-core';
+import {IStorageDriver, StorageDriver, BaseModel, ReferenceMap} from 'firestore-storage-core';
 import * as admin from 'firebase-admin';
 import * as env from 'node-env-file';
 import * as fs from 'fs';
@@ -15,9 +15,8 @@ if(fs.existsSync(path)){
 export class TestFactory {
 
 	static createWithRepository<T extends BaseRepository<any>>(context, repoConstructor: interfaces.Newable<T>,
-															   errorFactory?: IErrorFactory,
 															   forceFirebaseStorage?: boolean, ...ids: string[]) {
-		const tc = new TestCase(errorFactory, forceFirebaseStorage);
+		const tc = new TestCase(forceFirebaseStorage);
 		tc.container.bind(repoConstructor).toSelf().inSingletonScope();
 
 		context.beforeEach(() => {
@@ -33,16 +32,16 @@ export class TestCase {
 
 	container = new Container();
 
-	constructor(errorFactory?: IErrorFactory, forceFirebaseStorage?: boolean) {
+	constructor(forceFirebaseStorage?: boolean) {
 		const runWithFirestore = process.argv.indexOf('--firestore') >= 0;
 		const credentialsFile = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 		if (runWithFirestore || forceFirebaseStorage) {
 			if (!credentialsFile) {
 				throw new Error('GOOGLE_APPLICATION_CREDENTIALS env variable not set');
 			}
-			TestCase.initWithFirestore(this, credentialsFile, errorFactory);
+			TestCase.initWithFirestore(this, credentialsFile);
 		} else {
-			TestCase.initWithMemoryStorage(this, errorFactory);
+			TestCase.initWithMemoryStorage(this);
 		}
 	}
 
@@ -54,7 +53,7 @@ export class TestCase {
 		return this.container.get<IStorageDriver>(StorageDriver);
 	}
 
-	private static initWithFirestore(tc: TestCase, credentials: string, errorFactory?: IErrorFactory) {
+	private static initWithFirestore(tc: TestCase, credentials: string) {
 		if (admin.apps.length === 0) {
 			console.log('Initializing Firestore');
 			admin.initializeApp({
@@ -65,11 +64,11 @@ export class TestCase {
 				timestampsInSnapshots: false
 			})
 		}
-		tc.container.load(FirestoreStorageModule.createWithFirestore(admin.firestore(), errorFactory))
+		tc.container.load(FirestoreStorageModule.createWithFirestore(admin.firestore()))
 	}
 
-	private static initWithMemoryStorage(tc: TestCase, errorFactory?: IErrorFactory) {
-		tc.container.load(FirestoreStorageModule.createWithMemoryStorage(errorFactory))
+	private static initWithMemoryStorage(tc: TestCase) {
+		tc.container.load(FirestoreStorageModule.createWithMemoryStorage())
 	}
 
 }

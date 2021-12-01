@@ -8,7 +8,14 @@ import {
 	FirestoreInstance,
 	QueryBuilder,
 	SaveOptions,
-	IFirestoreTransaction, MemoryStorage, IDocument, Document, Collection, BaseModel
+	IFirestoreTransaction,
+	MemoryStorage,
+	IDocument,
+	Document,
+	Collection,
+	BaseModel,
+	IDocumentTransformer,
+	ModelDataOnly, DEFAULT_DOCUMENT_TRANSFORMER, StorageQueryOptions, StreamOptions, TransactionOptions
 } from "firestore-storage-core";
 import {Inject, Injectable} from "@nestjs/common";
 import {EventEmitter} from "events";
@@ -25,7 +32,7 @@ export interface StorageEvent {
 	count: number;
 }
 
-export interface FirestoreStorageExportOptions {
+export interface FirestoreStorageExportOptions extends StorageQueryOptions {
 	parallelCollections?: number;
 	parallelDocuments?: number;
 	tries?: number;
@@ -40,48 +47,42 @@ export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 	private static readonly EXPORT_OPTIONS: Required<FirestoreStorageExportOptions> = {
 		parallelCollections: 20,
 		parallelDocuments: 500,
-		tries: 3
+		tries: 3,
+		transformer: null
 	}
 
 	constructor(@inject(FirestoreInstance) @Inject(FirestoreInstance) protected firestore: admin.firestore.Firestore) {
 		super();
 	}
 
-	static clone(data): { id: string, data } {
-		const clone = Object.assign({}, data);
-		const id = data.id;
-		delete clone.id;
-		delete clone.createdAt;
-		delete clone.updatedAt;
-		delete clone._rawPath;
-		return {
-			id: id,
-			data: clone
-		};
+	static clone<T = any>(data: T, transformer: IDocumentTransformer<T>): { id: string, data: ModelDataOnly<T> } {
+		transformer = transformer || DEFAULT_DOCUMENT_TRANSFORMER as any;
+		return transformer.toFirestoreDocument(data)
 	}
 
-	static format(snapshot: FirebaseFirestore.DocumentSnapshot) {
+	static format(snapshot: FirebaseFirestore.DocumentSnapshot, transformer: IDocumentTransformer<any>) {
 		if (!snapshot.exists) {
 			return null;
 		}
+		transformer = transformer || DEFAULT_DOCUMENT_TRANSFORMER
 
-		return Object.assign(<BaseModel>{
+		return transformer.fromFirestoreToObject(snapshot.data(), {
 			id: snapshot.id,
 			createdAt: new Date(snapshot.createTime.toMillis()),
 			updatedAt: new Date(snapshot.updateTime.toMillis()),
-			_rawPath: snapshot.ref.path
-		}, snapshot.data()) as any;
+			rawPath: snapshot.ref.path
+		})
 	}
 
 	private static getPath(collection: string, id: string) {
 		return `${collection}/${id}`;
 	}
 
-	async findById(collection: string, id: string) {
+	async findById(collection: string, id: string, opts?: StorageQueryOptions) {
 		const path = FirestoreStorage.getPath(collection, id);
 		const snapshot = await this.firestore.doc(path).get();
 		this.emitRead(collection, 1);
-		return FirestoreStorage.format(snapshot);
+		return FirestoreStorage.format(snapshot, opts?.transformer);
 	}
 
 	async find<T>(collection: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>) {
@@ -95,7 +96,7 @@ export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 	async save<T>(collection: string, data: any, options?: SaveOptions): Promise<T> {
 		this.emitWrite(collection, 1);
 		this.emitRead(collection, 1);
-		const model = FirestoreStorage.clone(data);
+		const model = FirestoreStorage.clone(data, options?.transformer);
 		if (!model.id) {
 			return this.add(collection, model.data)
 		}
@@ -105,12 +106,12 @@ export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 			merge: !(options && options.avoidMerge)
 		});
 		const doc = await docRef.get();
-		return FirestoreStorage.format(doc);
+		return FirestoreStorage.format(doc, options?.transformer);
 	}
 
 	async update(collection: string, data: any, options?: SaveOptions) {
 		this.emitWrite(collection, 1);
-		const clone = FirestoreStorage.clone(data);
+		const clone = FirestoreStorage.clone(data, options?.transformer);
 		if (!clone.id) {
 			return this.add(collection, clone.data)
 		}
@@ -118,30 +119,30 @@ export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 		const docRef = await this.firestore.doc(path);
 		const shouldMerge = !(options && options.avoidMerge);
 		await docRef.update(clone.data, {
-			merge: shouldMerge
+			merge: shouldMerge,
 		});
 		const model = await docRef.get();
-		return FirestoreStorage.format(model);
+		return FirestoreStorage.format(model, options?.transformer);
 	}
 
-	async query<T>(collection: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>) {
+	async query<T>(collection: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>, opts?: StorageQueryOptions) {
 		const qb = this.firestore.collection(collection);
-		return this.executeQuery<T>(collection, cb ? cb(qb) : qb);
+		return this.executeQuery<T>(collection, cb ? cb(qb) : qb, opts);
 	}
 
-	async groupQuery<T>(collectionId: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>) {
+	async groupQuery<T>(collectionId: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>, opts?: StorageQueryOptions) {
 		const qb = this.firestore.collectionGroup(collectionId);
-		return this.executeQuery<T>(collectionId, cb ? cb(qb) : qb);
+		return this.executeQuery<T>(collectionId, cb ? cb(qb) : qb, opts);
 	}
 
-	private async executeQuery<T>(collection: string, query: QueryBuilder<T>) {
+	private async executeQuery<T>(collection: string, query: QueryBuilder<T>, opts: StorageQueryOptions) {
 		const result: FirebaseFirestore.QuerySnapshot = await query.get();
 		if (result.empty) {
 			return [];
 		}
 		let count = 0;
 		const data = result.docs.map((document) => {
-			const data = FirestoreStorage.format(document);
+			const data = FirestoreStorage.format(document, opts?.transformer);
 			if (data) {
 				count++;
 			}
@@ -151,7 +152,7 @@ export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 		return data;
 	}
 
-	stream<T>(collection: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>, options?: {size: number}): NodeJS.ReadableStream {
+	stream<T>(collection: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>, options?: StreamOptions): NodeJS.ReadableStream {
 		const qb = this.firestore.collection(collection);
 		const query = cb ? cb(qb) : qb;
 		const opts = Object.assign({
@@ -176,7 +177,7 @@ export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 					.get()
 					.then((result: FirebaseFirestore.QuerySnapshot) => {
 						for (const doc of result.docs) {
-							const data = FirestoreStorage.format(doc);
+							const data = FirestoreStorage.format(doc, options?.transformer);
 							this.push(data);
 						}
 						this.offset += result.size;
@@ -189,7 +190,7 @@ export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 		return new Stream(opts.size);
 	}
 
-	async batchGet(collection: string, ids: string[]): Promise<any> {
+	async batchGet(collection: string, ids: string[], opts?: StorageQueryOptions): Promise<any> {
 		if (ids.length === 0) {
 			return [];
 		}
@@ -201,7 +202,7 @@ export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 		const result = await this.firestore.getAll(docRefs[0], ...restDocRefs);
 		let count = 0;
 		const data = result.map((document) => {
-			const data = FirestoreStorage.format(document);
+			const data = FirestoreStorage.format(document, opts?.transformer);
 			if (data) {
 				count++;
 			}
@@ -212,7 +213,7 @@ export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 	}
 
 	async transaction<T>(updateFunction: (firestoreTrx: IFirestoreTransaction) => Promise<T>,
-						 transactionOptions?: { maxAttempts?: number; }) {
+						 transactionOptions?: TransactionOptions) {
 		return this.firestore.runTransaction((transaction) => {
 			const trx = new FirestoreTransaction(this.firestore, transaction);
 			return updateFunction(trx);
@@ -250,7 +251,7 @@ export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 		if (rootDoc) {
 			root = await this.firestore.doc(rootDoc);
 			const snapshot = await root.get();
-			const data = FirestoreStorage.format(snapshot);
+			const data = FirestoreStorage.format(snapshot, options?.transformer);
 			if (data) {
 				await storage.save(root.parent.path, data);
 			}

@@ -5,7 +5,7 @@ import {injectable} from "inversify";
 import * as should from 'should';
 import * as admin from "firebase-admin";
 import Timestamp = admin.firestore.Timestamp;
-import {BaseModel, MemoryStorage} from "firestore-storage-core";
+import {BaseModel} from "firestore-storage-core";
 
 interface Model extends BaseModel {
 	details?: {

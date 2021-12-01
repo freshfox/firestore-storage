@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import {inject, injectable} from 'inversify';
 import {
 	BaseModel,
-	IDocumentTransformer,
+	BaseRepository as CoreBaseRepository,
 	IFirestoreTransaction,
 	IStorageDriver,
 	ModelQuery,
@@ -11,14 +11,15 @@ import {
 	QueryBuilder,
 	ReadModel,
 	StorageDriver,
-	StreamOptions, TransformerRepository
+	StreamOptions
 } from "firestore-storage-core";
 import {Inject, Injectable} from "@nestjs/common";
 import {FirestoreStorageError} from "firestore-storage-core/dist/lib/storage/error";
+import {ModelDataOnly} from "firestore-storage-core/dist/lib/storage/base_model_v2";
 
 @injectable()
 @Injectable()
-export abstract class BaseRepository<T extends BaseModel> extends TransformerRepository<T> {
+export abstract class BaseRepository<T extends BaseModel> extends CoreBaseRepository<T> {
 
 	constructor(@inject(StorageDriver)
 				@Inject(StorageDriver)
@@ -26,20 +27,18 @@ export abstract class BaseRepository<T extends BaseModel> extends TransformerRep
 		super();
 	}
 
-	abstract getCollectionPath(...documentIds: string[]): string | PathFunction;
-
 	findById(...ids: string[]): Promise<ReadModel<T> | null> {
 		const docId = ids.pop();
-		return this.storage.findById(this.getStringCollectionPath(...ids), docId, {
-			transformer: this.transformer
+		return this.storage.findById(this.getPath(...ids), docId, {
+			transformer: this.getTransformer()
 		});
 	}
 
 	find(attributes: ModelQuery<T>, ...ids: string[]): Promise<ReadModel<T> | null> {
-		return this.storage.find(this.getStringCollectionPath(...ids), (qb) => {
+		return this.storage.find(this.getPath(...ids), (qb) => {
 			return this.mapToWhereClause(qb, attributes);
 		}, {
-			transformer: this.transformer
+			transformer: this.getTransformer()
 		})
 	}
 
@@ -76,26 +75,16 @@ export abstract class BaseRepository<T extends BaseModel> extends TransformerRep
 	}
 
 	query(cb: (qb: QueryBuilder<T>) => QueryBuilder<T>, ...ids: string[]): Promise<ReadModel<T>[]> {
-		return this.storage.query<ReadModel<T>>(this.getStringCollectionPath(...ids), cb, {
-			transformer: this.transformer
+		return this.storage.query<ReadModel<T>>(this.getPath(...ids), cb, {
+			transformer: this.getTransformer()
 		});
 	}
 
 	groupQuery(cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<ReadModel<T>[]> {
-		let collectionId = this.getCollectionId();
+		let collectionId = this.getCollectionName();
 		return this.storage.groupQuery<ReadModel<T>>(collectionId, cb, {
-			transformer: this.transformer
+			transformer: this.getTransformer()
 		});
-	}
-
-	private getCollectionId(): string {
-		try {
-			const path = this.getCollectionPath();
-			if (path instanceof Function) {
-				return path.collectionGroup;
-			}
-		} catch (err) {}
-		throw new Error('Unable to get collection id, getCollectionPath() must return a PathFunction')
 	}
 
 	stream(cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>, ...ids: string[])
@@ -106,12 +95,12 @@ export abstract class BaseRepository<T extends BaseModel> extends TransformerRep
 			pathIds.unshift(optionsOrId);
 			optionsOrId = null;
 		}
-		return this.storage.stream<T>(this.getStringCollectionPath(...pathIds), cb, optionsOrId as StreamOptions);
+		return this.storage.stream<T>(this.getPath(...pathIds), cb, optionsOrId as StreamOptions);
 	}
 
 	async findAll(documentIds: string[], ...ids: string[]): Promise<(ReadModel<T> | null)[]> {
-		return this.storage.batchGet(this.getStringCollectionPath(...ids), documentIds, {
-			transformer: this.transformer
+		return this.storage.batchGet(this.getPath(...ids), documentIds, {
+			transformer: this.getTransformer()
 		});
 	}
 
@@ -126,33 +115,33 @@ export abstract class BaseRepository<T extends BaseModel> extends TransformerRep
 		return all;
 	}
 
-	save(data: T | PatchUpdate<T>, ...ids: string[]): Promise<ReadModel<T>> {
-		return this.storage.save<any>(this.getStringCollectionPath(...ids), data, {
-			transformer: this.transformer
+	save(data: T | ModelDataOnly<T> | PatchUpdate<ModelDataOnly<T>>, ...ids: string[]): Promise<ReadModel<T>> {
+		return this.storage.save<any>(this.getPath(...ids), data, {
+			transformer: this.getTransformer()
 		})
 	}
 
-	write(data: T | PatchUpdate<T>, ...ids: string[]): Promise<ReadModel<T>> {
-		return this.storage.save<any>(this.getStringCollectionPath(...ids), data, {
+	write(data: T | ModelDataOnly<T> | PatchUpdate<ModelDataOnly<T>>, ...ids: string[]): Promise<ReadModel<T>> {
+		return this.storage.save<any>(this.getPath(...ids), data, {
 			avoidMerge: true,
-			transformer: this.transformer
+			transformer: this.getTransformer()
 		});
 	}
 
 	clear(...ids: string[]): Promise<void> {
-		return this.storage.clear(this.getStringCollectionPath(...ids))
+		return this.storage.clear(this.getPath(...ids))
 	}
 
 	delete(...ids: string[]): Promise<void> {
 		const docId = ids.pop();
-		return this.storage.delete(this.getStringCollectionPath(...ids), docId);
+		return this.storage.delete(this.getPath(...ids), docId);
 	}
 
 	transaction<R>(updateFunction: RepositoryTransactionCallback<T, R>, ...ids: string[]): Promise<R> {
 		return this.storage.transaction<R>((trx) => {
-			return updateFunction(new RepositoryTransaction(this.getStringCollectionPath(...ids), trx))
+			return updateFunction(new RepositoryTransaction(this.getPath(...ids), trx))
 		}, {
-			transformer: this.transformer
+			transformer: this.getTransformer()
 		});
 	}
 
@@ -160,16 +149,8 @@ export abstract class BaseRepository<T extends BaseModel> extends TransformerRep
 		return this.storage.generateId();
 	}
 
-	private getStringCollectionPath(...docIds: string[]) {
-		const path = this.getCollectionPath(...docIds);
-		if (typeof path === 'string') {
-			return path;
-		}
-		return path(...docIds);
-	}
-
 	private createError(attributes: Partial<T>, ids: string[]) {
-		return new FirestoreStorageError(attributes, this.getStringCollectionPath(...ids));
+		return new FirestoreStorageError(attributes, this.getPath(...ids));
 	}
 
 }
