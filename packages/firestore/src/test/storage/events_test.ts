@@ -7,7 +7,7 @@ import {StorageEventAccumulator} from "../../lib/storage/accumulator";
 
 describe('Events', function () {
 
-	const tc = new TestCase(null, true);
+	const tc = new TestCase(true);
 	const storage = tc.getStorage() as FirestoreStorage;
 
 	type Post = BaseModel & { authorId: string };

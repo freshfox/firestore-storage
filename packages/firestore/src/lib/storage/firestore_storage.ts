@@ -97,7 +97,9 @@ export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 		this.emitRead(collection, 1);
 		const model = FirestoreStorage.clone(data, options?.transformer);
 		if (!model.id) {
-			return this.add(collection, model.data)
+			const result = await this.firestore.collection(collection).add(data);
+			const model = await result.get();
+			return FirestoreStorage.format(model, options?.transformer);
 		}
 		const path = FirestoreStorage.getPath(collection, model.id);
 		const docRef = await this.firestore.doc(path);
@@ -106,22 +108,6 @@ export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 		});
 		const doc = await docRef.get();
 		return FirestoreStorage.format(doc, options?.transformer);
-	}
-
-	async update(collection: string, data: any, options?: SaveOptions) {
-		this.emitWrite(collection, 1);
-		const clone = FirestoreStorage.clone(data, options?.transformer);
-		if (!clone.id) {
-			return this.add(collection, clone.data)
-		}
-		const path = FirestoreStorage.getPath(collection, clone.id);
-		const docRef = await this.firestore.doc(path);
-		const shouldMerge = !(options && options.avoidMerge);
-		await docRef.update(clone.data, {
-			merge: shouldMerge,
-		});
-		const model = await docRef.get();
-		return FirestoreStorage.format(model, options?.transformer);
 	}
 
 	async query<T>(collection: string, cb?: (qb: QueryBuilder<T>) => QueryBuilder<T>, opts?: StorageQueryOptions) {
@@ -214,7 +200,7 @@ export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 	async transaction<T>(updateFunction: (firestoreTrx: IFirestoreTransaction) => Promise<T>,
 						 transactionOptions?: TransactionOptions) {
 		return this.firestore.runTransaction((transaction) => {
-			const trx = new FirestoreTransaction(this.firestore, transaction);
+			const trx = new FirestoreTransaction(this.firestore, transaction, transactionOptions);
 			return updateFunction(trx);
 		}, transactionOptions);
 	}
@@ -305,7 +291,7 @@ export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 				return;
 			}
 			await processPromisesParallelWithRetries(query.docs, opts.parallelDocuments, opts.tries, async (doc) => {
-				await storage.save(coll.path, FirestoreStorage.format(doc));
+				await storage.save(coll.path, FirestoreStorage.format(doc, DEFAULT_DOCUMENT_TRANSFORMER));
 				await this.exportDocument(storage, doc.ref, opts, collectionNames);
 			});
 			console.log('Exported', coll.path, 'in', time(Date.now() - collStart));
@@ -318,12 +304,6 @@ export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 			path = root.path;
 		}
 		console.log('Exported', path, 'in', time(Date.now() - docStart));
-	}
-
-	private async add(collection: string, data: any): Promise<any> {
-		const result = await this.firestore.collection(collection).add(data);
-		const model = await result.get();
-		return FirestoreStorage.format(model);
 	}
 
 	private deleteCollection(collectionPath, batchSize) {
@@ -379,11 +359,13 @@ export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 
 export class FirestoreTransaction implements IFirestoreTransaction {
 
-	constructor(private firestore: admin.firestore.Firestore, private transaction: FirebaseFirestore.Transaction) {
+	constructor(private firestore: admin.firestore.Firestore,
+				private transaction: FirebaseFirestore.Transaction,
+				private opts?: StorageQueryOptions) {
 
 	}
 
-	async query<T>(collectionPath: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>): Promise<T[]> {
+	async query<T>(collectionPath: string, cb: (qb: QueryBuilder<T>) => QueryBuilder<T>, ): Promise<T[]> {
 		//this.transaction.get()
 		const q = this.firestore.collection(collectionPath);
 		const result = await this.transaction.get(cb(q) as FirebaseFirestore.Query);
@@ -391,7 +373,7 @@ export class FirestoreTransaction implements IFirestoreTransaction {
 			return [];
 		}
 		return result.docs.map((document) => {
-			return FirestoreStorage.format(document);
+			return FirestoreStorage.format(document, this.opts?.transformer);
 		});
 	}
 
@@ -399,20 +381,20 @@ export class FirestoreTransaction implements IFirestoreTransaction {
 		const doc = this.firestore.collection(collectionPath).doc(docId);
 		const data = await this.transaction.get(doc);
 		if (data.exists) {
-			return FirestoreStorage.format(data);
+			return FirestoreStorage.format(data, this.opts?.transformer);
 		}
 		return null;
 	}
 
 	create<T>(collectionPath: string, data: T): FirestoreTransaction {
-		const model = FirestoreStorage.clone(data);
+		const model = FirestoreStorage.clone(data, this.opts?.transformer);
 		const doc = this.firestore.collection(collectionPath).doc();
 		this.transaction.create(doc, model.data);
 		return this;
 	};
 
 	set<T>(collectionPath: string, data: T): FirestoreTransaction {
-		const model = FirestoreStorage.clone(data);
+		const model = FirestoreStorage.clone(data, this.opts?.transformer);
 		//model.id can be null
 		const doc = this.firestore.collection(collectionPath).doc(model.id);
 		this.transaction.set(doc, model.data, {
@@ -422,7 +404,7 @@ export class FirestoreTransaction implements IFirestoreTransaction {
 	}
 
 	setAvoidMerge<T>(collectionPath: string, data: T): FirestoreTransaction {
-		const model = FirestoreStorage.clone(data);
+		const model = FirestoreStorage.clone(data, this.opts?.transformer);
 		//model.id can be null
 		const doc = this.firestore.collection(collectionPath).doc(model.id);
 		this.transaction.set(doc, model.data, {
@@ -432,7 +414,7 @@ export class FirestoreTransaction implements IFirestoreTransaction {
 	}
 
 	update<T>(collectionPath: string, data: T): FirestoreTransaction {
-		const model = FirestoreStorage.clone(data);
+		const model = FirestoreStorage.clone(data, this.opts?.transformer);
 		const doc = this.firestore.collection(collectionPath).doc(model.id);
 		this.transaction.update(doc, model.data);
 		return this;

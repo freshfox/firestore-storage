@@ -1,5 +1,5 @@
 import {BaseModel, PatchUpdate} from "./base_model";
-import {classToPlain, Exclude, plainToClass, ClassConstructor, Transform, Type, plainToClassFromExist} from "class-transformer";
+import {classToPlain, Exclude, plainToInstance, ClassConstructor, Transform, Type, plainToClassFromExist} from "class-transformer";
 
 type NonFunctionPropertyNames<T> = {
 	[K in keyof T]: T[K] extends Function ? never : K;
@@ -66,7 +66,7 @@ export class BaseModelClass<T> implements BaseModel {
 }
 
 export function serialize<T, V>(cls: ClassConstructor<T>, plain: V) {
-	return plainToClass(cls, plain)
+	return plainToInstance(cls, plain)
 }
 
 export function DateTransformer(): (target: object, key: string) => void {
