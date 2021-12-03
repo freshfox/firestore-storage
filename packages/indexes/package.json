@@ -1,0 +1,31 @@
+{
+  "name": "firestore-indexes",
+  "version": "0.0.0",
+  "description": "Manage and generate Firestore indexes using typescript",
+  "files": [
+    "bin",
+    "dist/lib",
+    "src/lib",
+    "README.md",
+    "package.json"
+  ],
+  "main": "dist/lib/index.js",
+  "bin": {
+    "fss": "bin/fss.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:freshfox/firestore-storage.git"
+  },
+  "author": "Dominic Bartl",
+  "scripts": {
+    "test": "NODE_ENV=test mocha dist/test",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "build": "yarn clean && tsc --build",
+    "fss": "fss"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "should": "^13.2.3"
+  }
+}

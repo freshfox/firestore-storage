@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
-const {IndexManager} = require('../dist/lib/storage/index_manger')
+const {IndexManager} = require('../../core/dist/lib/storage/index_manger')
 
 const args = [...process.argv];
 args.splice(0, 2);

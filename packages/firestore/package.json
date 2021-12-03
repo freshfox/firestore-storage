@@ -28,10 +28,10 @@
     "test": "yarn test:memory && yarn test:firestore",
     "test:firestore": "yarn test:memory --firestore",
     "test:memory": "NODE_ENV=test mocha dist/test",
+    "test:prepare": "./scripts/prepare",
     "build": "yarn clean && tsc --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "firebase": "firebase",
-    "fss": "fss"
+    "firebase": "firebase"
   },
   "repository": {
     "type": "git",

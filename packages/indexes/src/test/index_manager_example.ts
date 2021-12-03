@@ -1,4 +1,4 @@
-import {IndexManager, QueryScope} from "firestore-storage-core";
+import {IndexManager, QueryScope} from "../lib";
 
 interface User {
 	name: string;
