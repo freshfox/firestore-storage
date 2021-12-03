@@ -1,5 +1,5 @@
 # Firestore Storage
-[![Actions Status][gh-actions-badge]][gh-actions]
+[![Build Status](https://github.com/freshfox/firestore-storage/actions/workflows/main.yml/badge.svg)](https://github.com/freshfox/firestore-storage/actions)
 
 ## Table of Contents
 
