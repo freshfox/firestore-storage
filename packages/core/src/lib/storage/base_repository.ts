@@ -1,4 +1,4 @@
-import {IDocumentTransformer} from "./transformer";
+import {DEFAULT_DOCUMENT_TRANSFORMER, IDocumentTransformer} from "./transformer";
 import {PathFunction} from "./collection_utils";
 
 const transformerMetaKey = 'firestore:transformer';
@@ -6,6 +6,13 @@ const pathMetaKey = 'firestore:path';
 
 
 export abstract class BaseRepository<T> {
+
+	protected constructor() {
+		const path: PathFunction = Reflect.getMetadata(pathMetaKey, this.constructor);
+		if (!path) {
+			throw new Error(`Unable to get path for ${this.constructor.name}. Did you add the @Repository decorator`);
+		}
+	}
 
 	getPath(...docIds: string[]) {
 		const path = this.getPathFunction();
@@ -18,14 +25,10 @@ export abstract class BaseRepository<T> {
 	}
 
 	protected getPathFunction(): PathFunction {
-		const path: PathFunction = Reflect.getMetadata(pathMetaKey, this.constructor);
-		if (!path) {
-			throw new Error(`Unable to get path for ${this.constructor.name}. Did you add the @Repository decorator`);
-		}
-		return path;
+		return Reflect.getMetadata(pathMetaKey, this.constructor);
 	}
 
-	protected getTransformer(): IDocumentTransformer<T> | undefined {
+	protected getTransformer(): IDocumentTransformer<T> {
 		return Reflect.getMetadata(transformerMetaKey, this.constructor);
 	}
 
@@ -37,6 +40,6 @@ export function Repository<T>(args: {
 }): ClassDecorator {
 	return (target) => {
 		Reflect.defineMetadata(pathMetaKey, args.path, target);
-		Reflect.defineMetadata(transformerMetaKey, args.transformer, target);
+		Reflect.defineMetadata(transformerMetaKey, args.transformer || DEFAULT_DOCUMENT_TRANSFORMER, target);
 	}
 }
