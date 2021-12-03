@@ -20,8 +20,8 @@ jobs:
           key: ${{ runner.os }}-api-node-modules-${{ matrix.node }}-${{ hashFiles('packages/${{ matrix.package }}/yarn.lock') }}
       - name: Install dependencies
         if: steps.modules-cache.outputs.cache-hit != 'true'
-        run: cd ${{ matrix.package }} && yarn install
+        run: cd packages/${{ matrix.package }} && yarn install
       - name: Build package
-        run: cd ${{ matrix.package }} && yarn build
+        run: cd packages/${{ matrix.package }} && yarn build
       - name: Build test
-        run: cd ${{ matrix.package }} && yarn test
+        run: cd packages/${{ matrix.package }} && yarn test
