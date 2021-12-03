@@ -79,6 +79,10 @@ export function toComparableValue(val: any) {
 	return val;
 }
 
+export type KeyMap<K extends keyof any> = {
+	[P in K]: string
+}
+
 export function parsePath(path: string): Map<string, string> {
 	if (path.startsWith('/')) {
 		path = path.substring(1);

@@ -19,6 +19,9 @@ export type PathFunction = {
 
 export class CollectionUtils {
 	static createPath(path: string): PathFunction {
+		if (!path) {
+			throw new Error('Path is undefined whe')
+		}
 		return (() => {
 			const _f: PathFunction = (...ids: string[]) => {
 				return this.replacePathSegments(path, ...ids);
