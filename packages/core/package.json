@@ -9,7 +9,7 @@
     "node": ">=10.10.0"
   },
   "files": [
-    "bin",
+    "../indexes/bin",
     "dist/lib",
     "src/lib",
     "README.md",
@@ -27,9 +27,6 @@
     "url": "git@github.com:freshfox/firestore-storage.git"
   },
   "homepage": "https://github.com/freshfox/firestore-storage",
-  "bin": {
-    "fss": "./bin/fss.js"
-  },
   "devDependencies": {
     "@types/mocha": "^8.0.3",
     "firebase-admin": "^9.2.0",

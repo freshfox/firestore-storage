@@ -30,8 +30,7 @@
     "test:memory": "NODE_ENV=test mocha dist/test",
     "build": "yarn clean && tsc --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "firebase": "firebase",
-    "fss": "fss"
+    "firebase": "firebase"
   },
   "repository": {
     "type": "git",

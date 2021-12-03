@@ -1,5 +1,5 @@
-import {IndexManager, QueryScope} from "../lib";
 import 'should';
+import {IndexManager, QueryScope} from "../lib";
 
 describe('IndexManager', function () {
 
@@ -27,7 +27,6 @@ describe('IndexManager', function () {
 	});
 
 	it('should create an index with a field override', async () => {
-
 		const indexJson = new IndexManager()
 			.addOverride('renderings', 'jobId')
 			.add()
