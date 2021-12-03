@@ -2,7 +2,6 @@ import 'reflect-metadata';
 import {BaseModelClass, ModelDataOnly, ModelMeta} from "./base_model_v2";
 import {BaseModel} from "./base_model";
 import {cloneDeep} from 'lodash';
-import {BaseRepository} from "./base_repository";
 
 export interface IDocumentTransformer<T> {
 	fromFirestoreToObject(data: ModelDataOnly<T>, meta: ModelMeta): T;

@@ -13,7 +13,6 @@ import {
 	IDocument,
 	Document,
 	Collection,
-	BaseModel,
 	IDocumentTransformer,
 	ModelDataOnly, DEFAULT_DOCUMENT_TRANSFORMER, StorageQueryOptions, StreamOptions, TransactionOptions
 } from "firestore-storage-core";

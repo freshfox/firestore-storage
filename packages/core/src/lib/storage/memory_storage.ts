@@ -1,6 +1,5 @@
 import 'reflect-metadata';
 import {v4 as uuid} from 'uuid';
-import {injectable} from 'inversify';
 import {isPlainObject, isEqual, mergeWith} from 'lodash';
 
 import {
@@ -18,7 +17,6 @@ import {BaseModel, PatchUpdate} from "./base_model";
 import {DEFAULT_DOCUMENT_TRANSFORMER, IDocumentTransformer} from "./transformer";
 import {ModelDataOnly} from "./base_model_v2";
 
-@injectable()
 export class MemoryStorage implements IStorageDriver {
 
 	data: Document = new Document();
