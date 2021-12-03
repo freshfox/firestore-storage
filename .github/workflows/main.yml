@@ -34,5 +34,4 @@ jobs:
           cd packages/${{ matrix.package }}
           npm run test:prepare --if-present
       - name: Test package
-        env:
         run: cd packages/${{ matrix.package }} && yarn test
