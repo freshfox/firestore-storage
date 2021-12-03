@@ -4,13 +4,12 @@ on: [push]
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    env:
+      GOOGLE_APPLICATION_CREDENTIALS: '/tmp/google-credentials-sa-node-${{ matrix.node }}-${{ matrix.package }}.json'
     strategy:
       matrix:
         package: [ core, firestore, indexes ]
         node: [ 14 ]
-    env:
-      GOOGLE_APPLICATION_CREDENTIALS_BASE64: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}
-      GOOGLE_APPLICATION_CREDENTIALS: '/tmp/google-credentials-sa-node-${{ matrix.node }}-${{ matrix.package }}.json'
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -22,15 +21,18 @@ jobs:
           path: |
             'packages/**/node_modules'
             'node_modules'
-          key: ${{ runner.os }}-api-node-modules-${{ matrix.node }}-${{ hashFiles('packages/${{ matrix.package }}/package.json') }}
+          key: ${{ runner.os }}-api-node-modules-${{ matrix.node }}-${{ hashFiles('yarn.lock') }}
       - name: Install dependencies
         if: steps.modules-cache.outputs.cache-hit != 'true'
         run: yarn install
       - name: Build package
         run: cd packages/${{ matrix.package }} && yarn build
       - name: Prepare tests
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS_BASE64: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}
         run: |
           cd packages/${{ matrix.package }}
           npm run test:prepare --if-present
       - name: Test package
+        env:
         run: cd packages/${{ matrix.package }} && yarn test
