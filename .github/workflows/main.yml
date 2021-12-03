@@ -8,6 +8,9 @@ jobs:
       matrix:
         package: [ core, firestore, indexes ]
         node: [ 14 ]
+    env:
+      GOOGLE_APPLICATION_CREDENTIALS_BASE64: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}
+      GOOGLE_APPLICATION_CREDENTIALS: '/tmp/google-credentials-sa-node-${{ matrix.node }}-${{ matrix.package }}.json'
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -17,11 +20,15 @@ jobs:
         id: modules-cache
         with:
           path: 'packages/${{ matrix.package }}/node_modules'
-          key: ${{ runner.os }}-api-node-modules-${{ matrix.node }}-${{ hashFiles('packages/${{ matrix.package }}/yarn.lock') }}
+          key: ${{ runner.os }}-api-node-modules-${{ matrix.node }}-${{ hashFiles('packages/${{ matrix.package }}/package.json') }}
       - name: Install dependencies
         if: steps.modules-cache.outputs.cache-hit != 'true'
         run: cd packages/${{ matrix.package }} && yarn install
       - name: Build package
         run: cd packages/${{ matrix.package }} && yarn build
-      - name: Build test
+      - name: Prepare tests
+        run: |
+          cd packages/${{ matrix.package }}
+          npm run test:prepare --if-present
+      - name: Test package
         run: cd packages/${{ matrix.package }} && yarn test
