@@ -1,0 +1,26 @@
+{
+  "name": "firestore-function-utils",
+  "version": "0.0.0",
+  "description": "Utility functions for writing Cloud Functions with Firestore",
+  "files": [
+    "dist/lib",
+    "src/lib",
+    "README.md",
+    "package.json"
+  ],
+  "main": "dist/lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:freshfox/firestore-storage.git"
+  },
+  "author": "Dominic Bartl",
+  "scripts": {
+    "test": "NODE_ENV=test mocha dist/test",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "build": "yarn clean && tsc --build"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "should": "^13.2.3"
+  }
+}
