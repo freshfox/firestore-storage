@@ -15,12 +15,10 @@
   },
   "author": "Dominic Bartl",
   "scripts": {
-    "test": "NODE_ENV=test mocha dist/test",
+    "test": "echo No tests in this package available",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "build": "yarn clean && tsc --build"
   },
   "license": "MIT",
-  "devDependencies": {
-    "should": "^13.2.3"
-  }
+  "devDependencies": {}
 }
