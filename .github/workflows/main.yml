@@ -8,7 +8,7 @@ jobs:
       GOOGLE_APPLICATION_CREDENTIALS: '/tmp/google-credentials-sa-node-${{ matrix.node }}-${{ matrix.package }}.json'
     strategy:
       matrix:
-        package: [ core, firestore, indexes ]
+        package: [ core, firestore, indexes, function-utils ]
         node: [ 14 ]
     steps:
       - uses: actions/checkout@v2
