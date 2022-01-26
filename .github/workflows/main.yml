@@ -16,9 +16,11 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - name: Install dependencies
-        run: yarn install
+        run: yarn lerna bootstrap
       - name: Build package
-        run: cd packages/${{ matrix.package }} && yarn build
+        run: |
+          cd packages/${{ matrix.package }}
+          yarn build
       - name: Prepare tests
         env:
           GOOGLE_APPLICATION_CREDENTIALS_BASE64: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}
@@ -26,4 +28,6 @@ jobs:
           cd packages/${{ matrix.package }}
           npm run test:prepare --if-present
       - name: Test package
-        run: cd packages/${{ matrix.package }} && yarn test
+        run: |
+          cd packages/${{ matrix.package }}
+          yarn test
