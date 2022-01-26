@@ -8,17 +8,20 @@ jobs:
       GOOGLE_APPLICATION_CREDENTIALS: '/tmp/google-credentials-sa-node-${{ matrix.node }}-${{ matrix.package }}.json'
     strategy:
       matrix:
-        package: [ core, firestore, indexes ]
+        package: [ core, firestore, indexes, function-utils ]
         node: [ 14 ]
     steps:
-      - uses: actions/checkout@v2
+      fail-fast: false
+        - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
       - name: Install dependencies
-        run: yarn install
+        run: yarn lerna bootstrap
       - name: Build package
-        run: cd packages/${{ matrix.package }} && yarn build
+        run: |
+          cd packages/${{ matrix.package }}
+          yarn build
       - name: Prepare tests
         env:
           GOOGLE_APPLICATION_CREDENTIALS_BASE64: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}
@@ -26,4 +29,6 @@ jobs:
           cd packages/${{ matrix.package }}
           npm run test:prepare --if-present
       - name: Test package
-        run: cd packages/${{ matrix.package }} && yarn test
+        run: |
+          cd packages/${{ matrix.package }}
+          yarn test
