@@ -38,7 +38,7 @@ describe('Events', function () {
 
 		it('should track read event by findById()', async () => {
 
-			const accumulator = new StorageEventAccumulator(storage);
+			const accumulator = new StorageEventAccumulator(storage.events);
 
 			const p1 = await storage.save<Post>('posts', {});
 			await storage.findById('posts', p1.id);
@@ -57,7 +57,7 @@ describe('Events', function () {
 
 		it('should track read events by find()', async () => {
 
-			const accumulator = new StorageEventAccumulator(storage);
+			const accumulator = new StorageEventAccumulator(storage.events);
 
 			const p1 = await storage.save<Post>('posts', {authorId: 'a1'});
 			const p2 = await storage.save<Post>('posts', {authorId: 'a1'});
@@ -78,7 +78,7 @@ describe('Events', function () {
 
 		it('should track read events by query()', async () => {
 
-			const accumulator = new StorageEventAccumulator(storage);
+			const accumulator = new StorageEventAccumulator(storage.events);
 
 			const authorId = uuid();
 
