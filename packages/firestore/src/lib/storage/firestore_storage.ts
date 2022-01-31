@@ -35,7 +35,7 @@ export interface FirestoreStorageExportOptions {
 @Injectable()
 export class FirestoreStorage implements IStorageDriver {
 
-	private readonly events = new EventEmitter();
+	readonly events = new EventEmitter();
 
 	private static readonly EXPORT_OPTIONS: Required<FirestoreStorageExportOptions> = {
 		parallelCollections: 20,

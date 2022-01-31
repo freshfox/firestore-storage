@@ -16,7 +16,7 @@ describe('Events', function () {
 
 		it('should track write and delete events', async () => {
 
-			const accumulator = new StorageEventAccumulator(storage);
+			const accumulator = new StorageEventAccumulator(storage.events);
 
 			const p1 = await storage.save<Post>('posts', {});
 			const p2 = await storage.save<Post>('posts', {});
