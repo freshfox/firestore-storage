@@ -1,6 +1,6 @@
 {
   "name": "firestore-function-utils",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Utility functions for writing Cloud Functions with Firestore",
   "files": [
     "dist/lib",
@@ -19,6 +19,5 @@
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "build": "yarn clean && tsc --build"
   },
-  "license": "MIT",
-  "devDependencies": {}
+  "license": "MIT"
 }

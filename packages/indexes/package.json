@@ -1,6 +1,6 @@
 {
   "name": "firestore-indexes",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Manage and generate Firestore indexes using typescript",
   "files": [
     "bin",
