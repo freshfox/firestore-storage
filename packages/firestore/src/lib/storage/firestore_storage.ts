@@ -31,7 +31,7 @@ export interface FirestoreStorageExportOptions {
 	tries?: number;
 }
 
-decorate(injectable(), EventEmitter);
+//decorate(injectable(), EventEmitter);
 
 @injectable()
 @Injectable()
