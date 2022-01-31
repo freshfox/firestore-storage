@@ -92,7 +92,7 @@ export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 		return result[0] || null;
 	}
 
-	async save<T>(collection: string, data: any, options?: SaveOptions): Promise<T> {
+	async save<T>(collection: string, data: T, options?: SaveOptions): Promise<T> {
 		this.emitWrite(collection, 1);
 		this.emitRead(collection, 1);
 		const model = FirestoreStorage.clone(data, options?.transformer);

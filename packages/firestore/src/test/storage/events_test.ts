@@ -10,7 +10,7 @@ describe('Events', function () {
 	const tc = new TestCase(true);
 	const storage = tc.getStorage() as FirestoreStorage;
 
-	type Post = BaseModel & { authorId: string };
+	type Post = BaseModel & { authorId?: string };
 
 	if (storage instanceof FirestoreStorage) {
 

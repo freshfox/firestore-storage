@@ -10,6 +10,7 @@ jobs:
       matrix:
         package: [ core, firestore, indexes, function-utils ]
         node: [ 14 ]
+      fail-fast: false
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2

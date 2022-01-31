@@ -76,11 +76,6 @@
   resolved "https://registry.npmjs.org/@firebase/app-types/-/app-types-0.6.1.tgz#dcbd23030a71c0c74fc95d4a3f75ba81653850e9"
   integrity sha512-L/ZnJRAq7F++utfuoTKX4CLBG5YR7tFO3PLzG1/oXXKEezJ0kRL3CMRoueBEmTCzVb/6SIs2Qlaw++uDgi5Xyg==
 
-"@firebase/app-types@0.6.3":
-  version "0.6.3"
-  resolved "https://registry.npmjs.org/@firebase/app-types/-/app-types-0.6.3.tgz#3f10514786aad846d74cd63cb693556309918f4b"
-  integrity sha512-/M13DPPati7FQHEQ9Minjk1HGLm/4K4gs9bR4rzLCWJg64yGtVC0zNg9gDpkw9yc2cvol/mNFxqTtd4geGrwdw==
-
 "@firebase/app-types@0.7.0":
   version "0.7.0"
   resolved "https://registry.npmjs.org/@firebase/app-types/-/app-types-0.7.0.tgz#c9e16d1b8bed1a991840b8d2a725fb58d0b5899f"
@@ -164,12 +159,13 @@
     "@firebase/app-types" "0.7.0"
     "@firebase/util" "1.4.2"
 
-"@firebase/database-types@^0.7.2":
-  version "0.7.3"
-  resolved "https://registry.npmjs.org/@firebase/database-types/-/database-types-0.7.3.tgz#819f16dd4c767c864b460004458620f265a3f735"
-  integrity sha512-dSOJmhKQ0nL8O4EQMRNGpSExWCXeHtH57gGg0BfNAdWcKhC8/4Y+qfKLfWXzyHvrSecpLmO0SmAi/iK2D5fp5A==
+"@firebase/database-types@^0.9.3":
+  version "0.9.4"
+  resolved "https://registry.npmjs.org/@firebase/database-types/-/database-types-0.9.4.tgz#08b7da33d8dca8f5adab45bfb1cdf8654f2c6720"
+  integrity sha512-uAQuc6NUZ5Oh/cWZPeMValtcZ+4L1stgKOeYvz7mLn8+s03tnCDL2N47OLCHdntktVkhImQTwGNARgqhIhtNeA==
   dependencies:
-    "@firebase/app-types" "0.6.3"
+    "@firebase/app-types" "0.7.0"
+    "@firebase/util" "1.4.3"
 
 "@firebase/database@0.12.4":
   version "0.12.4"
@@ -356,6 +352,13 @@
   version "1.4.2"
   resolved "https://registry.npmjs.org/@firebase/util/-/util-1.4.2.tgz#271c63bb7cce4607f7679dc5624ef241c4cf2498"
   integrity sha512-JMiUo+9QE9lMBvEtBjqsOFdmJgObFvi7OL1A0uFGwTmlCI1ZeNPOEBrwXkgTOelVCdiMO15mAebtEyxFuQ6FsA==
+  dependencies:
+    tslib "^2.1.0"
+
+"@firebase/util@1.4.3":
+  version "1.4.3"
+  resolved "https://registry.npmjs.org/@firebase/util/-/util-1.4.3.tgz#4358cf5f18beaa9c8a1e5a5fc4c7c44a4ccd4b7b"
+  integrity sha512-gQJl6r0a+MElLQEyU8Dx0kkC2coPj67f/zKZrGR7z7WpLgVanhaCUqEsptwpwoxi9RMFIaebleG+C9xxoARq+Q==
   dependencies:
     tslib "^2.1.0"
 
@@ -3618,31 +3621,31 @@ find-up@^4.0.0, find-up@^4.1.0:
     locate-path "^5.0.0"
     path-exists "^4.0.0"
 
-firebase-admin@^9.2.0:
-  version "9.12.0"
-  resolved "https://registry.npmjs.org/firebase-admin/-/firebase-admin-9.12.0.tgz#d7e889e97c9c31610efbcd131bb6d06a783af757"
-  integrity sha512-AtA7OH5RbIFGoc0gZOQgaYC6cdjdhZv4w3XgWoupkPKO1HY+0GzixOuXDa75kFeoVyhIyo4PkLg/GAC1dC1P6w==
+firebase-admin@^10.0.2:
+  version "10.0.2"
+  resolved "https://registry.npmjs.org/firebase-admin/-/firebase-admin-10.0.2.tgz#d1142fb40738fa9b62f6625c4e3fc8cbc0ba61c6"
+  integrity sha512-MLH0SPmC4L0aCHvPjs1KThraru/T84T3hxiPY3uCH7NZEgE/T5n4GwecwU3RcM3X+br75BIBY7qhaR5uCxhdXA==
   dependencies:
     "@firebase/database-compat" "^0.1.1"
-    "@firebase/database-types" "^0.7.2"
+    "@firebase/database-types" "^0.9.3"
     "@types/node" ">=12.12.47"
     dicer "^0.3.0"
     jsonwebtoken "^8.5.1"
     jwks-rsa "^2.0.2"
-    node-forge "^0.10.0"
+    node-forge "^1.0.0"
   optionalDependencies:
     "@google-cloud/firestore" "^4.5.0"
     "@google-cloud/storage" "^5.3.0"
 
-firebase-functions-test@^0.2.2:
-  version "0.2.3"
-  resolved "https://registry.npmjs.org/firebase-functions-test/-/firebase-functions-test-0.2.3.tgz#90d6da662d604ed013a3735c6cdba5984e0d57ea"
-  integrity sha512-zYX0QTm53wCazuej7O0xqbHl90r/v1PTXt/hwa0jo1YF8nDM+iBKnLDlkIoW66MDd0R6aGg4BvKzTTdJpvigUA==
+firebase-functions-test@^0.3.3:
+  version "0.3.3"
+  resolved "https://registry.npmjs.org/firebase-functions-test/-/firebase-functions-test-0.3.3.tgz#d26626d6c3edb03cd27eb79c12980c2551722517"
+  integrity sha512-dCppF/2Ztv87IyyBaUQlT1Z05ial5v/3LB0huS2ktXz05yNiID5FVIKtO0/+w9Q7/SThJ8qIDG0hoGDPt4Xcug==
   dependencies:
     "@types/lodash" "^4.14.104"
     lodash "^4.17.5"
 
-firebase-functions@^3.11.0:
+firebase-functions@^3.16.0:
   version "3.16.0"
   resolved "https://registry.npmjs.org/firebase-functions/-/firebase-functions-3.16.0.tgz#603e47c2a563a5d0d1bc28f7362d0349c2f0d33f"
   integrity sha512-6ISOn0JckMtpA3aJ/+wCCGhThUhBUrpZD+tSkUeolx0Vr+NoYFXA0+2YzJZa/A2MDU8gotPzUtnauLSEQvfClQ==
@@ -6031,6 +6034,11 @@ node-forge@^0.10.0:
   version "0.10.0"
   resolved "https://registry.npmjs.org/node-forge/-/node-forge-0.10.0.tgz#32dea2afb3e9926f02ee5ce8794902691a676bf3"
   integrity sha512-PPmu8eEeG9saEUvI97fm4OYxXVB6bFvyNTyiUOBichBpFG8A1Ljw3bY62+5oOjDEMHRnd0Y7HQ+x7uzxOzC6JA==
+
+node-forge@^1.0.0:
+  version "1.2.1"
+  resolved "https://registry.npmjs.org/node-forge/-/node-forge-1.2.1.tgz#82794919071ef2eb5c509293325cec8afd0fd53c"
+  integrity sha512-Fcvtbb+zBcZXbTTVwqGA5W+MKBj56UjVRevvchv5XrcyXbmNdesfZL37nlcWOfpgHhgmxApw3tQbTr4CqNmX4w==
 
 node-gyp@^5.0.2:
   version "5.1.1"

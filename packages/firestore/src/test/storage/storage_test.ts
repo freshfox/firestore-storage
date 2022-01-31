@@ -170,7 +170,12 @@ describe('Storage', function () {
 
 		interface Restaurant extends BaseModel {
 			name: string;
-			dates: { date: Date }[];
+			dates?: { date: Date | Timestamp }[];
+		}
+
+		interface Review extends BaseModel {
+			date: Timestamp;
+			rating: number;
 		}
 
 		it('should export data', async function () {
@@ -183,7 +188,7 @@ describe('Storage', function () {
 			const r2 = await storage.save<Restaurant>(restaurantPath, {name: 'Hiro'});
 			const r3 = await storage.save(restaurantPath, {name: 'McDonalds'});
 
-			const rev = await storage.save<Restaurant>(`${restaurantPath}/${r1.id}/reviews`, {
+			const rev = await storage.save<Review>(`${restaurantPath}/${r1.id}/reviews`, {
 				rating: 5,
 				date: Timestamp.now()
 			});
@@ -208,7 +213,7 @@ describe('Storage', function () {
 			const mem = new MemoryStorage();
 			await mem.import(exportData);
 
-			const rev2 = await mem.findById(`${restaurantPath}/${r1.id}/reviews`, rev.id);
+			const rev2 = await mem.findById<Review>(`${restaurantPath}/${r1.id}/reviews`, rev.id);
 			should(rev2.date).instanceOf(Timestamp);
 
 			// Import data to firestore

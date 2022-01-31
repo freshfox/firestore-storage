@@ -136,7 +136,7 @@ describe('UserRepository', function () {
 		const u2 = await userRepo.save({});
 		const u3 = await userRepo.save({});
 
-		const users1 = await userRepo.batchGet([u3.id, 'something', u1.id]);
+		const users1 = await userRepo.findAll([u3.id, 'something', u1.id]);
 		should(users1).length(3);
 		should(users1[0]).property('id', u3.id);
 		should(users1[1]).eql(null);
@@ -150,7 +150,7 @@ describe('UserRepository', function () {
 		const u2 = await userRepo.save({});
 		const u3 = await userRepo.save({});
 
-		const users1 = await userRepo.batchGetNoNulls([u3.id, 'something', u1.id]);
+		const users1 = await userRepo.getAll([u3.id, 'something', u1.id]);
 		should(users1).length(2);
 		should(users1[0]).property('id', u3.id);
 		should(users1[1]).property('id', u1.id);

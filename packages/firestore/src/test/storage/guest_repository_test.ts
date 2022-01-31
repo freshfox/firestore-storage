@@ -5,7 +5,7 @@ import {OrderDirection} from "firestore-storage-core";
 describe('GuestRepository', function () {
 
 	const accountId = 'account-' + Date.now();
-	const tc = TestFactory.createWithRepository(this, GuestRepository, null, false, accountId);
+	const tc = TestFactory.createWithRepository(this, GuestRepository, false, accountId);
 	const guestRepo = tc.resolve(GuestRepository);
 
 	const has = (guests: Guest[], id: string) => {

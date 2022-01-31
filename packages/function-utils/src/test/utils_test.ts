@@ -1,10 +1,10 @@
-import {parseFirestoreChange, parseFirestoreSnapshot} from "../../lib/storage/utils";
 import * as _firebaseFunctionsTest from 'firebase-functions-test';
 import * as admin from "firebase-admin";
-import QueryDocumentSnapshot = admin.firestore.QueryDocumentSnapshot;
-const firebaseTest = _firebaseFunctionsTest();
 import * as should from 'should';
 import {BaseModel, DocumentChange} from "firestore-storage-core";
+import QueryDocumentSnapshot = admin.firestore.QueryDocumentSnapshot;
+import {parseFirestoreChangeValue} from "../lib";
+const firebaseTest = _firebaseFunctionsTest();
 
 describe('Utils', function () {
 
@@ -35,7 +35,7 @@ describe('Utils', function () {
 
 		it('should parse change with ids', async () => {
 
-			const result = parseFirestoreChange(change, context, 'accountId', 'userId');
+			const result = parseFirestoreChangeValue(change, context, 'accountId', 'userId');
 
 			should(result.before.id).eql(userId);
 			should(result.before.email).eql(email1);
