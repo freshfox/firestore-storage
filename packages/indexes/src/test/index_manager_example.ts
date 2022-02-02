@@ -12,7 +12,7 @@ interface User {
 export const indexManager = new IndexManager()
 	.addIndex<User>('users', QueryScope.Collection)
 	/**/.field('name')
-	/**/.field('address.street')
+	/**/.field(u => u.address.street)
 	/**/.add()
 	.addIndex<User>('users', QueryScope.Collection)
 	/**/.field('address.city')
