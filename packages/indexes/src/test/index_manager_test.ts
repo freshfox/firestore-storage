@@ -1,14 +1,14 @@
 import 'should';
 import {IndexManager, QueryScope} from "../lib";
 
+
 describe('IndexManager', function () {
 
 	interface User {
 		name: string;
 		registeredAt: Date;
 		address: {
-			street: string;
-			zip: number
+			street: string; zip: number
 		}
 	}
 
@@ -16,7 +16,7 @@ describe('IndexManager', function () {
 		const indexJson = new IndexManager()
 			.addIndex<User>('users', QueryScope.Collection)
 			/**/.field('name')
-			/**/.field('address.street')
+			/**/.field(o => o.address.street)
 			/**/.add()
 			.addIndex<User>('users', QueryScope.Collection)
 			/**/.field('address.city')
