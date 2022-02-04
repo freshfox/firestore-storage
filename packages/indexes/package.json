@@ -11,7 +11,7 @@
   ],
   "main": "dist/lib/index.js",
   "bin": {
-    "fss": "bin/fss.js"
+    "firestore-indexes": "bin/firestore-indexes.js"
   },
   "repository": {
     "type": "git",
