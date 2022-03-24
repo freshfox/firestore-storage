@@ -1,13 +1,15 @@
+import {extractPathParam, KeyOf} from "./path";
+
 export class IndexManager {
 
 	indexes: IIndexEntry[] = [];
 	fieldOverrides: IFieldOverride[] = [];
 
-	addIndex<T>(collectionGroup: string, queryScope: QueryScope) {
+	addIndex<T = any>(collectionGroup: string, queryScope: QueryScope) {
 		return new IndexBuilder<T>(this, collectionGroup, queryScope);
 	}
 
-	addOverride<T>(collectionGroup: string, fieldPath: KeyOf<T>) {
+	addOverride<T = any>(collectionGroup: string, fieldPath: KeyOf<T>) {
 		return new FieldOverrideBuilder(this, collectionGroup, fieldPath);
 	}
 
@@ -25,7 +27,7 @@ export class IndexManager {
 
 class IndexBuilder<T> {
 
-	readonly entry: IIndexEntry<T>;
+	readonly entry: IIndexEntry;
 
 	constructor(private parent: IndexManager, collectionGroup: string, queryScope: QueryScope) {
 		this.entry = {
@@ -35,17 +37,17 @@ class IndexBuilder<T> {
 		};
 	}
 
-	field(fieldPath: keyof T | string, order?: IndexFieldOrder) {
+	field(fieldPath: KeyOf<T>, order?: IndexFieldOrder) {
 		this.entry.fields.push({
-			fieldPath: fieldPath,
+			fieldPath: extractPathParam(fieldPath),
 			order: order || IndexFieldOrder.Asc
 		});
 		return this;
 	}
 
-	arrayField(fieldPath: keyof T | string, config: FieldArrayConfig) {
+	arrayField(fieldPath: KeyOf<T>, config: FieldArrayConfig) {
 		this.entry.fields.push({
-			fieldPath: fieldPath,
+			fieldPath: extractPathParam(fieldPath),
 			arrayConfig: config
 		});
 		return this;
@@ -67,7 +69,8 @@ class FieldOverrideBuilder<T> {
 
 	constructor(private parent: IndexManager, collectionGroup: string, fieldPath: KeyOf<T>) {
 		this.entry = {
-			collectionGroup, fieldPath,
+			collectionGroup:collectionGroup,
+			fieldPath: extractPathParam(fieldPath),
 			indexes: []
 		}
 	}
@@ -94,23 +97,23 @@ export interface IFirestoreIndex {
 	fieldOverrides: IFieldOverride[];
 }
 
-export interface IIndexEntry<T = any> {
+export interface IIndexEntry {
 	collectionGroup: string;
 	queryScope: QueryScope;
-	fields: IIndexField<T>[];
+	fields: IIndexField[];
 }
 
-export type IIndexField<T> = {
-	fieldPath: KeyOf<T>
+export type IIndexField = {
+	fieldPath: string
 	order?: IndexFieldOrder;
 } & {
-	fieldPath: KeyOf<T>;
+	fieldPath: string;
 	arrayConfig?: FieldArrayConfig;
 }
 
 export interface IFieldOverride<T = any> {
 	collectionGroup: string;
-	fieldPath: KeyOf<T>;
+	fieldPath: string;
 	indexes: IFieldOverrideIndex[];
 }
 
@@ -121,9 +124,6 @@ export type IFieldOverrideIndex = {
 	queryScope: QueryScope;
 	arrayConfig?: FieldArrayConfig;
 }
-
-// TODO update to support nested object paths
-type KeyOf<T> = keyof T | string;
 
 export enum IndexFieldOrder {
 	Asc = 'ASCENDING',

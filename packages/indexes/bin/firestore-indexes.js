@@ -8,10 +8,10 @@ args.splice(0, 2);
 const command = args.splice(0, 1)[0];
 
 const commands = {
-	'generate:index': (input, output) => {
+	'generate': (input, output) => {
 		if (!input || !output) {
 			console.error('Missing parameters');
-			console.log('Usage: $ fss generate:index <input.js> <output.json>');
+			console.error('Usage: $ firestore-indexes generate:index <input.js> <output.json>');
 			process.exit(1);
 		}
 

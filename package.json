@@ -3,7 +3,7 @@
   "version": "4.0.0",
   "description": "A typed wrapper around Firestore including a query-builder and an in-memory implementation for testing",
   "engines": {
-    "node": ">=10.10.0"
+    "node": ">=14"
   },
   "private": true,
   "scripts": {

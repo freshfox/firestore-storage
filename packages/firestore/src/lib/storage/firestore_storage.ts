@@ -1,4 +1,4 @@
-import {decorate, inject, injectable} from 'inversify';
+import {inject, injectable} from 'inversify';
 import * as admin from 'firebase-admin';
 import DocumentReference = admin.firestore.DocumentReference;
 import {processPromisesParallelWithRetries} from "ff-utils";
@@ -37,11 +37,11 @@ export interface FirestoreStorageExportOptions extends StorageQueryOptions {
 	tries?: number;
 }
 
-decorate(injectable(), EventEmitter);
-
 @injectable()
 @Injectable()
-export class FirestoreStorage extends EventEmitter implements IStorageDriver {
+export class FirestoreStorage implements IStorageDriver {
+
+	readonly events = new EventEmitter();
 
 	private static readonly EXPORT_OPTIONS: Required<FirestoreStorageExportOptions> = {
 		parallelCollections: 20,
@@ -51,7 +51,6 @@ export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 	}
 
 	constructor(@inject(FirestoreInstance) @Inject(FirestoreInstance) protected firestore: admin.firestore.Firestore) {
-		super();
 	}
 
 	static clone<T = any>(data: T, transformer: IDocumentTransformer<T>): { id: string, data: ModelDataOnly<T> } {
@@ -208,7 +207,7 @@ export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 	async delete(collection: string, id: string) {
 		const qb = this.firestore.collection(collection);
 		await qb.doc(id).delete();
-		this.emit(StorageEventType.Delete, <StorageEvent>{
+		this.events.emit(StorageEventType.Delete, <StorageEvent>{
 			type: StorageEventType.Delete,
 			collection: collection,
 			count: 1
@@ -254,6 +253,10 @@ export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 		for (const collectionName of collectionNames) {
 			await this.importCollection(collectionName, storage.data.collections[collectionName]);
 		}
+	}
+
+	on(event: string, listener: (...args: any[]) => void) {
+		return this.events.on(event, listener);
 	}
 
 	private async importDocument(collectionPath: string, id: string, doc: Document) {
@@ -348,11 +351,11 @@ export class FirestoreStorage extends EventEmitter implements IStorageDriver {
 	}
 
 	private emitRead(collection: string, count: number) {
-		return this.emit(StorageEventType.Read, <StorageEvent>{type: StorageEventType.Read, collection: collection, count: count})
+		return this.events.emit(StorageEventType.Read, <StorageEvent>{type: StorageEventType.Read, collection: collection, count: count})
 	}
 
 	private emitWrite(collection: string, count: number) {
-		return this.emit(StorageEventType.Write, <StorageEvent>{type: StorageEventType.Write, collection: collection, count: count})
+		return this.events.emit(StorageEventType.Write, <StorageEvent>{type: StorageEventType.Write, collection: collection, count: count})
 	}
 
 }
