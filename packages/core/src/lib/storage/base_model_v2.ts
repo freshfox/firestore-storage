@@ -1,5 +1,14 @@
 import {BaseModel, PatchUpdate} from "./base_model";
-import {classToPlain, Exclude, plainToInstance, ClassConstructor, Transform, Type, plainToClassFromExist} from "class-transformer";
+import {
+	classToPlain,
+	Exclude,
+	plainToInstance,
+	ClassConstructor,
+	Transform,
+	Type,
+	plainToClassFromExist,
+	instanceToPlain
+} from "class-transformer";
 
 type NonFunctionPropertyNames<T> = {
 	[K in keyof T]: T[K] extends Function ? never : K;
@@ -61,7 +70,7 @@ export class BaseModelClass<T> implements BaseModel {
 	}
 
 	getData(): ModelDataOnly<T> {
-		return classToPlain(this) as any;
+		return instanceToPlain(this) as any;
 	}
 }
 
