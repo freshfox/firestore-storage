@@ -1,9 +1,8 @@
 import {TestCase} from "../index";
-import {FirestoreStorage, StorageEventType} from "../../lib";
+import {FirestoreStorage, StorageEventType, StorageEventAccumulator} from "../../lib";
 import 'should';
 import {BaseModel} from "firestore-storage-core";
 import {v4 as uuid} from 'uuid';
-import {StorageEventAccumulator} from "../../lib/storage/accumulator";
 
 describe('Events', function () {
 

@@ -1,7 +1,7 @@
 import {Container, inject, injectable} from 'inversify';
 import * as should from 'should';
 import {IStorageDriver, Migrations, StorageDriver} from "firestore-storage-core";
-import {User, UserRepository} from "../index";
+import {getFirestoreTestRunId, User, UserRepository} from "../index";
 import {FirestoreStorageModule} from "../../lib";
 
 describe('Migrations', function () {
@@ -28,7 +28,7 @@ describe('Migrations', function () {
 		}
 
 		private async combineName() {
-			const collectionPath = this.userRepo.getCollectionPath();
+			const collectionPath = this.userRepo.getPath(getFirestoreTestRunId());
 			const users: User[] = await this.storage.query(collectionPath, qb => qb);
 			for (const user of users) {
 				user.name = `${user.firstname} ${user.lastname}`;

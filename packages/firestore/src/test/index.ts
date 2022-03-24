@@ -1,6 +1,13 @@
 import 'reflect-metadata';
 import {Container, injectable, interfaces} from 'inversify';
-import {IStorageDriver, StorageDriver, BaseModel, ReferenceMap, MemoryStorage} from 'firestore-storage-core';
+import {
+	IStorageDriver,
+	StorageDriver,
+	BaseModel,
+	ReferenceMap,
+	MemoryStorage,
+	Repository, CollectionUtils, Migrations,
+} from 'firestore-storage-core';
 import * as admin from 'firebase-admin';
 import * as env from 'node-env-file';
 import * as fs from 'fs';
@@ -13,6 +20,7 @@ if(fs.existsSync(path)){
 }
 
 Reflect.decorate([injectable() as any], MemoryStorage);
+Reflect.decorate([injectable() as any], Migrations);
 
 export class TestFactory {
 
@@ -105,11 +113,14 @@ export function getFirestoreTestPath(path?: string) {
 	return parts.join('/');
 }
 
-export class UserRepository extends BaseRepository<User> {
+export function getFirestoreTestPathV2(path?: string) {
+	return CollectionUtils.createPath(getFirestoreTestPath(path));
+}
 
-	getCollectionPath(...documentIds: string[]): string {
-		return getFirestoreTestPath(`users`);
-	}
+@Repository({
+	path: getFirestoreTestPathV2('users/{userId}')
+})
+export class UserRepository extends BaseRepository<User> {
 
 }
 
@@ -131,14 +142,10 @@ export interface Guest extends BaseModel {
 	protelId?: string;
 }
 
+@Repository({
+	path: getFirestoreTestPathV2(`accounts/{accountId}/guests`)
+})
 export class GuestRepository extends BaseRepository<Guest> {
-
-	getCollectionPath(...ids: string[]) {
-		if (!ids[0]) {
-			throw new Error('account id missing');
-		}
-		return getFirestoreTestPath(`accounts/${ids[0]}/guests`);
-	}
 
 }
 

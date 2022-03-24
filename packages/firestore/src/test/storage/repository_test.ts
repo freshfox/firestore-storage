@@ -1,11 +1,11 @@
 import 'reflect-metadata';
 import {BaseRepository} from "../../lib";
-import {getFirestoreTestPath, TestFactory} from "../index";
+import {getFirestoreTestPath, getFirestoreTestPathV2, TestFactory} from "../index";
 import {injectable} from "inversify";
 import * as should from 'should';
 import * as admin from "firebase-admin";
 import Timestamp = admin.firestore.Timestamp;
-import {BaseModel} from "firestore-storage-core";
+import {BaseModel, Repository} from "firestore-storage-core";
 
 interface Model extends BaseModel {
 	details?: {
@@ -21,10 +21,11 @@ interface Model extends BaseModel {
 }
 
 @injectable()
+@Repository({
+	path: getFirestoreTestPathV2('genericModels/{modelId}')
+})
 class ModelRepository extends BaseRepository<Model> {
-	getCollectionPath(...documentIds: string[]): string {
-		return getFirestoreTestPath('genericModels');
-	}
+
 }
 
 describe('Repository', function () {

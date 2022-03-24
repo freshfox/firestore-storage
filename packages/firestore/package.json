@@ -29,6 +29,7 @@
     "test:firestore": "yarn test:memory --firestore",
     "test:memory": "NODE_ENV=test mocha dist/test",
     "test:prepare": "./scripts/prepare",
+    "test:ts": "NODE_ENV=test mocha -r ./node_modules/ts-node/register ./src/test/**/*.ts",
     "build": "yarn clean && tsc --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "firebase": "firebase"
