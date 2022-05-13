@@ -35,7 +35,7 @@ describe('Utils', function () {
 
 		it('should parse change with ids', async () => {
 
-			const result = parseFirestoreChangeValue(change, context, 'accountId', 'userId');
+			const result = parseFirestoreChangeValue(, change, context, 'accountId', 'userId');
 
 			should(result.before.id).eql(userId);
 			should(result.before.email).eql(email1);

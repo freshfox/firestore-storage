@@ -1,6 +1,5 @@
 import {BaseModel, PatchUpdate} from "./base_model";
 import {
-	classToPlain,
 	Exclude,
 	plainToInstance,
 	ClassConstructor,
@@ -20,10 +19,10 @@ type Clonable<T> = {
 };
 
 export interface ModelMeta {
-	id?: string;
-	createdAt?: Date;
-	updatedAt?: Date;
-	rawPath?: string;
+	id: string;
+	createdAt: Date;
+	updatedAt: Date;
+	rawPath: string;
 }
 
 export type ModelDataOnly<T> = Omit<Clonable<T>, keyof ModelMeta>;
@@ -31,7 +30,7 @@ export type ModelDataOnly<T> = Omit<Clonable<T>, keyof ModelMeta>;
 export class BaseModelClass<T> implements BaseModel {
 
 	@Exclude()
-	private __metadata: ModelMeta = {};
+	private __metadata?: ModelMeta;
 
 	constructor(data: PatchUpdate<ModelDataOnly<T>> | ModelDataOnly<T>) {
 		plainToClassFromExist(this, data);
@@ -46,7 +45,7 @@ export class BaseModelClass<T> implements BaseModel {
 	}
 
 	get createdAt() {
-		return this.__metadata.createdAt;
+		return this.__metadata?.createdAt;
 	}
 
 	set createdAt(date: Date) {
