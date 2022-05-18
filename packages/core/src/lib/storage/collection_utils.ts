@@ -20,7 +20,7 @@ export type PathFunction = {
 export class CollectionUtils {
 	static createPath(path: string): PathFunction {
 		if (!path) {
-			throw new Error('Path is undefined whe')
+			throw new Error('Path parameter is undefined')
 		}
 		return (() => {
 			const _f: PathFunction = (...ids: string[]) => {

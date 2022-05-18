@@ -44,6 +44,7 @@
   "dependencies": {
     "@nestjs/common": "^8.2.3",
     "@nestjs/core": "^8.2.3",
+    "@nestjs/microservices": "^8.4.5",
     "ff-utils": "^2.0.0",
     "firestore-storage-core": "^4.5.4",
     "inversify": "^6.0.1",

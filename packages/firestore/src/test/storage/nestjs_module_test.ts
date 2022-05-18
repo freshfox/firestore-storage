@@ -1,16 +1,16 @@
 import {Injectable, Module} from "@nestjs/common";
 import {BaseRepository, FirestoreStorage, FirestoreStorageNestModule} from "../../lib";
 import {Test} from "@nestjs/testing";
-import {IStorageDriver, MemoryStorage, StorageDriver} from "firestore-storage-core";
+import {CollectionUtils, IStorageDriver, MemoryStorage, Repository, StorageDriver} from "firestore-storage-core";
 import 'should';
 
 describe('FirestoreStorageNestModule', function () {
 
 	@Injectable()
+	@Repository({
+		path: CollectionUtils.createPath('/test/{id}')
+	})
 	class MyRepo extends BaseRepository<any> {
-		getCollectionPath(documentIds: string): string {
-			throw new Error();
-		}
 	}
 
 	@Module({
