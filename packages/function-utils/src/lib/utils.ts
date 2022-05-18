@@ -73,3 +73,29 @@ function parseFirestoreMapValue<T>(value: FirestoreMapValue<T>) {
 	}
 	return obj;
 }
+
+function data<T extends BaseModel>(data: T | undefined, id: string) {
+	if (data) {
+		data.id = id;
+		return data;
+	}
+	return null;
+}
+
+function getIdMap<K>(context: EventContext, firstId: string, idNames: string[]): {lastId: string, ids: AnyKeys<keyof K>} {
+	const ids: AnyKeys<keyof K> = {};
+	let lastId;
+	idNames.unshift(firstId);
+	for (const idName of idNames) {
+		const id = context.params[idName];
+		if (id) {
+			ids[idName as keyof K] = id
+			lastId = id;
+		} else {
+			console.error(idName, 'not found in document path', context);
+		}
+	}
+	return {
+		lastId, ids
+	}
+}

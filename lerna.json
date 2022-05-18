@@ -1,7 +1,9 @@
 {
   "npmClient": "yarn",
   "packages": [
-    "packages/*"
+    "packages/core",
+    "packages/firestore",
+    "packages/indexes"
   ],
   "useWorkspaces": true,
   "version": "independent"
