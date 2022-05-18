@@ -19,10 +19,10 @@ type Clonable<T> = {
 };
 
 export interface ModelMeta {
-	id: string;
-	createdAt: Date;
-	updatedAt: Date;
-	rawPath: string;
+	id?: string;
+	createdAt?: Date;
+	updatedAt?: Date;
+	rawPath?: string;
 }
 
 export type ModelDataOnly<T> = Omit<Clonable<T>, keyof ModelMeta>;
@@ -30,14 +30,15 @@ export type ModelDataOnly<T> = Omit<Clonable<T>, keyof ModelMeta>;
 export class BaseModelClass<T> implements BaseModel {
 
 	@Exclude()
-	private __metadata?: ModelMeta;
+	private readonly __metadata?: ModelMeta;
 
-	constructor(data: PatchUpdate<ModelDataOnly<T>> | ModelDataOnly<T>) {
+	constructor(data: PatchUpdate<ModelDataOnly<T>> | ModelDataOnly<T>, meta?: ModelMeta) {
 		plainToClassFromExist(this, data);
+		this.__metadata = Object.assign(this.__metadata || {}, meta || {});
 	}
 
 	get id() {
-		return this.__metadata.id;
+		return this.__metadata?.id;
 	}
 
 	set id(id: string) {
@@ -48,24 +49,12 @@ export class BaseModelClass<T> implements BaseModel {
 		return this.__metadata?.createdAt;
 	}
 
-	set createdAt(date: Date) {
-		this.__metadata.createdAt = date;
-	}
-
 	get updatedAt() {
 		return this.__metadata.updatedAt;
 	}
 
-	set updatedAt(date: Date) {
-		this.__metadata.updatedAt = date;
-	}
-
 	get rawPath() {
 		return this.__metadata.rawPath;
-	}
-
-	set rawPath(path: string) {
-		this.__metadata.rawPath = path;
 	}
 
 	getData(): ModelDataOnly<T> {

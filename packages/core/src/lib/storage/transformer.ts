@@ -14,12 +14,7 @@ export class ModelClassTransformer<T extends BaseModelClass<T>> implements IDocu
 	}
 
 	fromFirestoreToObject(data, meta) {
-		const type = new this.TypeClass(data);
-		type.id = meta.id;
-		type.createdAt = meta.createdAt;
-		type.updatedAt = meta.updatedAt;
-		type.rawPath = meta.rawPath;
-		return type;
+		return new this.TypeClass(data, meta);
 	}
 
 	toFirestoreDocument(doc) {
