@@ -33,8 +33,8 @@ export class BaseModelClass<T> implements BaseModel {
 	private readonly __metadata?: ModelMeta;
 
 	constructor(data: PatchUpdate<ModelDataOnly<T>> | ModelDataOnly<T>, meta?: ModelMeta) {
+		this.__metadata = Object.assign({}, meta || {});
 		plainToClassFromExist(this, data);
-		this.__metadata = Object.assign(this.__metadata || {}, meta || {});
 	}
 
 	get id() {
