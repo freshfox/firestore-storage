@@ -87,7 +87,7 @@ export class FirestoreStorage implements IStorageDriver {
 		// Emits event via query
 		const result = await this.query(collection, (qb) => {
 			return cb(qb).limit(1);
-		});
+		}, );
 		return result[0] || null;
 	}
 
