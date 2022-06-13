@@ -1,7 +1,8 @@
 import {parsePath} from "./utils";
+import {Id} from "./base_model";
 
-export type PathFunction = {
-	(...ids: string[]): string;
+export type PathFunction<Ids extends string[] = string[]> = {
+	(...ids: Ids): string;
 
 	/**
 	 * The full raw path with id placeholders
@@ -18,7 +19,7 @@ export type PathFunction = {
 }
 
 export class CollectionUtils {
-	static createPath(path: string): PathFunction {
+	static createPath<Ids extends string[] = string[]>(path: string): PathFunction<Ids> {
 		if (!path) {
 			throw new Error('Path parameter is undefined')
 		}
@@ -34,7 +35,7 @@ export class CollectionUtils {
 		})();
 	}
 
-	static replacePathSegments(path: String, ...ids: string[]) {
+	static replacePathSegments(path: string, ...ids: string[]) {
 		const arr = new Array(...ids);
 		let lastArgument = false;
 		return path.replace(/\/\{(\w+)\}/g, () => {
@@ -50,3 +51,8 @@ export class CollectionUtils {
 		});
 	}
 }
+
+type UserId = Id<'User'>;
+type AccountId = Id<'Account'>;
+
+const path = CollectionUtils.createPath<[AccountId, UserId]>('');

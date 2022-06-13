@@ -1,4 +1,7 @@
 
+declare const t: unique symbol;
+export type Id<T> = string & { readonly [t]: T };
+
 export interface BaseModel {
 	id?: string;
 	createdAt?: Date;
