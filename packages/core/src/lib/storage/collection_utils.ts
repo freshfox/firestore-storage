@@ -51,8 +51,3 @@ export class CollectionUtils {
 		});
 	}
 }
-
-type UserId = Id<'User'>;
-type AccountId = Id<'Account'>;
-
-const path = CollectionUtils.createPath<[AccountId, UserId]>('');
