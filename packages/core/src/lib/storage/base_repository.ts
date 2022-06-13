@@ -39,7 +39,7 @@ export abstract class BaseRepository<T> {
 }
 
 export function Repository<T>(args: {
-	path: PathFunction
+	path: PathFunction<any[]>
 	transformer?: IDocumentTransformer<T>;
 }): ClassDecorator {
 	return (target) => {

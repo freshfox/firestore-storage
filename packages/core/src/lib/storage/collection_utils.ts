@@ -1,5 +1,4 @@
 import {parsePath} from "./utils";
-import {Id} from "./base_model";
 
 export type PathFunction<Ids extends string[] = string[]> = {
 	(...ids: Ids): string;
