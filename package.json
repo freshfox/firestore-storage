@@ -9,8 +9,8 @@
   "scripts": {
     "test": "lerna run --stream test",
     "build": "lerna run --stream build",
-    "preversion": "git pull && yarn build",
-    "release": "yarn build && lerna publish",
+    "preversion": "git pull && pnpm build",
+    "release": "pnpm build && lerna publish",
     "lerna": "lerna",
     "emulators": "firebase emulators:start --only firestore --project firestore-storage-local",
     "prettier": "prettier"
