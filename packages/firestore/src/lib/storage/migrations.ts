@@ -1,8 +1,7 @@
-import {DocumentReference, Firestore} from "@google-cloud/firestore";
+import { DocumentReference, Firestore } from '@google-cloud/firestore';
 
 export abstract class Migrations {
-
-	protected constructor(protected storage: Firestore){}
+	protected constructor(protected storage: Firestore) {}
 
 	abstract getVersion(): number;
 
@@ -11,7 +10,7 @@ export abstract class Migrations {
 	async upgrade() {
 		let version = await this.readVersion();
 		const targetVersion = this.getVersion();
-		console.log(`Current database version (${version}). Target version (${targetVersion})`)
+		console.log(`Current database version (${version}). Target version (${targetVersion})`);
 		while (version < targetVersion) {
 			console.log(`Upgrading from ${version} to ${version + 1}`);
 			version++;
@@ -25,22 +24,24 @@ export abstract class Migrations {
 
 	async readVersion(): Promise<number> {
 		const data = await this.getDocumentReference().get();
-		return data.data()?.version || 0
+		return data.data()?.version || 0;
 	}
 
 	async writeVersion(version: number) {
-		await this.getDocumentReference().set({
-			version: version
-		}, {merge: true})
+		await this.getDocumentReference().set(
+			{
+				version: version,
+			},
+			{ merge: true }
+		);
 	}
 
 	// noinspection JSMethodCanBeStatic
 	protected getVersionDocumentPath() {
-		return 'version/current'
+		return 'version/current';
 	}
 
-	private getDocumentReference(): DocumentReference<{version: number}> {
-		return this.storage.doc(this.getVersionDocumentPath()) as DocumentReference<{version: number}>;
+	private getDocumentReference(): DocumentReference<{ version: number }> {
+		return this.storage.doc(this.getVersionDocumentPath()) as DocumentReference<{ version: number }>;
 	}
-
 }

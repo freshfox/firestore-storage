@@ -8,28 +8,26 @@ if (fs.existsSync(path)) {
 	env(path);
 }
 
-
 export function createFirestoreTests(context: Mocha.Suite, setup: (firestore: Firestore) => any) {
-
 	let app: RulesTestEnvironment;
 
 	context.beforeEach(async () => {
 		app = await initializeTestEnvironment({
 			projectId: 'firestore-storage-local',
-		})
+		});
 		await app.clearFirestore();
 		const firestore = new Firestore({
 			projectId: app.projectId,
 			host: app.emulators.firestore.host,
 			port: app.emulators.firestore.port,
-			ssl: false
+			ssl: false,
 		});
-		await setup(firestore)
+		await setup(firestore);
 	});
 
 	context.afterEach(async () => {
 		if (app) {
 			await app.cleanup();
 		}
-	})
+	});
 }

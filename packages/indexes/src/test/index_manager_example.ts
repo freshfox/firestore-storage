@@ -1,20 +1,20 @@
-import {IndexManager, QueryScope} from "../lib";
+import { IndexManager, QueryScope } from '../lib';
 
 interface User {
 	name: string;
 	registeredAt: Date;
 	address: {
 		street: string;
-		zip: number
-	}
+		zip: number;
+	};
 }
 
 export const indexManager = new IndexManager()
 	.addIndex<User>('users', QueryScope.Collection)
-	/**/.field('name')
-	/**/.field(u => u.address.street)
-	/**/.add()
+	/**/ .field('name')
+	/**/ .field((u) => u.address.street)
+	/**/ .add()
 	.addIndex<User>('users', QueryScope.Collection)
-	/**/.field('address.city')
-	/**/.field('address.zip')
-	/**/.add()
+	/**/ .field('address.city')
+	/**/ .field('address.zip')
+	/**/ .add();

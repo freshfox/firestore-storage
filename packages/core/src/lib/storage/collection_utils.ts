@@ -1,4 +1,4 @@
-import {parsePath} from "./utils";
+import { parsePath } from './utils';
 
 export type PathFunction<Ids extends string[] = string[]> = {
 	(...ids: Ids): string;
@@ -15,12 +15,12 @@ export type PathFunction<Ids extends string[] = string[]> = {
 	 * A map containing the collection name as a key and the id placeholder name as a value
 	 */
 	collectionIdMap: Map<string, string>;
-}
+};
 
 export class CollectionUtils {
 	static createPath<Ids extends string[] = string[]>(path: string): PathFunction<Ids> {
 		if (!path) {
-			throw new Error('Path parameter is undefined')
+			throw new Error('Path parameter is undefined');
 		}
 		return (() => {
 			const _f: PathFunction = (...ids: string[]) => {
@@ -50,4 +50,3 @@ export class CollectionUtils {
 		});
 	}
 }
-

@@ -1,7 +1,6 @@
-import {extractPathParam, KeyOf} from "./path";
+import { extractPathParam, KeyOf } from './path';
 
 export class IndexManager {
-
 	indexes: IIndexEntry[] = [];
 	fieldOverrides: IFieldOverride[] = [];
 
@@ -16,8 +15,8 @@ export class IndexManager {
 	toObject(): IFirestoreIndex {
 		return {
 			indexes: this.indexes,
-			fieldOverrides: this.fieldOverrides
-		}
+			fieldOverrides: this.fieldOverrides,
+		};
 	}
 
 	toJSON(space?: string | number) {
@@ -26,21 +25,20 @@ export class IndexManager {
 }
 
 class IndexBuilder<T> {
-
 	readonly entry: IIndexEntry;
 
 	constructor(private parent: IndexManager, collectionGroup: string, queryScope: QueryScope) {
 		this.entry = {
 			collectionGroup,
 			queryScope,
-			fields: []
+			fields: [],
 		};
 	}
 
 	field(fieldPath: KeyOf<T>, order?: IndexFieldOrder) {
 		this.entry.fields.push({
 			fieldPath: extractPathParam(fieldPath),
-			order: order || IndexFieldOrder.Asc
+			order: order || IndexFieldOrder.Asc,
 		});
 		return this;
 	}
@@ -48,7 +46,7 @@ class IndexBuilder<T> {
 	arrayField(fieldPath: KeyOf<T>, config: FieldArrayConfig) {
 		this.entry.fields.push({
 			fieldPath: extractPathParam(fieldPath),
-			arrayConfig: config
+			arrayConfig: config,
 		});
 		return this;
 	}
@@ -60,28 +58,26 @@ class IndexBuilder<T> {
 		this.parent.indexes.push(this.entry);
 		return this.parent;
 	}
-
 }
 
 class FieldOverrideBuilder<T> {
-
 	private readonly entry: IFieldOverride<T>;
 
 	constructor(private parent: IndexManager, collectionGroup: string, fieldPath: KeyOf<T>) {
 		this.entry = {
-			collectionGroup:collectionGroup,
+			collectionGroup: collectionGroup,
 			fieldPath: extractPathParam(fieldPath),
-			indexes: []
-		}
+			indexes: [],
+		};
 	}
 
 	order(queryScope: QueryScope, order: IndexFieldOrder) {
-		this.entry.indexes.push({queryScope, order});
+		this.entry.indexes.push({ queryScope, order });
 		return this;
 	}
 
 	array(queryScope: QueryScope, arrayConfig: FieldArrayConfig) {
-		this.entry.indexes.push({queryScope, arrayConfig})
+		this.entry.indexes.push({ queryScope, arrayConfig });
 		return this;
 	}
 
@@ -89,7 +85,6 @@ class FieldOverrideBuilder<T> {
 		this.parent.fieldOverrides.push(this.entry);
 		return this.parent;
 	}
-
 }
 
 export interface IFirestoreIndex {
@@ -104,12 +99,12 @@ export interface IIndexEntry {
 }
 
 export type IIndexField = {
-	fieldPath: string
+	fieldPath: string;
 	order?: IndexFieldOrder;
 } & {
 	fieldPath: string;
 	arrayConfig?: FieldArrayConfig;
-}
+};
 
 export interface IFieldOverride<T = any> {
 	collectionGroup: string;
@@ -117,13 +112,15 @@ export interface IFieldOverride<T = any> {
 	indexes: IFieldOverrideIndex[];
 }
 
-export type IFieldOverrideIndex = {
-	queryScope: QueryScope;
-	order?: IndexFieldOrder;
-} | {
-	queryScope: QueryScope;
-	arrayConfig?: FieldArrayConfig;
-}
+export type IFieldOverrideIndex =
+	| {
+			queryScope: QueryScope;
+			order?: IndexFieldOrder;
+	  }
+	| {
+			queryScope: QueryScope;
+			arrayConfig?: FieldArrayConfig;
+	  };
 
 export enum IndexFieldOrder {
 	Asc = 'ASCENDING',
@@ -131,10 +128,10 @@ export enum IndexFieldOrder {
 }
 
 export enum FieldArrayConfig {
-	Contains = 'CONTAINS'
+	Contains = 'CONTAINS',
 }
 
 export enum QueryScope {
 	Collection = 'COLLECTION',
-	CollectionGroup = 'COLLECTION_GROUP'
+	CollectionGroup = 'COLLECTION_GROUP',
 }

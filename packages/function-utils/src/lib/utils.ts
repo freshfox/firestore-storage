@@ -1,9 +1,9 @@
-import {FirestoreChangeValue, FirestoreDocument, FirestoreEvent, FirestoreMapValue, FirestoreValue} from "./types";
-import * as admin from "firebase-admin";
-import {Change, EventContext} from 'firebase-functions';
+import { FirestoreChangeValue, FirestoreDocument, FirestoreEvent, FirestoreMapValue, FirestoreValue } from './types';
+import * as admin from 'firebase-admin';
+import { Change, EventContext } from 'firebase-functions';
 import QueryDocumentSnapshot = admin.firestore.QueryDocumentSnapshot;
 import DocumentSnapshot = admin.firestore.DocumentSnapshot;
-import {AnyKeys, BaseModel, ParsedChange, ParsedSnapshot} from "firestore-storage-core";
+import { AnyKeys, BaseModel, ParsedChange, ParsedSnapshot } from 'firestore-storage-core';
 
 /**
  * Takes the Firestore change and event context of a Firestore function hook, parses the data and returns a typed result.
@@ -16,17 +16,22 @@ import {AnyKeys, BaseModel, ParsedChange, ParsedSnapshot} from "firestore-storag
 export function parseFirestoreChange<T extends BaseModel, K extends keyof any>(
 	change: Change<QueryDocumentSnapshot<T> | DocumentSnapshot<T>>,
 	context: EventContext,
-	firstId: K, ...idNames: K[]): ParsedChange<T, K> {
-
-	const {lastId, ids} = getIdMap(context, firstId as string, idNames as string[]);
+	firstId: K,
+	...idNames: K[]
+): ParsedChange<T, K> {
+	const { lastId, ids } = getIdMap(context, firstId as string, idNames as string[]);
 	return {
 		before: data(change.before?.data(), lastId),
 		after: data(change.after?.data(), lastId),
-		ids
+		ids,
 	};
 }
 
-export function parseFirestoreChangeValue<T>(idParameter: string, change: FirestoreChangeValue<T>, event: FirestoreEvent): FirestoreDocument<T> | null {
+export function parseFirestoreChangeValue<T>(
+	idParameter: string,
+	change: FirestoreChangeValue<T>,
+	event: FirestoreEvent
+): FirestoreDocument<T> | null {
 	// Before value is an empty object on creation (not null)
 	if (change && Object.keys(change).length) {
 		const value: T = parseFirestoreMapValue<T>(change);
@@ -39,7 +44,7 @@ export function parseFirestoreChangeValue<T>(idParameter: string, change: Firest
 			id: id,
 			createdAt: new Date(change.createTime),
 			updatedAt: new Date(change.updateTime),
-			data: value
+			data: value,
 		};
 	}
 	return null;
@@ -51,15 +56,15 @@ function parseFirestoreValue(value: FirestoreValue): any {
 	} else if (value.arrayValue) {
 		if (value.arrayValue.values) {
 			return value.arrayValue.values.map((value) => {
-				return parseFirestoreValue(value)
+				return parseFirestoreValue(value);
 			});
 		} else {
 			return [];
 		}
 	} else if (value.timestampValue) {
-		return new Date(value.timestampValue)
+		return new Date(value.timestampValue);
 	} else if (value.integerValue) {
-		return parseInt(value.integerValue, 10)
+		return parseInt(value.integerValue, 10);
 	}
 	return Object.values(value)[0] || null;
 }
@@ -82,20 +87,25 @@ function data<T extends BaseModel>(data: T | undefined, id: string) {
 	return null;
 }
 
-function getIdMap<K>(context: EventContext, firstId: string, idNames: string[]): {lastId: string, ids: AnyKeys<keyof K>} {
+function getIdMap<K>(
+	context: EventContext,
+	firstId: string,
+	idNames: string[]
+): { lastId: string; ids: AnyKeys<keyof K> } {
 	const ids: AnyKeys<keyof K> = {};
 	let lastId;
 	idNames.unshift(firstId);
 	for (const idName of idNames) {
 		const id = context.params[idName];
 		if (id) {
-			ids[idName as keyof K] = id
+			ids[idName as keyof K] = id;
 			lastId = id;
 		} else {
 			console.error(idName, 'not found in document path', context);
 		}
 	}
 	return {
-		lastId, ids
-	}
+		lastId,
+		ids,
+	};
 }

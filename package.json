@@ -12,7 +12,8 @@
     "preversion": "git pull && yarn build",
     "release": "yarn build && lerna publish",
     "lerna": "lerna",
-    "emulators": "firebase emulators:start --only firestore --project firestore-storage-local"
+    "emulators": "firebase emulators:start --only firestore --project firestore-storage-local",
+    "prettier": "prettier"
   },
   "workspaces": {
     "packages": [

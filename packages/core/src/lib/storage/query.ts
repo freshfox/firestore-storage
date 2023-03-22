@@ -1,10 +1,9 @@
-import {ModelQuery} from "./types";
-import {getPath} from "ts-object-path";
+import { ModelQuery } from './types';
+import { getPath } from 'ts-object-path';
 
 export type WhereProp<T> = keyof T | ((t: T) => unknown);
 
 export abstract class BaseQuery<T, Op extends string, Dir extends string, R> {
-
 	protected abstract applyWhere(key: string, operator: Op, value: any): this;
 	protected abstract applyOrderBy(key: string, direction: Dir): this;
 	protected abstract applyOffset(offset: number): this;
@@ -17,10 +16,9 @@ export abstract class BaseQuery<T, Op extends string, Dir extends string, R> {
 
 	whereAll(attributes: ModelQuery<T> | null) {
 		if (attributes) {
-			return Object.keys(attributes)
-				.reduce((query, key) => {
-					return query.applyWhere(key, '==' as any, attributes[key])
-				}, this);
+			return Object.keys(attributes).reduce((query, key) => {
+				return query.applyWhere(key, '==' as any, attributes[key]);
+			}, this);
 		}
 		return this;
 	}

@@ -5,9 +5,9 @@ import {
 	Transform,
 	Type,
 	plainToClassFromExist,
-	instanceToPlain
-} from "class-transformer";
-import {PatchUpdate} from "./types";
+	instanceToPlain,
+} from 'class-transformer';
+import { PatchUpdate } from './types';
 
 type NonFunctionPropertyNames<T> = {
 	[K in keyof T]: T[K] extends Function ? never : K;
@@ -15,9 +15,8 @@ type NonFunctionPropertyNames<T> = {
 type NonFunctionProperties<T> = Pick<T, NonFunctionPropertyNames<T>>;
 
 type Clonable<T> = {
-	[K in keyof NonFunctionProperties<T>]: T[K] extends object ? Clonable<T[K]> : T[K]
+	[K in keyof NonFunctionProperties<T>]: T[K] extends object ? Clonable<T[K]> : T[K];
 };
-
 
 export interface ModelMetaInternal {
 	id?: string;
@@ -31,7 +30,6 @@ export type ModelMeta<R extends boolean = false> = R extends true ? Required<Mod
 export type ModelDataOnly<T> = Omit<Clonable<T>, keyof ModelMeta>;
 
 export class BaseModelClass<T> implements ModelMeta {
-
 	@Exclude()
 	private readonly __metadata?: ModelMeta;
 
@@ -66,7 +64,7 @@ export class BaseModelClass<T> implements ModelMeta {
 }
 
 export function serialize<T, V>(cls: ClassConstructor<T>, plain: V) {
-	return plainToInstance(cls, plain)
+	return plainToInstance(cls, plain);
 }
 
 export function DateTransformer(): (target: object, key: string) => void {
@@ -81,7 +79,7 @@ export function DateTransformer(): (target: object, key: string) => void {
 				}
 			}
 			return null;
-		})(target, key)
-		Type(() => Date)(target, key)
-	}
+		})(target, key);
+		Type(() => Date)(target, key);
+	};
 }

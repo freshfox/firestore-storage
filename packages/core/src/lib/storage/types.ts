@@ -5,7 +5,7 @@ export interface BaseModel {
 	id?: string;
 	createdAt?: Date;
 	updatedAt?: Date;
-	_rawPath?: string
+	_rawPath?: string;
 }
 
 export type ModelQuery<T extends BaseModel> = Partial<Omit<T, keyof BaseModel>>;
@@ -23,7 +23,7 @@ export function toReferenceMap(...entities: BaseModel[]): ReferenceMap {
 
 export function toReferenceMapFromIds(ids: string[], value: any = true): ReferenceMap {
 	return ids.reduce((map, id) => {
-		map[id] = value
+		map[id] = value;
 		return map;
 	}, {});
 }
@@ -43,7 +43,7 @@ export function isSameReferenceMap(r1: ReferenceMap, r2: ReferenceMap) {
 }
 
 type NestedPartial<T> = {
-	[K in keyof T]?: T[K] extends Array<infer R> ? Array<R> : NestedPartial<T[K]>
+	[K in keyof T]?: T[K] extends Array<infer R> ? Array<R> : NestedPartial<T[K]>;
 };
 
 export type PatchUpdate<T> = { id: string } & NestedPartial<T>;

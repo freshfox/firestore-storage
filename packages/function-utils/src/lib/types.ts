@@ -3,7 +3,7 @@ export interface FirestoreChange<T = any> {
 	value: FirestoreChangeValue<T>;
 	updateMask: {
 		fieldPaths: string[];
-	}
+	};
 }
 
 export interface FirestoreChangeValue<T> extends FirestoreMapValue<T> {
@@ -36,9 +36,9 @@ export interface FirestoreValue {
 
 export type FirestoreMapValue<T> = {
 	fields: {
-		[K in keyof T]: FirestoreValue
-	}
-}
+		[K in keyof T]: FirestoreValue;
+	};
+};
 
 export interface FirestoreDocument<T> {
 	id: string;
@@ -47,4 +47,7 @@ export interface FirestoreDocument<T> {
 	data: T;
 }
 
-export type FirestoreChangeFunction<T = any> = (change: FirestoreChange<T>, event: FirestoreEvent) => Promise<any> | any;
+export type FirestoreChangeFunction<T = any> = (
+	change: FirestoreChange<T>,
+	event: FirestoreEvent
+) => Promise<any> | any;

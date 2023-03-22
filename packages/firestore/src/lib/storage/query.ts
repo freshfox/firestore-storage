@@ -5,12 +5,16 @@ import {
 	OrderByDirection,
 	QuerySnapshot,
 	WhereFilterOp,
-	Query as FSQuery
-} from "@google-cloud/firestore";
-import {BaseQuery} from "firestore-storage-core";
+	Query as FSQuery,
+} from '@google-cloud/firestore';
+import { BaseQuery } from 'firestore-storage-core';
 
-export class Query<T extends DocumentData> extends BaseQuery<T, WhereFilterOp, OrderByDirection, Promise<QuerySnapshot<T>>> {
-
+export class Query<T extends DocumentData> extends BaseQuery<
+	T,
+	WhereFilterOp,
+	OrderByDirection,
+	Promise<QuerySnapshot<T>>
+> {
 	constructor(private base: CollectionReference | CollectionGroup | FSQuery) {
 		super();
 	}
@@ -38,5 +42,4 @@ export class Query<T extends DocumentData> extends BaseQuery<T, WhereFilterOp, O
 	execute(): Promise<QuerySnapshot<T>> {
 		return this.base.get() as any;
 	}
-
 }

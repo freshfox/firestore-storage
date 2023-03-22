@@ -1,14 +1,29 @@
-export type CollectionIds<C extends CollectionPath<any, any, any>, D = void> = C extends CollectionPath<infer IdKey, infer IdType, infer P> ? P : D;
+export type CollectionIds<C extends CollectionPath<any, any, any>, D = void> = C extends CollectionPath<
+	infer IdKey,
+	infer IdType,
+	infer P
+>
+	? P
+	: D;
 
-export type DocumentIds<C extends CollectionPath<any, any, any>> =
-	C extends CollectionPath<infer IdKey, infer IdType, infer P> ? P extends void ? {[k in IdKey]: IdType} : P & {
-	[k in IdKey]: IdType
-} : never;
+export type DocumentIds<C extends CollectionPath<any, any, any>> = C extends CollectionPath<
+	infer IdKey,
+	infer IdType,
+	infer P
+>
+	? P extends void
+		? { [k in IdKey]: IdType }
+		: P & {
+				[k in IdKey]: IdType;
+		  }
+	: never;
 
 export class CollectionPath<IdKey extends string, IdType extends string, P extends object | void = void> {
-
-	constructor(public readonly collectionName: string, private idKey: IdKey, private parent?: CollectionPath<any, any, any>) {
-	}
+	constructor(
+		public readonly collectionName: string,
+		private idKey: IdKey,
+		private parent?: CollectionPath<any, any, any>
+	) {}
 
 	/**
 	 * Returns the collection path template
@@ -29,5 +44,4 @@ export class CollectionPath<IdKey extends string, IdType extends string, P exten
 		}
 		return `${this.collection(ids as CollectionIds<this>)}/${id}`;
 	}
-
 }
