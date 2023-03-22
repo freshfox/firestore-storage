@@ -4,4 +4,3 @@ export * from './storage/migrations';
 export * from './storage/query';
 export * from './storage/repository';
 export * from './storage/transaction';
-export * from './storage/utils';
