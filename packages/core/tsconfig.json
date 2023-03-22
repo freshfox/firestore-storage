@@ -4,6 +4,11 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "baseUrl": "./",
+    "types": [
+      "node",
+      "mocha",
+      "reflect-metadata"
+    ]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]

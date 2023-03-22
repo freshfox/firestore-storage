@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { DEFAULT_DOCUMENT_TRANSFORMER, IDocumentTransformer } from './transformer';
 import { CollectionIds, CollectionPath, DocumentIds } from './collections';
-import { ModelDataOnly } from './base_model_v2';
+import { ModelDataOnly } from './model';
 
 const transformerMetaKey = 'firestore:transformer';
 const pathMetaKey = 'firestore:path';

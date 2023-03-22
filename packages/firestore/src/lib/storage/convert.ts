@@ -1,8 +1,7 @@
-import { BaseModelClass } from 'firestore-storage-core/dist/lib/storage/base_model_v2';
-import { Type } from '@nestjs/common';
+import { BaseModelClass } from 'firestore-storage-core';
 import { DocumentData, FirestoreDataConverter, QueryDocumentSnapshot } from '@google-cloud/firestore';
 
-export function createClassConverter<T extends BaseModelClass<any>>(ModelClass: Type<T>): FirestoreDataConverter<T> {
+export function createClassConverter<T extends BaseModelClass<any>>(ModelClass: any): FirestoreDataConverter<T> {
 	return {
 		toFirestore(data: T): DocumentData {
 			return data.getData();

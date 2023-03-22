@@ -4,11 +4,6 @@
     "module": "commonjs",
     "target": "es2021",
     "skipLibCheck": true,
-    "types": [
-      "node",
-      "mocha",
-      "reflect-metadata"
-    ],
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,

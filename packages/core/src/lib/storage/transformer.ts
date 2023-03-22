@@ -1,4 +1,4 @@
-import { BaseModelClass, ModelDataOnly, ModelMeta } from './base_model_v2';
+import { BaseModelClass, ModelDataOnly, ModelMeta } from './model';
 import { cloneDeep } from 'lodash';
 import { BaseModel } from './types';
 
