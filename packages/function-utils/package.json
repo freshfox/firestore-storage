@@ -1,6 +1,6 @@
 {
   "name": "firestore-function-utils",
-  "version": "1.0.0",
+  "version": "1.0.1-alpha.0",
   "description": "Utility functions for writing Cloud Functions with Firestore",
   "files": [
     "dist/lib",
