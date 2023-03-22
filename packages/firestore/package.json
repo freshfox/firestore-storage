@@ -25,7 +25,7 @@
     "node": ">=10.10.0"
   },
   "scripts": {
-    "test": "yarn test:memory && yarn test:firestore",
+    "test": "firebase emulators:exec --only firestore --project firestore-storage-local 'NODE_ENV=test mocha dist/test'",
     "test:firestore": "yarn test:memory --firestore",
     "test:memory": "NODE_ENV=test mocha dist/test",
     "test:prepare": "./scripts/prepare",
