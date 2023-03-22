@@ -1,4 +1,3 @@
-import {BaseModel, PatchUpdate} from "./base_model";
 import {
 	Exclude,
 	plainToInstance,
@@ -8,6 +7,7 @@ import {
 	plainToClassFromExist,
 	instanceToPlain
 } from "class-transformer";
+import {PatchUpdate} from "./types";
 
 type NonFunctionPropertyNames<T> = {
 	[K in keyof T]: T[K] extends Function ? never : K;
@@ -18,16 +18,19 @@ type Clonable<T> = {
 	[K in keyof NonFunctionProperties<T>]: T[K] extends object ? Clonable<T[K]> : T[K]
 };
 
-export interface ModelMeta {
+
+export interface ModelMetaInternal {
 	id?: string;
 	createdAt?: Date;
 	updatedAt?: Date;
 	rawPath?: string;
 }
 
+export type ModelMeta<R extends boolean = false> = R extends true ? Required<ModelMetaInternal> : ModelMetaInternal;
+
 export type ModelDataOnly<T> = Omit<Clonable<T>, keyof ModelMeta>;
 
-export class BaseModelClass<T> implements BaseModel {
+export class BaseModelClass<T> implements ModelMeta {
 
 	@Exclude()
 	private readonly __metadata?: ModelMeta;

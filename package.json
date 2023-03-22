@@ -11,7 +11,8 @@
     "build": "lerna run --stream build",
     "preversion": "git pull && yarn build",
     "release": "yarn build && lerna publish",
-    "lerna": "lerna"
+    "lerna": "lerna",
+    "emulators": "firebase emulators:start --only firestore --project firestore-storage-local"
   },
   "workspaces": {
     "packages": [
@@ -26,6 +27,8 @@
   "license": "MIT",
   "homepage": "https://github.com/freshfox/firestore-storage",
   "devDependencies": {
-    "lerna": "^4.0.0"
+    "firebase-tools": "^11.25.1",
+    "lerna": "^4.0.0",
+    "prettier": "^2.8.6"
   }
 }

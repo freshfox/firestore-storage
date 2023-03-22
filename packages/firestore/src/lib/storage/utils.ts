@@ -1,8 +1,6 @@
-import * as admin from "firebase-admin";
 import {Change, EventContext} from 'firebase-functions';
-import QueryDocumentSnapshot = admin.firestore.QueryDocumentSnapshot;
-import DocumentSnapshot = admin.firestore.DocumentSnapshot;
-import {AnyKeys, BaseModel, ParsedChange, ParsedSnapshot} from "firestore-storage-core";
+import {AnyKeys, BaseModel, ParsedSnapshot} from "firestore-storage-core";
+import { QueryDocumentSnapshot } from '@google-cloud/firestore';
 
 export function parseFirestoreSnapshot<T extends BaseModel, K extends keyof any> (
 	snapshot: QueryDocumentSnapshot<T>,

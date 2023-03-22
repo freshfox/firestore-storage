@@ -1,8 +1,8 @@
-import {IStorageDriver, StorageDriver} from "./storage";
+import {DocumentReference, Firestore} from "@google-cloud/firestore";
 
 export abstract class Migrations {
 
-	constructor(protected storage: IStorageDriver){}
+	protected constructor(protected storage: Firestore){}
 
 	abstract getVersion(): number;
 
@@ -24,20 +24,14 @@ export abstract class Migrations {
 	}
 
 	async readVersion(): Promise<number> {
-		const parts = this.getVersionDocumentPathParts();
-		const snapshot = await this.storage.findById(parts.collection, parts.document);
-		if (snapshot) {
-			return snapshot.version || 0;
-		}
-		return 0;
+		const data = await this.getDocumentReference().get();
+		return data.data()?.version || 0
 	}
 
 	async writeVersion(version: number) {
-		const parts = this.getVersionDocumentPathParts();
-		await this.storage.save(parts.collection, {
-			id: parts.document,
+		await this.getDocumentReference().set({
 			version: version
-		});
+		}, {merge: true})
 	}
 
 	// noinspection JSMethodCanBeStatic
@@ -45,15 +39,8 @@ export abstract class Migrations {
 		return 'version/current'
 	}
 
-	private getVersionDocumentPathParts() {
-		const path = this.getVersionDocumentPath();
-		const parts = path.split('/');
-		if (parts.length !== 2) {
-			throw new Error('Invalid version document path. Use format collection/docId. For example version/current');
-		}
-		return {
-			collection: parts[0],
-			document: parts[1]
-		}
+	private getDocumentReference(): DocumentReference<{version: number}> {
+		return this.storage.doc(this.getVersionDocumentPath()) as DocumentReference<{version: number}>;
 	}
+
 }

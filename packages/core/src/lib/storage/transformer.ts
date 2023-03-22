@@ -1,17 +1,14 @@
-import 'reflect-metadata';
-import {BaseModelClass, ModelDataOnly, ModelMeta} from "./base_model_v2";
-import {BaseModel} from "./base_model";
-import {cloneDeep} from 'lodash';
+import { BaseModelClass, ModelDataOnly, ModelMeta } from './base_model_v2';
+import { cloneDeep } from 'lodash';
+import { BaseModel } from './types';
 
 export interface IDocumentTransformer<T> {
 	fromFirestoreToObject(data: ModelDataOnly<T>, meta: ModelMeta): T;
-	toFirestoreDocument(doc: T): {id: string, data: ModelDataOnly<T>};
+	toFirestoreDocument(doc: T): { id: string; data: ModelDataOnly<T> };
 }
 
 export class ModelClassTransformer<T extends BaseModelClass<T>> implements IDocumentTransformer<T> {
-
-	constructor(private TypeClass: new (...args: any[]) => T) {
-	}
+	constructor(private TypeClass: new (...args: any[]) => T) {}
 
 	fromFirestoreToObject(data, meta) {
 		return new this.TypeClass(data, meta);
@@ -24,19 +21,21 @@ export class ModelClassTransformer<T extends BaseModelClass<T>> implements IDocu
 				data: doc.getData(),
 			};
 		}
-		return DEFAULT_DOCUMENT_TRANSFORMER.toFirestoreDocument(doc) as any
+		return DEFAULT_DOCUMENT_TRANSFORMER.toFirestoreDocument(doc) as any;
 	}
-
 }
 
 export const DEFAULT_DOCUMENT_TRANSFORMER: IDocumentTransformer<BaseModel> = {
 	fromFirestoreToObject(data, meta) {
-		return Object.assign(<BaseModel>{
-			id: meta.id,
-			createdAt: meta.createdAt,
-			updatedAt: meta.updatedAt,
-			_rawPath: meta.rawPath
-		}, data);
+		return Object.assign(
+			<BaseModel>{
+				id: meta.id,
+				createdAt: meta.createdAt,
+				updatedAt: meta.updatedAt,
+				_rawPath: meta.rawPath,
+			},
+			data
+		);
 	},
 	toFirestoreDocument(doc) {
 		const clone = cloneDeep(doc);
@@ -46,7 +45,7 @@ export const DEFAULT_DOCUMENT_TRANSFORMER: IDocumentTransformer<BaseModel> = {
 
 		return {
 			id: doc.id,
-			data: clone
-		}
-	}
-}
+			data: clone,
+		};
+	},
+};

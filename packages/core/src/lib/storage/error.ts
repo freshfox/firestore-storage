@@ -1,15 +1,7 @@
-import {BaseModel} from "./base_model";
+import { BaseModel } from './types';
 
 export class FirestoreStorageError<T extends BaseModel> extends Error {
-
-	public readonly id: string | null;
-
-	constructor(public readonly attributes: Partial<T>,
-				public readonly path: string) {
-		super(`Unable to get document${attributes?.id ? `(${attributes.id})` : ''} from ${path}`);
-		this.id = attributes?.id || null;
+	constructor(public rawPath: string, public readonly ids: object, msg?: string) {
+		super(`Unable to get document from ${rawPath}. ${JSON.stringify(ids)} (${msg || ''})`);
 	}
-
-
-
 }

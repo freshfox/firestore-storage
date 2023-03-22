@@ -1,17 +1,9 @@
-import * as admin from "firebase-admin";
 import * as should from 'should';
 import {CollectionUtils, isTimestamp, parsePath, parsePathWithFunction, toComparableValue} from "../lib";
-import Timestamp = admin.firestore.Timestamp;
 
 describe('Utils', function () {
 
 	describe('#toComparableValue', function () {
-
-		it('should convert Timestamp', async () => {
-			const millis = Date.now();
-			const ts = Timestamp.fromMillis(millis);
-			toComparableValue(ts).should.eql(millis);
-		});
 
 		it('should convert Date', async () => {
 			const millis = Date.now();
@@ -22,19 +14,6 @@ describe('Utils', function () {
 			toComparableValue('test').should.eql('test');
 			toComparableValue(1).should.eql(1);
 			toComparableValue(true).should.eql(true);
-		});
-	});
-
-	describe('#isTimestamp()', function () {
-
-		it('should check if value is a Timestamp', async () => {
-
-			isTimestamp(Timestamp.now()).should.true();
-			isTimestamp({
-				_seconds: 0,
-				_nanoseconds: 0
-			}).should.true();
-
 		});
 	});
 

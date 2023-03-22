@@ -1,13 +1,13 @@
-import {DEFAULT_DOCUMENT_TRANSFORMER, IDocumentTransformer} from "./transformer";
-import {PathFunction} from "./collection_utils";
+import 'reflect-metadata';
+import { DEFAULT_DOCUMENT_TRANSFORMER, IDocumentTransformer } from './transformer';
+import { CollectionIds, CollectionPath, DocumentIds } from './collections';
+import { ModelDataOnly } from './base_model_v2';
 
 const transformerMetaKey = 'firestore:transformer';
 const pathMetaKey = 'firestore:path';
 
-
-export abstract class BaseRepository<T> {
-
-	private readonly collectionPath: PathFunction;
+export abstract class BaseRepository<T, Path extends CollectionPath<any, any, any>, DocSnap> {
+	private readonly collectionPath: CollectionPath<any, any, any>;
 	private readonly transformer: IDocumentTransformer<T>;
 
 	protected constructor() {
@@ -18,32 +18,39 @@ export abstract class BaseRepository<T> {
 		this.transformer = Reflect.getMetadata(transformerMetaKey, this.constructor);
 	}
 
-	getPath(...docIds: string[]) {
-		const path = this.getPathFunction();
-		return path(...docIds);
+	protected abstract fromFirestoreToObject(snap: DocSnap);
+
+	toFirestoreDocument(data: T): { id: string; data: ModelDataOnly<T> } {
+		return this.getTransformer().toFirestoreDocument(data);
+	}
+
+	getDocumentPath(ids: DocumentIds<Path>) {
+		return this.getPath().doc(ids);
+	}
+
+	getCollectionPath(ids: CollectionIds<Path>) {
+		return this.getPath().collection(ids);
 	}
 
 	getCollectionName() {
-		const path = this.getPathFunction();
-		return path.collectionGroup;
+		return this.getPath().collectionName;
 	}
 
-	protected getPathFunction(): PathFunction {
+	getPath(): CollectionPath<any, any, any> {
 		return this.collectionPath;
 	}
 
 	protected getTransformer(): IDocumentTransformer<T> {
 		return this.transformer;
 	}
-
 }
 
 export function Repository<T>(args: {
-	path: PathFunction<any[]>
+	path: CollectionPath<any, any, any>;
 	transformer?: IDocumentTransformer<T>;
 }): ClassDecorator {
 	return (target) => {
 		Reflect.defineMetadata(pathMetaKey, args.path, target);
 		Reflect.defineMetadata(transformerMetaKey, args.transformer || DEFAULT_DOCUMENT_TRANSFORMER, target);
-	}
+	};
 }

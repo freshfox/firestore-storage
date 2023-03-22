@@ -1,77 +1,60 @@
-import {Container, inject, injectable} from 'inversify';
-import * as should from 'should';
-import {IStorageDriver, Migrations, StorageDriver} from "firestore-storage-core";
-import {User, UserRepository} from "../index";
-import {FirestoreStorageModule} from "../../lib";
+import 'should';
+import { Migrations } from '../../lib/storage/migrations';
+import { Firestore } from '@google-cloud/firestore';
+import { AccountRepository } from './definitions';
+import { createFirestoreTests } from '../index';
 
 describe('Migrations', function () {
-
-	@injectable()
 	class MyProjectMigrations extends Migrations {
+		public readonly accountRepo: AccountRepository;
 
-		constructor(private userRepo: UserRepository,
-					@inject(StorageDriver) protected storage: IStorageDriver) {
-			super(storage);
+		constructor(firestore: Firestore) {
+			super(firestore);
+			this.accountRepo = new AccountRepository(firestore);
 		}
 
 		getVersion(): number {
-			return 2;
+			return 1;
 		}
 
 		onUpgrade(toVersion: number) {
 			switch (toVersion) {
 				case 1:
-					return this.combineName();
-				case 2:
-					return this.somethingElse();
+					return this.appendToName();
 			}
 		}
 
-		private async combineName() {
-			const collectionPath = this.userRepo.getPath();
-			const users: User[] = await this.storage.query(collectionPath, qb => qb);
-			for (const user of users) {
-				user.name = `${user.firstname} ${user.lastname}`;
-				await this.storage.save(collectionPath, user);
+		private async appendToName() {
+			const accounts = await this.accountRepo.list(null);
+			for (const account of accounts) {
+				await this.accountRepo.update({
+					id: account.id,
+					name: `${account.name}-1`,
+				});
 			}
 		}
-
-		private async somethingElse() {
-
-		}
-
 	}
 
-	const container = new Container();
-	container.load(FirestoreStorageModule.createWithMemoryStorage());
-	container.bind(UserRepository).toSelf().inSingletonScope();
-	container.bind(MyProjectMigrations).toSelf().inSingletonScope();
-
-	const userRepo = container.resolve(UserRepository);
-	const migrations = container.resolve(MyProjectMigrations);
-
-	beforeEach(async () => {
-		return userRepo.clear();
+	let migrations: MyProjectMigrations;
+	createFirestoreTests(this, (firestore) => {
+		migrations = new MyProjectMigrations(firestore);
 	});
 
-    it('should run a simple migration', async () => {
-
-    	const u1 = await userRepo.save({
-			firstname: 'John',
-			lastname: 'Doe',
-			email: 'john@example.com'
+	it('should run a simple migration', async () => {
+		await migrations.readVersion().should.resolvedWith(0);
+		let a1 = await migrations.accountRepo.save({
+			name: 'acc1',
 		});
-
+		let a2 = await migrations.accountRepo.save({
+			name: 'acc2',
+		});
 		await migrations.upgrade();
 
-		const u2 = await userRepo.getById(u1.id);
-		should(u2.name).eql('John Doe');
+		a1 = await migrations.accountRepo.getById({ accountId: a1.id });
+		a2 = await migrations.accountRepo.getById({ accountId: a2.id });
 
-		const version = await migrations.readVersion();
-		should(version).eql(2);
-
-    });
-
-
-
+		a1.name.should.eql('acc1-1');
+		a2.name.should.eql('acc2-1');
+		await migrations.readVersion().should.resolvedWith(1);
+	});
 });

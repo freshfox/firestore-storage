@@ -1,23 +1,22 @@
-import {isPlainObject, isEqual} from 'lodash/fp';
-import {PathFunction} from "./collection_utils";
+import { isPlainObject, isEqual } from 'lodash';
+import { PathFunction } from './collection_utils';
 
 export type AnyKeys<K extends keyof any> = {
 	[P in keyof Pick<any, K>]?: string;
-}
+};
 
 export type ParsedChange<T, K extends keyof any> = {
 	before: T;
 	after: T;
-	ids: AnyKeys<K>
-}
+	ids: AnyKeys<K>;
+};
 
 export type ParsedSnapshot<T, K extends keyof any> = {
 	data: T;
-	ids: AnyKeys<K>
-}
+	ids: AnyKeys<K>;
+};
 
 export class DocumentChange<T, K extends keyof any> {
-
 	readonly changedKeys: string[];
 
 	constructor(private change: ParsedChange<T, K>) {
@@ -62,15 +61,13 @@ export class DocumentChange<T, K extends keyof any> {
 		}
 		return toComparableValue(v1) === toComparableValue(v2);
 	}
-
 }
 
 export function isTimestamp(value: any) {
 	if (!value) {
 		return false;
 	}
-	return value.hasOwnProperty('_seconds')
-		&& value.hasOwnProperty('_nanoseconds');
+	return value.hasOwnProperty('_seconds') && value.hasOwnProperty('_nanoseconds');
 }
 
 export function toComparableValue(val: any) {
@@ -80,8 +77,8 @@ export function toComparableValue(val: any) {
 }
 
 export type KeyMap<K extends keyof any> = {
-	[P in K]: string
-}
+	[P in K]: string;
+};
 
 export function parsePath(path: string): Map<string, string> {
 	if (path.startsWith('/')) {
@@ -90,7 +87,7 @@ export function parsePath(path: string): Map<string, string> {
 	const parts = path.split('/');
 	const ids = new Map<string, string>();
 	for (let i = 0; i < parts.length; i += 2) {
-		ids.set(parts[i], parts[i + 1] || null)
+		ids.set(parts[i], parts[i + 1] || null);
 	}
 	return ids;
 }
@@ -103,7 +100,7 @@ export function parsePathWithFunction(func: PathFunction, path: string): Map<str
 		if (!idName) {
 			throw new Error(`Paths don't match (${path} != ${func.path})`);
 		}
-		finalMap.set(idName, id)
+		finalMap.set(idName, id);
 	}
 	return finalMap;
 }
