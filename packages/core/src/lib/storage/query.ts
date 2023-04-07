@@ -5,10 +5,7 @@ export type WhereProp<T> = keyof T | ((t: T) => unknown);
 
 export abstract class BaseQuery<T, Op extends string, Dir extends string, R> {
 	protected abstract applyWhere(key: string, operator: Op, value: any): this;
-	protected abstract applyOrderBy(key: string, direction: Dir): this;
-	protected abstract applyOffset(offset: number): this;
-	protected abstract applyLimit(limit: number): this;
-	protected abstract execute(): R;
+	abstract execute(): R;
 
 	where(prop: WhereProp<T>, op: Op, value: any) {
 		return this.applyWhere(this.getWhereProp(prop), op, value);
