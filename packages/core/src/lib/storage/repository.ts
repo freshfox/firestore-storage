@@ -7,7 +7,7 @@ const transformerMetaKey = 'firestore:transformer';
 const pathMetaKey = 'firestore:path';
 
 export abstract class BaseRepository<T, Path extends CollectionPath<any, any, any>, DocSnap> {
-	private readonly collectionPath: CollectionPath<any, any, any>;
+	private readonly collectionPath: Path;
 	private readonly transformer: IDocumentTransformer<T>;
 
 	protected constructor() {
@@ -36,7 +36,7 @@ export abstract class BaseRepository<T, Path extends CollectionPath<any, any, an
 		return this.getPath().collectionName;
 	}
 
-	getPath(): CollectionPath<any, any, any> {
+	getPath(): Path {
 		return this.collectionPath;
 	}
 
