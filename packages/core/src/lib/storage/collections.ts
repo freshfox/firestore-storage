@@ -21,7 +21,7 @@ export type DocumentIds<C extends CollectionPath<any, any, any>> = C extends Col
 export class CollectionPath<IdKey extends string, IdType extends string, P extends object | void = void> {
 	constructor(
 		public readonly collectionName: string,
-		private idKey: IdKey,
+		public readonly idKey: IdKey,
 		private parent?: CollectionPath<any, any, any>
 	) {}
 
@@ -43,5 +43,12 @@ export class CollectionPath<IdKey extends string, IdType extends string, P exten
 			throw new Error(`Missing ${this.idKey} in ids`);
 		}
 		return `${this.collection(ids as CollectionIds<this>)}/${id}`;
+	}
+
+	toDocIds(ids: CollectionIds<this>, docId: IdType): DocumentIds<this> {
+		return {
+			...ids,
+			[this.idKey]: docId,
+		} as DocumentIds<this>;
 	}
 }
