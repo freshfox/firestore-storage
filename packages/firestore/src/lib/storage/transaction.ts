@@ -76,7 +76,7 @@ export class FirestoreTransaction {
 		ids: DocumentIds<Path>
 	): FirestoreTransaction {
 		return this.applyToDoc(repo, data, ids, (id, data, doc) => {
-			this.transaction.delete(doc, data);
+			this.transaction.delete(doc);
 		});
 	}
 
