@@ -12,6 +12,7 @@ import {
 } from 'firestore-storage-core';
 import { Query } from './query';
 import { DocumentReference, DocumentSnapshot, Firestore } from '@google-cloud/firestore';
+import { applyToDoc } from './utils';
 
 export abstract class BaseRepository<
 	T extends BaseModel,
@@ -27,8 +28,6 @@ export abstract class BaseRepository<
 		}
 		return this.getTransformer().fromFirestoreToObject(snapshot.data(), {
 			id: snapshot.id,
-			createdAt: new Date(snapshot.createTime.toMillis()),
-			updatedAt: new Date(snapshot.updateTime.toMillis()),
 			rawPath: snapshot.ref.path,
 		});
 	}
@@ -142,16 +141,15 @@ export abstract class BaseRepository<
 		ids: CollectionIds<Path>,
 		cb: (doc: DocumentReference, data: ModelDataOnly<T>) => Promise<any>
 	) {
-		const d = this.toFirestoreDocument(data as T);
-		const collectionRef = this.firestore.collection(this.getCollectionPath(ids));
-		const docRef = d.id ? collectionRef.doc(d.id) : collectionRef.doc();
-		try {
-			await cb(docRef, d.data);
-		} catch (err) {
-			throw new FirestoreStorageError(this.getPath().path(), ids, err.message);
-		}
-		const doc = await docRef.get();
-		return this.fromFirestoreToObject(doc as DocumentSnapshot<T>);
+		return applyToDoc(this.firestore, this, data, ids, async (id, data, docRef) => {
+			try {
+				await cb(docRef, data);
+			} catch (err) {
+				throw new FirestoreStorageError(this.getPath().path(), ids, err.message);
+			}
+			const doc = await docRef.get();
+			return this.fromFirestoreToObject(doc as DocumentSnapshot<T>);
+		});
 	}
 
 	async delete(ids: DocumentIds<Path>): Promise<void> {

@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { DEFAULT_DOCUMENT_TRANSFORMER, IDocumentTransformer } from './transformer';
 import { CollectionIds, CollectionPath, DocumentIds } from './collections';
-import { ModelDataOnly } from './model';
+import { ModelDataOnly, PatchUpdate } from './types';
 
 const transformerMetaKey = 'firestore:transformer';
 const pathMetaKey = 'firestore:path';
@@ -18,9 +18,14 @@ export abstract class BaseRepository<T, Path extends CollectionPath<any, any, an
 		this.transformer = Reflect.getMetadata(transformerMetaKey, this.constructor);
 	}
 
-	protected abstract fromFirestoreToObject(snap: DocSnap);
+	protected abstract fromFirestoreToObject(snap: DocSnap): T;
 
-	toFirestoreDocument(data: T): { id: string; data: ModelDataOnly<T> } {
+	toFirestoreDocument(doc: T): { id: string; data: ModelDataOnly<T> };
+	toFirestoreDocument(doc: ModelDataOnly<T> | PatchUpdate<ModelDataOnly<T>>): {
+		id: undefined;
+		data: ModelDataOnly<T>;
+	};
+	toFirestoreDocument(data: T | ModelDataOnly<T> | PatchUpdate<ModelDataOnly<T>>) {
 		return this.getTransformer().toFirestoreDocument(data);
 	}
 

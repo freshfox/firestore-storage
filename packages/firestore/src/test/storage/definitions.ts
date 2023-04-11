@@ -24,12 +24,12 @@ export class ModelRepository extends BaseRepository<Model, typeof GenericModelPa
 export type AccountId = Id<'Account'>;
 export type UserId = Id<'User'>;
 
-export interface Account {
+export interface Account extends BaseModel {
 	id: AccountId;
 	name: string;
 }
 
-export interface User {
+export interface User extends BaseModel {
 	id: UserId;
 	userName: string;
 	lastSignIn?: Timestamp;

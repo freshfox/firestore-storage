@@ -1,5 +1,4 @@
 import { isPlainObject, isEqual } from 'lodash';
-import { PathFunction } from './collection_utils';
 
 export type AnyKeys<K extends keyof any> = {
 	[P in keyof Pick<any, K>]?: string;
@@ -79,28 +78,3 @@ export function toComparableValue(val: any) {
 export type KeyMap<K extends keyof any> = {
 	[P in K]: string;
 };
-
-export function parsePath(path: string): Map<string, string> {
-	if (path.startsWith('/')) {
-		path = path.substring(1);
-	}
-	const parts = path.split('/');
-	const ids = new Map<string, string>();
-	for (let i = 0; i < parts.length; i += 2) {
-		ids.set(parts[i], parts[i + 1] || null);
-	}
-	return ids;
-}
-
-export function parsePathWithFunction(func: PathFunction, path: string): Map<string, string> {
-	const finalMap = new Map<string, string>();
-	const map = parsePath(path);
-	for (const [collection, id] of map) {
-		const idName = func.collectionIdMap.get(collection);
-		if (!idName) {
-			throw new Error(`Paths don't match (${path} != ${func.path})`);
-		}
-		finalMap.set(idName, id);
-	}
-	return finalMap;
-}

@@ -1,9 +1,9 @@
-import { ModelQuery } from './types';
+import { BaseModel, ModelQuery } from './types';
 import { getPath } from 'ts-object-path';
 
 export type WhereProp<T> = keyof T | ((t: T) => unknown);
 
-export abstract class BaseQuery<T, Op extends string, Dir extends string, R> {
+export abstract class BaseQuery<T extends BaseModel, Op extends string, R> {
 	protected abstract applyWhere(key: string, operator: Op, value: any): this;
 	abstract execute(): R;
 
@@ -20,7 +20,7 @@ export abstract class BaseQuery<T, Op extends string, Dir extends string, R> {
 		return this;
 	}
 
-	getWhereProp(prop: WhereProp<T>): string {
+	protected getWhereProp(prop: WhereProp<T>): string {
 		if (typeof prop === 'string') return prop;
 		return getPath<T, (t: T) => unknown>(prop).join('.');
 	}

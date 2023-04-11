@@ -1,4 +1,3 @@
-export * from './storage/collection_utils';
 export * from './storage/collections';
 export * from './storage/error';
 export * from './storage/model';

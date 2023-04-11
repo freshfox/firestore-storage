@@ -1,20 +1,14 @@
 import {
 	CollectionGroup,
 	CollectionReference,
-	DocumentData,
 	OrderByDirection,
 	QuerySnapshot,
 	WhereFilterOp,
 	Query as FSQuery,
 } from '@google-cloud/firestore';
-import { BaseQuery } from 'firestore-storage-core';
+import { BaseQuery, BaseModel, WhereProp } from 'firestore-storage-core';
 
-export class Query<T extends DocumentData> extends BaseQuery<
-	T,
-	WhereFilterOp,
-	OrderByDirection,
-	Promise<QuerySnapshot<T>>
-> {
+export class Query<T extends BaseModel> extends BaseQuery<T, WhereFilterOp, Promise<QuerySnapshot<T>>> {
 	constructor(private base: CollectionReference | CollectionGroup | FSQuery) {
 		super();
 	}
@@ -24,18 +18,18 @@ export class Query<T extends DocumentData> extends BaseQuery<
 		return this;
 	}
 
-	protected applyOrderBy(key: string, direction: OrderByDirection) {
-		this.base = this.base.orderBy(key, direction);
+	orderBy(prop: WhereProp<T>, direction: OrderByDirection) {
+		this.base = this.base.orderBy(this.getWhereProp(prop), direction);
 		return this;
 	}
 
-	protected applyOffset(offset: number): this {
-		this.base = this.base.offset(offset);
-		return this;
-	}
-
-	protected applyLimit(limit: number): this {
+	limit(limit: number) {
 		this.base = this.base.limit(limit);
+		return this;
+	}
+
+	offset(offset: number) {
+		this.base = this.base.offset(offset);
 		return this;
 	}
 
