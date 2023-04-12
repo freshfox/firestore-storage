@@ -1,8 +1,8 @@
 import 'should';
-import { Migrations } from '../../lib/storage/migrations';
 import { Firestore } from '@google-cloud/firestore';
-import { AccountRepository } from './definitions';
-import { createFirestoreTests } from '../index';
+import { Migrations } from './migrations';
+import { AccountRepository } from './definitions.test';
+import { createFirestoreTests } from './test-utils';
 
 describe('Migrations', function () {
 	class MyProjectMigrations extends Migrations {

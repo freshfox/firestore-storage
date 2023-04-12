@@ -1,7 +1,7 @@
 import 'should';
-import { createFirestoreTests } from '../index';
-import { AccountId, AccountRepository, ModelRepository, UserRepository } from './definitions';
 import { FirestoreStorageError } from 'firestore-storage-core';
+import { AccountId, AccountRepository, ModelRepository, UserRepository } from './definitions.test';
+import { createFirestoreTests } from './test-utils';
 
 describe('Repository', function () {
 	let modelRepo: ModelRepository;
