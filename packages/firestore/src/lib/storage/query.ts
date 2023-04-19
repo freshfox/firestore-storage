@@ -36,4 +36,8 @@ export class Query<T extends BaseModel> extends BaseQuery<T, WhereFilterOp, Prom
 	execute(): Promise<QuerySnapshot<T>> {
 		return this.base.get() as any;
 	}
+
+	count() {
+		return this.base.count();
+	}
 }

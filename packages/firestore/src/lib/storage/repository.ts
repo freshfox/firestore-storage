@@ -114,6 +114,13 @@ export abstract class BaseRepository<
 		return all;
 	}
 
+	async count(cb: (qb: Query<T>) => Query<T>, ids: CollectionIds<Path>) {
+		const path = this.getCollectionPath(ids);
+		const query = new Query<T>(this.firestore.collection(path));
+		const result = await cb(query).count().get();
+		return result.data().count;
+	}
+
 	async save(data: T | ModelDataOnly<T> | PatchUpdate<ModelDataOnly<T>>, ids: CollectionIds<Path>): Promise<T> {
 		return this.applyToDocRef(data, ids, (doc, data) => {
 			return doc.set(data, {
