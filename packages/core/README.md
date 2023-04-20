@@ -21,18 +21,18 @@
 
 ## Overview
 >Typed repositories for Node around Firestore providing a very simple API to
-write and read documents. Including a simple to use query builder and an in-memory
+write and read documents. Including a simple-to-use query builder and an in-memory
 storage implementation for running blazing fast tests
 
 Firestore Storage provides a thin layer of abstraction to accessing data in Firestore.
-It follows the repository pattern, for more information about it you can read this
+It follows the repository pattern, for more information about it, you can read this
 [short article](https://medium.com/@pererikbergman/repository-design-pattern-e28c0f3e4a30)
 
 ### Return value conventions for methods
 
 - `find*()` methods return the document or null when no result was found
-- `get*()` methods always return the document and will [throw an error](#custom-error) when no result was found
-- `list*()` methods always return an array and never null. When no result is found the array is empty
+- `get*()` methods always return the document and will throw an error when no result was found
+- `list*()` methods always return an array and never null or undefined. When no result is found the array is empty
 
 ## Example
 

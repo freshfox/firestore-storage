@@ -1,3 +1,7 @@
+/**
+ * A generic type used to generate a new type from a given collection path. The generated type is
+ * a map with keys for each id of this path leading up to this collection.
+ */
 export type CollectionIds<C extends CollectionPath<any, any, any>, D = void> = C extends CollectionPath<
 	infer IdKey,
 	infer IdType,
@@ -6,6 +10,10 @@ export type CollectionIds<C extends CollectionPath<any, any, any>, D = void> = C
 	? P
 	: D;
 
+/**
+ * A generic type used to generate a new type from a given collection path. The generated type is
+ * a map with keys for each id of this path leading up to a document in this collection.
+ */
 export type DocumentIds<C extends CollectionPath<any, any, any>> = C extends CollectionPath<
 	infer IdKey,
 	infer IdType,

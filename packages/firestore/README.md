@@ -5,7 +5,7 @@
 [![img](https://david-dm.org/freshfox/firestore-storage/dev-status.svg)](https://david-dm.org/freshfox/firestore-storage/#info=devDependencies)
 [![Known Vulnerabilities](https://snyk.io/test/github/freshfox/firestore-storage/badge.svg)](https://snyk.io/test/github/freshfox/firestore-storage)
 
-## Table of Contents
+## Table of contents
 
 * [Overview](#overview)
 * [Example](#example)
@@ -17,34 +17,88 @@
 * [Repository](#repositories)
 * [Migrations](#migrations)
 * [Typing indexes](#typing-indexes)
-* [Throwing custom errors](#custom-error)
 
 ## Overview
->Typed repositories for Node around Firestore providing a very simple API to
-write and read documents. Including a simple to use query builder and an in-memory
-storage implementation for running blazing fast tests
+> Typed repositories for Node around Firestore providing a very simple API to
+> write and query documents.
 
-Firestore Storage provides a thin layer of abstraction to accessing data in Firestore.
-It follows the repository pattern, for more information about it you can read this
-[short article](https://medium.com/@pererikbergman/repository-design-pattern-e28c0f3e4a30)
+## Example
+```typescript
+// Path is /users/{userId}
+const user = await userRepo.save({
+   email: 'john@example.com'
+});
+
+const user = await userRepo.findById({
+  userId: 'some-user-id'
+});
+
+// Path is /restaurants/{restaurantId}/ratings/{ratingId}
+const fiveStars = await ratingRepo.list({
+	stars: 5
+}, { restaurantId: 'some-restaurant-id' });
+```
+
+## Usage
+
+### Installation
+```bash
+npm install firestore-storage-core
+npm install firestore-storage
+```
+
+### Defining collection paths
+Collection paths are defined using the `CollectionPath` class instead of
+just a string, to provide detailed information for this path. Such as the
+name of the collection and the name of the id. Defining a root collection
+path such as `/restaurants/{restaurantId}` will look like:
+```typescript
+const RestaurantsCollection = new CollectionPath('restaurants', 'restaurantId');
+```
+When defining subcollections, the parent collection gets passed as
+the third parameter. Currently, generic types have to be passed as well
+to have the correct typings in your repositories.
+A subcollection such as `/restaurants/{restaurantId}/ratings/{ratingId}` looks like:
+```typescript
+const RatingsCollection = new CollectionPath<'ratingId', string, DocumentIds<typeof RestaurantsCollection>>('ratings', 'ratingId', RestaurantsCollection);
+```
+
+### Creating repositories
+
+```typescript
+import { BaseRepository } from 'firestore-storage';
+import { BaseModel, Repository} from 'firestore-storage-core';
+
+interface Rating extends BaseModel {
+	stars: number
+}
+
+@Repository({
+	path: RatingsCollection
+})
+export class RatingsRepository extends BaseRepository<Rating, RatingsCollection> {
+
+}
+```
 
 ### Return value conventions for methods
 
 - `find*()` methods return the document or null when no result was found
-- `get*()` methods always return the document and will [throw an error](#custom-error) when no result was found
-- `list*()` methods always return an array and never null. When no result is found the array is empty
+- `get*()` methods always return the document and will throw an error when no result was found
+- `list*()` methods always return an array and never null or undefined. When no result is found the array is empty
+
+## Defining collection paths
+
 
 ## Example
 
 ```typescript
-const restaurantRepo = new RestaurantRepository();
-
 // Saving data
 const restaurant = await restaurantRepo.save({
-  name: 'FreshFoods',
-  address: 'SomeStreet 123',
-  city: 'New York',
-  type: 'vegan'
+	name: 'FreshFoods',
+	address: 'SomeStreet 123',
+	city: 'New York',
+	type: 'vegan'
 });
 
 console.log(restaurant);
@@ -55,8 +109,6 @@ console.log(restaurant);
   address: 'SomeStreet 123',
   city: 'New York',
   type: 'vegan',
-  createdAt: Date('2019-04-29T16:35:33.195Z'),
-  updatedAt: Date('2019-04-29T16:35:33.195Z')
 }*/
 
 // Listing all documents
@@ -64,46 +116,18 @@ const allRestaurants = await restaurantRepo.list();
 
 // Filtering documents based on attributes
 const restaurantsInNewYork = await restaurantRepo.list({
-  city: 'New York'
+	city: 'New York'
 });
 
 // More complex queries
 const date = new Date('2019-02-01');
 const restaurants = await restaurantRepo.query((qb) => {
-  return qb
-    .where('openDate', '<=', date)
-    .orderBy('openDate', 'asc');
+	return qb
+		.where('openDate', '<=', date)
+		.orderBy('openDate', 'asc');
 });
 ```
 
-## Installation
-
-The `firestore-storage` package is available via npm
-
-```bash
-$ npm install firestore-storage
-# or
-$ yarn add firestore-storage
-```
-
-## Tests
-To run all tests using only the `MemoryStorage` implementation run:
-```bash
-$ yarn test
-```
-
-It's also possible to run all tests using the `FirestoreStorage` implementation. To do this
-you need to create a Firebase project and download the Admin SDK credentials file.
-Copy the `.env.sample` to `.env` and add the absolute path to the `FIREBASE_CREDENTIALS` variable.
-To execute the tests run:
-```bash
-$ yarn test:firestore
-```
-
-To run tests using both `MemoryStorage` and `FirestoreStorage` run
-```bash
-$ yarn test
-```
 
 ### Running tests on your firestore.rules
 
@@ -180,65 +204,6 @@ describe('Rules', function () {
 });
 ```
 
-## Usage
-
-**Firestore Storage** can be used with the dependency injection library [Inversify][inversify]
-as well as without it.
-
-```typescript
-// In another file (storage.ts)
-export const storage = new FirestoreStorage(admin.firestore());
-// OR
-export const storage = new MemoryStorage();
-
-// restaurant_repository.ts
-import {storage} from './storage';
-
-class RestaurantRepository extends BaseRepository<Restaurant> {
-
-  constructor() {
-    super(storage);
-  }
-
-  getCollectionPath(...documentIds: string[]): string {
-    return 'restaurants';
-  }
-
-  listVegan() {
-    return this.list({type: 'vegan'});
-  }
-}
-
-const repo = new RestaurantRepository();
-```
-
-### Inversify
-This library fully supports [Inversify][inversify] To use it you have load the `FirestoreStorageModule` module
-into your container and add the `@injectable()` decorator to each repository class. This will automatically
-inject the correct storage implementation (Firestore or In-Memory) into your repositories
-
-```typescript
-if (process.env.NODE_ENV === 'test') {
-  container.load(FirestoreStorageModule.createWithMemoryStorage());
-} else {
-  container.load(FirestoreStorageModule.createWithFirestore(admin.firestore()));
-}
-
-container.bind(RestaurantRepository).toSelf().inSingletonScope();
-```
-
-## Models
-
-Your models should extend or implement the interface `BaseModel` which contains the id and
-modification timestamps.
-```typescript
-interface BaseModel {
-  id?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-```
-
 Since those values are not in the document itself, they will be added to the
 returning object when reading from Firestore. You can pass objects with those attributes to
 the `save()` function. They will always be omitted and the id will be used as the document id
@@ -277,7 +242,7 @@ const review = await reviewRepo.findById(restaurantId, reviewId);
 Queries the collection to match the given arguments, returns the first result or `null` if none is found.
 ```typescript
 const review = await reviewRepo.find({
-  rating: 5
+	rating: 5
 }, restaurantId);
 ```
 
@@ -293,7 +258,7 @@ the array will be empty
 
 ```typescript
 const allOneStarRatings = await reviewRepo.list({
-  rating: 1
+	rating: 1
 }, restaurantId);
 ```
 
@@ -301,9 +266,9 @@ const allOneStarRatings = await reviewRepo.list({
 Do more complex queries like `greater than` and `lower than` comparisons.
 ```typescript
 const reviews = await reviewRepo.query(() => {
-  return qb
-    .where('rating', '==', 2)
-    .where('submitDate', '<', new Date('2019-12-31'));
+	return qb
+		.where('rating', '==', 2)
+		.where('submitDate', '<', new Date('2019-12-31'));
 }, restaurantId);
 ```
 Valid operators are `==` | `<` | `<=` | `>` | `>=`
@@ -334,15 +299,15 @@ const r = await restaurantRepo.getAll([id1, id2]);
 Saves a document into Firestore.
 ```typescript
 const restaurant = await restaurantRepo.save({
-  name: 'Ebi'
+	name: 'Ebi'
 });
 ```
 If you want to update data you just have to pass the id of the document.
 ```typescript
 const user = await restaurantRepo.save({
-  id: '8zCW4UszD0wmdrpBNswp',
-  name: 'Ebi',
-  openDate: new Date()
+	id: '8zCW4UszD0wmdrpBNswp',
+	name: 'Ebi',
+	openDate: new Date()
 });
 ```
 By default this will create the document with this id if it doesn't exist
@@ -353,8 +318,8 @@ and instead of don't merge use the [write()][write] function
 Sets the passed data. If the document exists it will be overwritten.
 ```typescript
 const user = await restaurantRepo.write({
-  name: 'FreshBurgers',
-  openDate: new Date()
+	name: 'FreshBurgers',
+	openDate: new Date()
 });
 ```
 
@@ -396,13 +361,13 @@ When creating repositories for nested collection it's always a good idea to chec
 ```typescript
 export class ReviewRepository<T> extends BaseRepository<Review> {
 
-  getCollectionPath(...documentIds): string {
-    const id = documentIds.shift();
-    if (!id) {
-      throw new Error('RestaurantId id is missing');
-    }
-    return `restaurants/${id}/reviews`;
-  }
+	getCollectionPath(...documentIds): string {
+		const id = documentIds.shift();
+		if (!id) {
+			throw new Error('RestaurantId id is missing');
+		}
+		return `restaurants/${id}/reviews`;
+	}
 }
 ```
 
@@ -431,13 +396,13 @@ The query functions [get](#get) and [getById](#getbyid) will throw an error if t
 If you want to throw an custom error you can do that by passing an error factory.
 ```typescript
 export class HttpError extends Error {
-  constructor(msg: string, public code: number) {
-    super(msg)
-  }
+	constructor(msg: string, public code: number) {
+		super(msg)
+	}
 }
 
 const errorFactory = (msg) => {
-  return new HttpError(msg, 404);
+	return new HttpError(msg, 404);
 };
 
 ```
@@ -451,9 +416,9 @@ FirestoreStorageModule.createWithFirestore(admin.firestore(), errorFactory)
 ```typescript
 class RestaurantRepository extends BaseRepository<Restaurant> {
 
-  constructor() {
-    super(storage, errorFactory);
-  }
+	constructor() {
+		super(storage, errorFactory);
+	}
 }
 ```
 
