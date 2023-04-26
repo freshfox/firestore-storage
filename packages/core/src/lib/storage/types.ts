@@ -1,7 +1,7 @@
 declare const t: unique symbol;
 export type Id<T> = string & { readonly [t]: T };
 
-export interface BaseModel {
+export interface BaseModel extends Record<string, unknown> {
 	id: string;
 	_rawPath: string;
 }
@@ -14,6 +14,12 @@ type NonFunctionProperties<T> = Pick<T, NonFunctionPropertyNames<T>>;
 type Clonable<T> = {
 	[K in keyof NonFunctionProperties<T>]: T[K] extends object ? Clonable<T[K]> : T[K];
 };
+
+export type FlattenObjectKeys<T extends Record<string, unknown>, Key = keyof T> = Key extends string
+	? T[Key] extends Record<string, unknown>
+		? `${Key}.${FlattenObjectKeys<T[Key]>}`
+		: `${Key}`
+	: never;
 
 export type ModelDataOnly<T> = Omit<Clonable<T>, keyof BaseModel>;
 

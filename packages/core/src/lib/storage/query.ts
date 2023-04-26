@@ -1,7 +1,7 @@
-import { BaseModel, ModelQuery } from './types';
+import { BaseModel, FlattenObjectKeys, ModelQuery } from './types';
 import { getPath } from 'ts-object-path';
 
-export type WhereProp<T> = keyof T | ((t: T) => unknown);
+export type WhereProp<T extends BaseModel> = FlattenObjectKeys<T> | ((t: T) => unknown);
 
 export abstract class BaseQuery<T extends BaseModel, Op extends string, R> {
 	protected abstract applyWhere(key: string, operator: Op, value: any): this;
