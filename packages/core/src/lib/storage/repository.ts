@@ -1,12 +1,17 @@
 import 'reflect-metadata';
 import { DEFAULT_DOCUMENT_TRANSFORMER, IDocumentTransformer } from './transformer';
 import { CollectionIds, CollectionPath, DocumentIds } from './collections';
-import { ModelDataOnly, PatchUpdate } from './types';
+import { BaseModel, ModelDataOnly, ModelDataWithId, PatchUpdate } from './types';
 
 const transformerMetaKey = 'firestore:transformer';
 const pathMetaKey = 'firestore:path';
 
-export abstract class BaseRepository<T, Path extends CollectionPath<any, any, any>, DocSnap> {
+export abstract class BaseRepository<
+	T extends BaseModel,
+	Path extends CollectionPath<any, any, any>,
+	DocSnap,
+	Meta = any
+> {
 	private readonly collectionPath: Path;
 	private readonly transformer: IDocumentTransformer<T>;
 
@@ -21,11 +26,11 @@ export abstract class BaseRepository<T, Path extends CollectionPath<any, any, an
 	protected abstract fromFirestoreToObject(snap: DocSnap): T;
 
 	toFirestoreDocument(doc: T): { id: string; data: ModelDataOnly<T> };
-	toFirestoreDocument(doc: ModelDataOnly<T> | PatchUpdate<ModelDataOnly<T>>): {
+	toFirestoreDocument(doc: ModelDataOnly<T> | PatchUpdate<ModelDataWithId<T>>): {
 		id: undefined;
 		data: ModelDataOnly<T>;
 	};
-	toFirestoreDocument(data: T | ModelDataOnly<T> | PatchUpdate<ModelDataOnly<T>>) {
+	toFirestoreDocument(data: T | ModelDataOnly<T> | PatchUpdate<ModelDataWithId<T>>) {
 		return this.getTransformer().toFirestoreDocument(data);
 	}
 
@@ -50,7 +55,7 @@ export abstract class BaseRepository<T, Path extends CollectionPath<any, any, an
 	}
 }
 
-export function Repository<T>(args: {
+export function Repository<T extends BaseModel>(args: {
 	path: CollectionPath<any, any, any>;
 	transformer?: IDocumentTransformer<T>;
 }): ClassDecorator {

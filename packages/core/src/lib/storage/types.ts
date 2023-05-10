@@ -1,27 +1,23 @@
 declare const t: unique symbol;
 export type Id<T> = string & { readonly [t]: T };
 
-export interface BaseModel extends Record<string, unknown> {
+export interface BaseModel {
 	id: string;
 	_rawPath: string;
 }
 
 type NonFunctionPropertyNames<T> = {
 	[K in keyof T]: T[K] extends Function ? never : K;
-}[keyof T];
-type NonFunctionProperties<T> = Pick<T, NonFunctionPropertyNames<T>>;
+};
+type NonFunctionProperties<T> = Pick<T, keyof NonFunctionPropertyNames<T>>;
 
 type Clonable<T> = {
 	[K in keyof NonFunctionProperties<T>]: T[K] extends object ? Clonable<T[K]> : T[K];
 };
 
-export type FlattenObjectKeys<T extends Record<string, unknown>, Key = keyof T> = Key extends string
-	? T[Key] extends Record<string, unknown>
-		? `${Key}.${FlattenObjectKeys<T[Key]>}`
-		: `${Key}`
-	: never;
+export type ModelDataOnly<T> = Omit<T, keyof BaseModel>;
 
-export type ModelDataOnly<T> = Omit<Clonable<T>, keyof BaseModel>;
+export type ModelDataWithId<T extends BaseModel> = Pick<T, 'id'> & ModelDataOnly<T>;
 
 export type ModelQuery<T extends BaseModel> = Partial<ModelDataOnly<T>>;
 
@@ -61,4 +57,4 @@ type NestedPartial<T> = {
 	[K in keyof T]?: T[K] extends Array<infer R> ? Array<R> : NestedPartial<T[K]>;
 };
 
-export type PatchUpdate<T> = { id: string } & NestedPartial<T>;
+export type PatchUpdate<T extends { id: string }> = Required<Pick<T, 'id'>> & Omit<NestedPartial<T>, 'id'>;

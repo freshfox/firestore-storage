@@ -1,4 +1,4 @@
-import { BaseModel, FlattenObjectKeys, ModelQuery } from './types';
+import { BaseModel, ModelQuery } from './types';
 import { getPath } from 'ts-object-path';
 
 export type WhereProp<T extends BaseModel> = string | ((t: T) => unknown);

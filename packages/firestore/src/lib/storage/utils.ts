@@ -4,6 +4,7 @@ import {
 	CollectionIds,
 	CollectionPath,
 	ModelDataOnly,
+	ModelDataWithId,
 	PatchUpdate,
 } from 'firestore-storage-core';
 import { DocumentReference, Firestore } from '@google-cloud/firestore';
@@ -11,7 +12,7 @@ import { DocumentReference, Firestore } from '@google-cloud/firestore';
 export function applyToDoc<T extends BaseModel, Path extends CollectionPath<any, any, any>, R = void>(
 	firestore: Firestore,
 	repo: BaseRepository<T, Path, any>,
-	data: T | ModelDataOnly<T> | PatchUpdate<ModelDataOnly<T>>,
+	data: T | ModelDataOnly<T> | PatchUpdate<ModelDataWithId<T>>,
 	ids: CollectionIds<Path>,
 	cb: (id: string, data: ModelDataOnly<T>, doc: DocumentReference) => R
 ) {

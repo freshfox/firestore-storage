@@ -7,6 +7,7 @@ import {
 	FirestoreStorageError,
 	DocumentIds,
 	PatchUpdate,
+	ModelDataWithId,
 } from 'firestore-storage-core';
 import { BaseRepository } from './repository';
 import { applyToDoc } from './utils';
@@ -49,7 +50,7 @@ export class FirestoreTransaction {
 
 	save<T extends BaseModel, Path extends CollectionPath<any, any, any>>(
 		repo: BaseRepository<T, Path>,
-		data: T | ModelDataOnly<T> | PatchUpdate<ModelDataOnly<T>>,
+		data: T | ModelDataOnly<T> | PatchUpdate<ModelDataWithId<T>>,
 		ids: CollectionIds<Path>
 	): FirestoreTransaction {
 		return this.applyToDoc(repo, data, ids, (id, data, doc) => {
@@ -69,7 +70,7 @@ export class FirestoreTransaction {
 
 	update<T extends BaseModel, Path extends CollectionPath<any, any, any>>(
 		repo: BaseRepository<T, Path>,
-		data: PatchUpdate<ModelDataOnly<T>>,
+		data: PatchUpdate<ModelDataWithId<T>>,
 		ids: CollectionIds<Path>
 	): FirestoreTransaction {
 		return this.applyToDoc(repo, data, ids, (id, data, doc) => {
@@ -88,7 +89,7 @@ export class FirestoreTransaction {
 
 	private applyToDoc<T extends BaseModel, Path extends CollectionPath<any, any, any>>(
 		repo: BaseRepository<T, Path>,
-		data: T | ModelDataOnly<T> | PatchUpdate<ModelDataOnly<T>>,
+		data: T | ModelDataOnly<T> | PatchUpdate<ModelDataWithId<T>>,
 		ids: CollectionIds<Path>,
 		cb: (id: string, data: ModelDataOnly<T>, doc: DocumentReference) => void
 	) {

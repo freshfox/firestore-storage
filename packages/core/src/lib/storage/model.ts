@@ -7,7 +7,7 @@ import {
 	plainToClassFromExist,
 	instanceToPlain,
 } from 'class-transformer';
-import { ModelDataOnly, PatchUpdate } from './types';
+import { BaseModel, ModelDataOnly, ModelDataWithId, PatchUpdate } from './types';
 
 export interface ModelMetaInternal {
 	id?: string;
@@ -18,11 +18,11 @@ export interface ModelMetaInternal {
 
 export type ModelMeta<R extends boolean = false> = R extends true ? Required<ModelMetaInternal> : ModelMetaInternal;
 
-export class BaseModelClass<T> implements ModelMeta {
+export class BaseModelClass<T extends BaseModel> implements BaseModel, ModelMeta {
 	@Exclude()
 	private readonly __metadata?: ModelMeta;
 
-	constructor(data: PatchUpdate<ModelDataOnly<T>> | ModelDataOnly<T>, meta?: ModelMeta) {
+	constructor(data: PatchUpdate<ModelDataWithId<T>> | ModelDataOnly<T>, meta?: ModelMeta) {
 		this.__metadata = Object.assign({}, meta || {});
 		plainToClassFromExist(this, data);
 	}
@@ -43,7 +43,7 @@ export class BaseModelClass<T> implements ModelMeta {
 		return this.__metadata.updatedAt;
 	}
 
-	get rawPath() {
+	get _rawPath() {
 		return this.__metadata.rawPath;
 	}
 

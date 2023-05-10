@@ -9,6 +9,7 @@ import {
 	PatchUpdate,
 	ModelDataOnly,
 	FirestoreStorageError,
+	ModelDataWithId,
 } from 'firestore-storage-core';
 import { Query } from './query';
 import { DocumentReference, DocumentSnapshot, Firestore } from '@google-cloud/firestore';
@@ -121,7 +122,7 @@ export abstract class BaseRepository<
 		return result.data().count;
 	}
 
-	async save(data: T | ModelDataOnly<T> | PatchUpdate<ModelDataOnly<T>>, ids: CollectionIds<Path>): Promise<T> {
+	async save(data: T | ModelDataOnly<T> | PatchUpdate<ModelDataWithId<T>>, ids: CollectionIds<Path>): Promise<T> {
 		return this.applyToDocRef(data, ids, (doc, data) => {
 			return doc.set(data, {
 				merge: true,
@@ -129,7 +130,7 @@ export abstract class BaseRepository<
 		});
 	}
 
-	async write(data: T | ModelDataOnly<T> | PatchUpdate<ModelDataOnly<T>>, ids: CollectionIds<Path>): Promise<T> {
+	async write(data: T | ModelDataOnly<T> | PatchUpdate<ModelDataWithId<T>>, ids: CollectionIds<Path>): Promise<T> {
 		return this.applyToDocRef(data, ids, (doc, data) => {
 			return doc.set(data, {
 				merge: false,
@@ -137,14 +138,14 @@ export abstract class BaseRepository<
 		});
 	}
 
-	async update(data: T | PatchUpdate<ModelDataOnly<T>>, ids: CollectionIds<Path>): Promise<T> {
+	async update(data: T | PatchUpdate<ModelDataWithId<T>>, ids: CollectionIds<Path>): Promise<T> {
 		return this.applyToDocRef(data, ids, (doc, data) => {
 			return doc.update(data);
 		});
 	}
 
 	private async applyToDocRef(
-		data: T | ModelDataOnly<T> | PatchUpdate<ModelDataOnly<T>>,
+		data: T | ModelDataOnly<T> | PatchUpdate<ModelDataWithId<T>>,
 		ids: CollectionIds<Path>,
 		cb: (doc: DocumentReference, data: ModelDataOnly<T>) => Promise<any>
 	) {

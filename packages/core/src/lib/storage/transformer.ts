@@ -1,16 +1,16 @@
 import { BaseModelClass, ModelMeta } from './model';
 import { cloneDeep } from 'lodash';
-import { BaseModel, ModelDataOnly, PatchUpdate } from './types';
+import { BaseModel, ModelDataOnly, ModelDataWithId, PatchUpdate } from './types';
 
-export interface IDocumentTransformer<T> {
+export interface IDocumentTransformer<T extends BaseModel> {
 	fromFirestoreToObject(data: ModelDataOnly<T>, meta: ModelMeta): T;
 
 	toFirestoreDocument(doc: T): { id: string; data: ModelDataOnly<T> };
-	toFirestoreDocument(doc: ModelDataOnly<T> | PatchUpdate<ModelDataOnly<T>>): {
+	toFirestoreDocument(doc: ModelDataOnly<T> | PatchUpdate<ModelDataWithId<T>>): {
 		id: undefined;
 		data: ModelDataOnly<T>;
 	};
-	toFirestoreDocument(doc: T | ModelDataOnly<T> | PatchUpdate<ModelDataOnly<T>>): {
+	toFirestoreDocument(doc: T | ModelDataOnly<T> | PatchUpdate<ModelDataWithId<T>>): {
 		id?: string;
 		data: ModelDataOnly<T>;
 	};
