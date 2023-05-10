@@ -122,6 +122,12 @@ export abstract class BaseRepository<
 		return result.data().count;
 	}
 
+	async create(data: T | ModelDataOnly<T>, ids: CollectionIds<Path>): Promise<T> {
+		return this.applyToDocRef(data, ids, (doc, data) => {
+			return doc.create(data);
+		});
+	}
+
 	async save(data: T | ModelDataOnly<T> | PatchUpdate<ModelDataWithId<T>>, ids: CollectionIds<Path>): Promise<T> {
 		return this.applyToDocRef(data, ids, (doc, data) => {
 			return doc.set(data, {
