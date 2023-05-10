@@ -60,5 +60,5 @@
   "peerDependencies": {
     "firestore-storage-core": ">=6.0.0"
   },
-  "gitHead": "e64208ceb668a3cf6f6261ac23e820914889658e"
+  "gitHead": "54e2b66d68eb693028b14daed51775e39808c06d"
 }
