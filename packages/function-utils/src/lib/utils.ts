@@ -22,7 +22,7 @@ type ParsedSnapshot<T, TIds> = {
 };
 
 export function parseFirestoreChange<T extends BaseModel, TCollPath extends CollectionPath<any, any, any>>(
-	event: FirestoreEvent<Change<QueryDocumentSnapshot<T> | DocumentSnapshot<T>>>,
+	event: FirestoreEvent<Change<QueryDocumentSnapshot | DocumentSnapshot>>,
 	path: TCollPath,
 	transformer?: IDocumentTransformer<T>
 ): ParsedChange<T, DocumentIds<TCollPath>> {
@@ -48,10 +48,10 @@ export function parseFirestoreCreate<T extends BaseModel, TCollPath extends Coll
 	};
 }
 
-function transform<T extends BaseModel>(doc: DocumentSnapshot<T>, transformer: IDocumentTransformer<T>): T | null {
-	const d = doc.data();
-	if (d) {
-		return transformer.fromFirestoreToObject(d, {
+function transform<T extends BaseModel>(doc: DocumentSnapshot, transformer: IDocumentTransformer<T>): T | null {
+	const data = doc.data();
+	if (data) {
+		return transformer.fromFirestoreToObject(data as any, {
 			id: doc.id,
 			rawPath: doc.ref.path,
 		});
