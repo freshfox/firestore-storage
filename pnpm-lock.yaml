@@ -70,17 +70,25 @@ importers:
 
   packages/function-utils:
     specifiers:
+      '@types/mocha': ^9.0.0
       '@types/node': ^14.11.8
       firebase-admin: ^11.8.0
       firebase-functions: ^4.4.0
-      firestore-storage-core: workspace:^6.0.4
+      firebase-functions-test: ^3.1.0
+      firestore-storage-core: ^6.0.5
+      mocha: ^9.1.3
+      should: ^13.2.3
       ts-node: ^10.4.0
       typescript: ^4.0.3
     devDependencies:
+      '@types/mocha': 9.1.1
       '@types/node': 14.18.36
       firebase-admin: 11.8.0
       firebase-functions: 4.4.0_firebase-admin@11.8.0
+      firebase-functions-test: 3.1.0_sb7rxsx4yvnpsl7vrxf2jqlmvy
       firestore-storage-core: link:../core
+      mocha: 9.2.2
+      should: 13.2.3
       ts-node: 10.9.1_7iyetdgfmqiorh7qupktbe7tm4
       typescript: 4.9.5
 
@@ -3817,6 +3825,21 @@ packages:
     transitivePeerDependencies:
       - encoding
       - supports-color
+    dev: true
+
+  /firebase-functions-test/3.1.0_sb7rxsx4yvnpsl7vrxf2jqlmvy:
+    resolution: {integrity: sha512-yfm9ToguShxmRXb7TINN88zE2bM9gsBbs7vMWVKJAxGcl/n1f/U0sT5k2yho676QIcSqXVSjCONU8W4cUEL+Sw==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      firebase-admin: ^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0
+      firebase-functions: '>=4.3.0'
+      jest: '>=28.0.0'
+    dependencies:
+      '@types/lodash': 4.14.191
+      firebase-admin: 11.8.0
+      firebase-functions: 4.4.0_firebase-admin@11.8.0
+      lodash: 4.17.21
+      ts-deepmerge: 2.0.7
     dev: true
 
   /firebase-functions/4.4.0_firebase-admin@11.8.0:
@@ -8076,6 +8099,10 @@ packages:
 
   /triple-beam/1.3.0:
     resolution: {integrity: sha512-XrHUvV5HpdLmIj4uVMxHggLbFSZYIn7HEWsqePZcI50pco+MPqJ50wMGY794X7AOOhxOBAjbkqfAbEe/QMp2Lw==}
+    dev: true
+
+  /ts-deepmerge/2.0.7:
+    resolution: {integrity: sha512-3phiGcxPSSR47RBubQxPoZ+pqXsEsozLo4G4AlSrsMKTFg9TA3l+3he5BqpUi9wiuDbaHWXH/amlzQ49uEdXtg==}
     dev: true
 
   /ts-node/10.9.1_7iyetdgfmqiorh7qupktbe7tm4:
