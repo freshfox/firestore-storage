@@ -36,15 +36,11 @@ export class ModelClassTransformer<T extends BaseModelClass<T>> implements IDocu
 
 export const DEFAULT_DOCUMENT_TRANSFORMER: IDocumentTransformer<BaseModel> = {
 	fromFirestoreToObject(data, meta) {
-		return Object.assign(
-			<BaseModel>{
-				id: meta.id,
-				createdAt: meta.createdAt,
-				updatedAt: meta.updatedAt,
-				_rawPath: meta.rawPath,
-			},
-			data
-		);
+		const base: BaseModel = {
+			id: meta.id,
+			_rawPath: meta.rawPath,
+		};
+		return Object.assign(base, data);
 	},
 	toFirestoreDocument(doc) {
 		const clone = cloneDeep(doc);

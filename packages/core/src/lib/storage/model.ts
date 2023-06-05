@@ -11,8 +11,6 @@ import { BaseModel, ModelDataOnly, ModelDataWithId, PatchUpdate } from './types'
 
 export interface ModelMetaInternal {
 	id?: string;
-	createdAt?: Date;
-	updatedAt?: Date;
 	rawPath?: string;
 }
 
@@ -33,14 +31,6 @@ export class BaseModelClass<T extends BaseModel> implements BaseModel, ModelMeta
 
 	set id(id: string) {
 		this.__metadata.id = id;
-	}
-
-	get createdAt() {
-		return this.__metadata?.createdAt;
-	}
-
-	get updatedAt() {
-		return this.__metadata.updatedAt;
 	}
 
 	get _rawPath() {
