@@ -40,7 +40,7 @@ export const DEFAULT_DOCUMENT_TRANSFORMER: IDocumentTransformer<BaseModel> = {
 			id: meta.id,
 			_rawPath: meta.rawPath,
 		};
-		return Object.assign(base, data);
+		return Object.assign({}, data, base);
 	},
 	toFirestoreDocument(doc) {
 		const clone = cloneDeep(doc);
