@@ -6,12 +6,11 @@ import { BaseModel, ModelDataOnly, ModelDataWithId, PatchUpdate } from './types'
 const transformerMetaKey = 'firestore:transformer';
 const pathMetaKey = 'firestore:path';
 
-export abstract class BaseRepository<
-	T extends BaseModel,
-	Path extends CollectionPath<any, any, any>,
-	DocSnap,
-	Meta = any
-> {
+/**
+ * Base class for platform independent repositories. Contains methods accessing its metadata supplied
+ * via the Typescript @Repository decorator
+ */
+export abstract class BaseRepository<T extends BaseModel, Path extends CollectionPath<any, any, any>, DocSnap> {
 	private readonly collectionPath: Path;
 	private readonly transformer: IDocumentTransformer<T>;
 
@@ -34,14 +33,25 @@ export abstract class BaseRepository<
 		return this.getTransformer().toFirestoreDocument(data);
 	}
 
-	getDocumentPath(ids: DocumentIds<Path>) {
+	/**
+	 * Returns the path to the document as a string
+	 * @param ids - A map containing all ids up to the document itself
+	 */
+	getDocumentPath(ids: DocumentIds<Path>): string {
 		return this.getPath().doc(ids);
 	}
 
+	/**
+	 * Returns the path to the collection as a string
+	 * @param ids - A map containing all ids excluding the last documents id
+	 */
 	getCollectionPath(ids: CollectionIds<Path>) {
 		return this.getPath().collection(ids);
 	}
 
+	/**
+	 * Returns the standalone collection name
+	 */
 	getCollectionName() {
 		return this.getPath().collectionName;
 	}

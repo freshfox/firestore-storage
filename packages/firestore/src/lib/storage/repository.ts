@@ -32,6 +32,9 @@ export abstract class BaseRepository<
 		});
 	}
 
+	/**
+	 *
+	 */
 	async findById(ids: DocumentIds<Path>): Promise<T | null> {
 		const doc = await this.firestore.doc(this.getDocumentPath(ids)).get();
 		return this.fromFirestoreToObject(doc as any);
