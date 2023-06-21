@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { Firestore } from '@google-cloud/firestore';
 import { initializeTestEnvironment, RulesTestEnvironment } from '@firebase/rules-unit-testing';
 
-const path = __dirname + '/../../.env';
+const path = __dirname + '/../../../.env';
 if (fs.existsSync(path)) {
 	env(path);
 }

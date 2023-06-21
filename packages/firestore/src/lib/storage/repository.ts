@@ -91,16 +91,15 @@ export abstract class BaseRepository<
 	}
 
 	async findAll(documentIds: string[], ids: CollectionIds<Path>): Promise<(T | null)[]> {
-		if (ids.length === 0) {
+		if (documentIds.length === 0) {
 			return [];
 		}
 
 		const path = this.getCollectionPath(ids);
-		const docRefs: DocumentReference[] = ids.map((id) => {
+		const docRefs: DocumentReference[] = documentIds.map((id) => {
 			return this.firestore.collection(path).doc(id);
 		});
-		const restDocRefs = docRefs.slice(1);
-		const result = await this.firestore.getAll(docRefs[0], ...restDocRefs);
+		const result = await this.firestore.getAll(...docRefs);
 		return result.map((document) => {
 			return this.fromFirestoreToObject(document as any);
 		});

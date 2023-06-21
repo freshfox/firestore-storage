@@ -32,6 +32,24 @@ describe('Repository', function () {
 		});
 	});
 
+	describe('#findAll()', function () {
+		it('should find a set of documents', async () => {
+			const ids = {
+				accountId: 'acc1' as AccountId,
+			};
+			const u1 = await userRepo.save({ userName: 'U1' }, ids);
+			const u2 = await userRepo.save({ userName: 'U2' }, ids);
+
+			const users = await userRepo.findAll([u1.id, u2.id], ids);
+			users.should.eql([u1, u2]);
+		});
+
+		it("should return null if a document doesn't exist", async () => {
+			const accounts = await accountRepo.findAll(['id']);
+			accounts.should.eql([null]);
+		});
+	});
+
 	describe('#query()', function () {
 		it('should query documents based on sub-field', async () => {
 			const ids = {
