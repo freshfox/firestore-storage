@@ -40,4 +40,8 @@ export class Query<T extends BaseModel> extends BaseQuery<T, WhereFilterOp, Prom
 	count() {
 		return this.base.count();
 	}
+
+	getQuery() {
+		return this.base;
+	}
 }

@@ -11,11 +11,12 @@ import {
 } from 'firestore-storage-core';
 import { BaseRepository } from './repository';
 import { applyToDoc } from './utils';
+import { Query } from './query';
 
 export class FirestoreTransaction {
 	constructor(private firestore: Firestore, private transaction: Transaction) {}
 
-	async find<T extends BaseModel, Path extends CollectionPath<any, any, any>>(
+	async findById<T extends BaseModel, Path extends CollectionPath<any, any, any>>(
 		repo: BaseRepository<T, Path>,
 		ids: DocumentIds<Path>
 	): Promise<T | null> {
@@ -27,15 +28,44 @@ export class FirestoreTransaction {
 		return null;
 	}
 
-	async get<T extends BaseModel, Path extends CollectionPath<any, any, any>>(
+	/** @deprecated Use findById() instead */
+	async find<T extends BaseModel, Path extends CollectionPath<any, any, any>>(
+		repo: BaseRepository<T, Path>,
+		ids: DocumentIds<Path>
+	): Promise<T | null> {
+		return this.findById(repo, ids);
+	}
+
+	async getById<T extends BaseModel, Path extends CollectionPath<any, any, any>>(
 		repo: BaseRepository<T, Path>,
 		ids: DocumentIds<Path>
 	): Promise<T> {
-		const doc = await this.find(repo, ids);
+		const doc = await this.findById(repo, ids);
 		if (!doc) {
 			throw new FirestoreStorageError(repo.getPath().path(), ids);
 		}
 		return doc;
+	}
+
+	/** @deprecated Use getById() instead */
+	async get<T extends BaseModel, Path extends CollectionPath<any, any, any>>(
+		repo: BaseRepository<T, Path>,
+		ids: DocumentIds<Path>
+	): Promise<T> {
+		return this.getById(repo, ids);
+	}
+
+	async query<T extends BaseModel, Path extends CollectionPath<any, any, any>>(
+		repo: BaseRepository<T, Path>,
+		cb: (qb: Query<T>) => Query<T>,
+		ids: CollectionIds<Path>
+	): Promise<T[]> {
+		const path = repo.getCollectionPath(ids);
+		const query = cb(new Query<T>(this.firestore.collection(path))).getQuery();
+		const documents = await this.transaction.get(query);
+		return documents.docs.map((doc) => {
+			return repo.fromFirestoreToObject(doc as DocumentSnapshot<T>);
+		});
 	}
 
 	create<T extends BaseModel, Path extends CollectionPath<any, any, any>>(
@@ -98,4 +128,14 @@ export class FirestoreTransaction {
 			return this;
 		});
 	}
+}
+
+export function runFirestoreTransaction<T>(
+	firestore: Firestore,
+	cb: (trx: FirestoreTransaction) => Promise<T>
+): Promise<T> {
+	return firestore.runTransaction(async (t) => {
+		const trx = new FirestoreTransaction(firestore, t);
+		return cb(trx);
+	});
 }
