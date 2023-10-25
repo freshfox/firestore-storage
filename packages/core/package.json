@@ -17,7 +17,7 @@
   "scripts": {
     "test": "NODE_ENV=test mocha dist/test",
     "test:ts": "NODE_ENV=test mocha -r ./node_modules/ts-node/register src/test",
-    "build": "yarn clean && tsc --build",
+    "build": "pnpm clean && tsc --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "fss": "fss"
   },

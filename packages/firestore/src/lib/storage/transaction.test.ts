@@ -2,7 +2,7 @@ import { Account, AccountRepository, AccountsPath, ModelRepository, UserReposito
 import { createFirestoreTests } from './test-utils';
 import { runFirestoreTransaction } from './transaction';
 import { Firestore } from '@google-cloud/firestore';
-import { CollectionIds } from 'firestore-storage-core';
+import 'should';
 
 describe('Transaction', function () {
 	let firestore: Firestore;
@@ -17,14 +17,13 @@ describe('Transaction', function () {
 		accountRepo = new AccountRepository(firestore);
 	});
 
-	it('should query multiple documents', async () => {
+	it('should create a document', async () => {
 		const acc = await accountRepo.create({
 			name: 'Test',
 		});
 
 		await runFirestoreTransaction(firestore, async (trx) => {
 			const a = await trx.getById(accountRepo, { accountId: acc.id });
-
 			trx.create(
 				accountRepo,
 				{
@@ -33,5 +32,37 @@ describe('Transaction', function () {
 				undefined
 			);
 		});
+	});
+
+	it('should query documents', async () => {
+		const create = async (name: string) => {
+			const acc = await accountRepo.create({
+				name,
+			});
+			return acc.id;
+		};
+
+		const prefix = `acc-${Date.now()}`;
+
+		const [a1, a2, a3, a4] = await Promise.all([
+			create(prefix + 'Test1'),
+			create(prefix + 'Test2'),
+			create(prefix + 'Test3'),
+			create(prefix + 'Test1'),
+		]);
+
+		const ids = await runFirestoreTransaction(firestore, async (trx) => {
+			const accounts = await trx.query(
+				accountRepo,
+				(qb) => {
+					return qb.whereAll({
+						name: prefix + 'Test1',
+					});
+				},
+				undefined
+			);
+			return accounts.map((a) => a.id);
+		});
+		ids.sort().should.eql([a1, a4].sort());
 	});
 });
