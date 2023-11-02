@@ -25,12 +25,9 @@
     "node": ">=10.10.0"
   },
   "scripts": {
-    "test": "firebase emulators:exec --only firestore --project firestore-storage-local 'NODE_ENV=test mocha dist/test'",
-    "test:firestore": "yarn test:memory --firestore",
-    "test:memory": "NODE_ENV=test mocha dist/test",
-    "test:prepare": "./scripts/prepare",
-    "test:ts": "NODE_ENV=test mocha -r ./node_modules/ts-node/register ./src/test/**/*.ts",
-    "build": "yarn clean && tsc --build",
+    "test:ts": "NODE_ENV=test mocha './src/**/*.test.ts'",
+    "test": "pnpm firebase emulators:exec --only firestore --project firestore-storage-local 'pnpm test:ts --reporter mocha-junit-reporter'",
+    "build": "pnpm clean && tsc --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "firebase": "firebase"
   },
@@ -53,6 +50,7 @@
     "node-env-file": "^0.1.8",
     "should": "^13.2.3",
     "ts-node": "^10.4.0",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^4.0.3"
   },
   "peerDependencies": {
