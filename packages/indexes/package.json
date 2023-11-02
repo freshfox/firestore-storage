@@ -21,7 +21,7 @@
   "scripts": {
     "test": "NODE_ENV=test mocha dist/test",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "build": "yarn clean && tsc --build",
+    "build": "pnpm clean && tsc --build",
     "fss": "fss"
   },
   "license": "MIT",
