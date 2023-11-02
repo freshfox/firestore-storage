@@ -6,7 +6,7 @@
     "baseUrl": "./",
     "types": [
       "node",
-      "mocha",
+      "mocha"
     ],
     "paths": {
       "firestore-storage-core": ["../core"]
