@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         package: [ core, firestore, indexes, function-utils ]
-        node: [ 14 ]
+        node: [ 16 ]
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
