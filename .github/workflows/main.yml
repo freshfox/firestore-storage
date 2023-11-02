@@ -22,7 +22,7 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm lerna bootstrap
+        run: pnpm install --frozen-lockfile
       - name: Build package
         run: |
           cd packages/${{ matrix.package }}
