@@ -104,7 +104,7 @@ export class FirestoreTransaction {
 		ids: CollectionIds<Path>
 	): FirestoreTransaction {
 		return this.applyToDoc(repo, data, ids, (id, data, doc) => {
-			this.transaction.update(doc, data, { exists: true });
+			this.transaction.update(doc, data);
 		});
 	}
 
