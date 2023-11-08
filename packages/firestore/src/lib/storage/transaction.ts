@@ -100,7 +100,7 @@ export class FirestoreTransaction {
 
 	update<T extends BaseModel, Path extends CollectionPath<any, any, any>>(
 		repo: BaseRepository<T, Path>,
-		data: PatchUpdate<ModelDataWithId<T>>,
+		data: T | ModelDataOnly<T>,
 		ids: CollectionIds<Path>
 	): FirestoreTransaction {
 		return this.applyToDoc(repo, data, ids, (id, data, doc) => {
