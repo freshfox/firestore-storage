@@ -29,7 +29,10 @@ export abstract class BaseRepository<T extends BaseModel, Path extends Collectio
 		id: undefined;
 		data: ModelDataOnly<T>;
 	};
-	toFirestoreDocument(data: T | ModelDataOnly<T> | PatchUpdate<ModelDataWithId<T>>) {
+	toFirestoreDocument(data: T | ModelDataOnly<T> | PatchUpdate<ModelDataWithId<T>>): {
+		id: string | undefined;
+		data: ModelDataOnly<T>;
+	} {
 		return this.getTransformer().toFirestoreDocument(data);
 	}
 

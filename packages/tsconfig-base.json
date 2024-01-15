@@ -9,9 +9,17 @@
     "sourceMap": true,
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
-    "composite": true
+    "composite": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "outDir": "build/node",
+    "rootDir": "./src",
+    "strict": true,
+    "inlineSources": true,
+    "removeComments": false,
   },
-	"exclude": [
+  "exclude": [
 		"node_modules",
 		"dist"
 	],

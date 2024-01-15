@@ -11,10 +11,11 @@ export abstract class BaseQuery<T extends BaseModel, Op extends string, R> {
 		return this.applyWhere(this.getWhereProp(prop), op, value);
 	}
 
-	whereAll(attributes: ModelQuery<T> | null) {
+	whereAll<K extends ModelQuery<T>>(attributes: K | null) {
 		if (attributes) {
-			return Object.keys(attributes).reduce((query, key) => {
-				return query.applyWhere(key, '==' as any, attributes[key]);
+			const keys = Object.keys(attributes) as (keyof K)[];
+			return keys.reduce((query, key) => {
+				return query.applyWhere(String(key), '==' as any, attributes[key]);
 			}, this);
 		}
 		return this;

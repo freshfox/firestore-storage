@@ -3,8 +3,9 @@
   "version": "6.0.11",
   "description": "Core classes, types and utilities for firestore-storage",
   "license": "MIT",
-  "main": "dist/lib/index.js",
-  "types": "dist/lib/index.d.ts",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm2015/index.js",
+  "types": "dist/types/index.d.ts",
   "engines": {
     "node": ">=10.10.0"
   },
@@ -16,7 +17,10 @@
   ],
   "scripts": {
     "test": "NODE_ENV=test mocha './src/**/*.test.ts' --reporter mocha-junit-reporter",
-    "build": "pnpm clean && tsc --build",
+    "build": "pnpm build:cjs && pnpm build:esm && pnpm build:types",
+    "build:cjs": "tsc --project tsconfig.json",
+    "build:esm": "tsc --project tsconfig.esm2015.json",
+    "build:types": "tsc --project tsconfig.types.json",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "fss": "fss"
   },
