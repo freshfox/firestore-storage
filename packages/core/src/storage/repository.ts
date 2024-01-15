@@ -22,7 +22,7 @@ export abstract class BaseRepository<T extends BaseModel, Path extends Collectio
 		this.transformer = Reflect.getMetadata(transformerMetaKey, this.constructor);
 	}
 
-	protected abstract fromFirestoreToObject(snap: DocSnap): T;
+	protected abstract fromFirestoreToObject(snap: DocSnap): T | null;
 
 	toFirestoreDocument(doc: T): { id: string; data: ModelDataOnly<T> };
 	toFirestoreDocument(doc: ModelDataOnly<T> | PatchUpdate<ModelDataWithId<T>>): {

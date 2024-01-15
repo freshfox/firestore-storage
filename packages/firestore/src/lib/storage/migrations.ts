@@ -5,7 +5,7 @@ export abstract class Migrations {
 
 	abstract getVersion(): number;
 
-	abstract onUpgrade(toVersion: number);
+	abstract onUpgrade(toVersion: number): Promise<any>;
 
 	async upgrade() {
 		let version = await this.readVersion();

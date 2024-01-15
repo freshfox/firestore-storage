@@ -1,4 +1,3 @@
-export * from './storage/convert';
 export * from './storage/export';
 export * from './storage/migrations';
 export * from './storage/query';

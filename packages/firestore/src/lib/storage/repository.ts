@@ -13,6 +13,7 @@ import {
 import { Query } from './query';
 import { DocumentReference, DocumentSnapshot, Firestore } from '@google-cloud/firestore';
 import { applyToDoc } from './utils';
+import { IDocumentTransformer } from 'firestore-storage-core/dist/cjs';
 
 export abstract class BaseRepository<
 	T extends BaseModel,
@@ -26,7 +27,8 @@ export abstract class BaseRepository<
 		if (!snapshot.exists) {
 			return null;
 		}
-		return this.getTransformer().fromFirestoreToObject(snapshot.data(), {
+		const transformer: IDocumentTransformer<T> = this.getTransformer();
+		return transformer.fromFirestoreToObject(snapshot.data() as ModelDataOnly<T>, {
 			id: snapshot.id,
 			rawPath: snapshot.ref.path,
 		});
@@ -75,7 +77,7 @@ export abstract class BaseRepository<
 			return [];
 		}
 		return result.docs.map((doc) => {
-			return this.fromFirestoreToObject(doc);
+			return this.fromFirestoreToObject(doc)!;
 		});
 	}
 
@@ -86,7 +88,7 @@ export abstract class BaseRepository<
 			return [];
 		}
 		return result.docs.map((doc) => {
-			return this.fromFirestoreToObject(doc as any);
+			return this.fromFirestoreToObject(doc as any)!;
 		});
 	}
 

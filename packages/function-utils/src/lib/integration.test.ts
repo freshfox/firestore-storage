@@ -2,7 +2,7 @@ import { onDocumentCreated, onDocumentWritten } from 'firebase-functions/v2/fire
 import { parseFirestoreChange, parseFirestoreCreate } from './utils';
 import { CollectionPath } from 'firestore-storage-core';
 import 'should';
-import * as functionTest from 'firebase-functions-test';
+import functionTest from 'firebase-functions-test';
 
 describe('Functions', function () {
 	const Users = new CollectionPath('users', 'userId');
