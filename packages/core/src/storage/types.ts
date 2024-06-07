@@ -21,8 +21,4 @@ export type ModelDataWithId<T extends BaseModel> = Pick<T, 'id'> & ModelDataOnly
 
 export type ModelQuery<T extends BaseModel> = Partial<ModelDataOnly<T>>;
 
-type NestedPartial<T> = {
-	[K in keyof T]?: T[K] extends Array<infer R> ? Array<R> : NestedPartial<T[K]>;
-};
-
-export type PatchUpdate<T extends { id: string }> = Required<Pick<T, 'id'>> & Omit<NestedPartial<T>, 'id'>;
+export type PatchUpdate<T extends { id: string }> = Required<Pick<T, 'id'>> & Omit<Partial<T>, 'id'>;
