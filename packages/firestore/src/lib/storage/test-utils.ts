@@ -14,6 +14,10 @@ export function createFirestoreTests(context: Mocha.Suite, setup: (firestore: Fi
 	context.beforeEach(async () => {
 		app = await initializeTestEnvironment({
 			projectId: 'firestore-storage-local',
+			firestore: {
+				host: '127.0.0.1',
+				port: 8080,
+			},
 		});
 		await app.clearFirestore();
 		const firestore = new Firestore({

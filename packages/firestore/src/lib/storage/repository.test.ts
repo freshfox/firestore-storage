@@ -133,5 +133,57 @@ describe('Repository', function () {
 			});
 			acc.should.property('name', 'acc2');
 		});
+
+		it('should check for 1 level merge', async () => {
+			const accountId = 'acc1' as AccountId;
+			let user = await userRepo.create({ userName: 'name' }, { accountId });
+			user = await userRepo.update(
+				{
+					id: user.id,
+					address: {
+						street: 'street',
+					},
+				},
+				{ accountId }
+			);
+			user.should.eql({
+				id: user.id,
+				userName: 'name',
+				address: {
+					street: 'street',
+				},
+				_rawPath: user._rawPath,
+			});
+		});
+
+		it('should check for 2 level merge', async () => {
+			const accountId = 'acc1' as AccountId;
+			let user = await userRepo.create(
+				{
+					userName: 'name',
+					address: {
+						street: 'street',
+					},
+				},
+				{ accountId }
+			);
+			user = await userRepo.update(
+				{
+					id: user.id,
+					address: {
+						city: 'Vienna',
+					},
+				},
+				{ accountId }
+			);
+			user.should.eql({
+				id: user.id,
+				userName: 'name',
+				address: {
+					city: 'Vienna',
+				},
+				_rawPath: user._rawPath,
+			});
+		});
 	});
 });
