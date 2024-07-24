@@ -27,8 +27,6 @@ export const DEFAULT_DOCUMENT_TRANSFORMER: IDocumentTransformer<BaseModel> = {
 	toFirestoreDocument(doc) {
 		const clone = cloneDeep(doc) as any;
 		delete clone.id;
-		delete clone.createdAt;
-		delete clone.updatedAt;
 
 		return {
 			id: (doc as any)['id'] || undefined,
