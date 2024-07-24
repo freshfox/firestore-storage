@@ -131,6 +131,7 @@ export abstract class BaseRepository<
 		});
 	}
 
+	/**@deprecated use upsert instead*/
 	async save(data: T | ModelDataOnly<T> | PatchUpdate<ModelDataWithId<T>>, ids: CollectionIds<Path>): Promise<T> {
 		return this.applyToDocRef(data, ids, (doc, data) => {
 			return doc.set(data, {
@@ -139,7 +140,15 @@ export abstract class BaseRepository<
 		});
 	}
 
-	async write(data: T | ModelDataOnly<T> | PatchUpdate<ModelDataWithId<T>>, ids: CollectionIds<Path>): Promise<T> {
+	async upsert(data: T | ModelDataOnly<T>, ids: CollectionIds<Path>): Promise<T> {
+		return this.applyToDocRef(data, ids, (doc, data) => {
+			return doc.set(data, {
+				merge: true,
+			});
+		});
+	}
+
+	async write(data: T | ModelDataOnly<T>, ids: CollectionIds<Path>): Promise<T> {
 		return this.applyToDocRef(data, ids, (doc, data) => {
 			return doc.set(data, {
 				merge: false,
