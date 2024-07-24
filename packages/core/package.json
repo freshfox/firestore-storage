@@ -1,6 +1,6 @@
 {
   "name": "firestore-storage-core",
-  "version": "7.0.2",
+  "version": "7.0.3",
   "description": "Core classes, types and utilities for firestore-storage",
   "license": "MIT",
   "main": "dist/cjs/index.js",
