@@ -1,14 +1,19 @@
 import { BaseModel, ModelQuery } from './types';
 import { getPath } from 'ts-object-path';
+import { Filter } from '@google-cloud/firestore';
 
 export type WhereProp<T extends BaseModel> = string | ((t: T) => unknown);
 
 export abstract class BaseQuery<T extends BaseModel, Op extends string, R> {
-	protected abstract applyWhere(key: string, operator: Op, value: any): this;
+	protected abstract applyWhere(key: string | Filter, operator: Op, value: any): this;
+	protected abstract applyWhere(filter: Filter): this;
 	abstract execute(): R;
 
-	where(prop: WhereProp<T>, op: Op, value: any) {
-		return this.applyWhere(this.getWhereProp(prop), op, value);
+	where(propOrFilter: WhereProp<T> | Filter, op?: Op, value?: any) {
+		if (propOrFilter instanceof Filter) {
+			return this.applyWhere(propOrFilter);
+		}
+		return this.applyWhere(this.getWhereProp(propOrFilter), op!, value);
 	}
 
 	whereAll<K extends ModelQuery<T>>(attributes: K | null) {

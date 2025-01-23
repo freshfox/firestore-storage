@@ -5,6 +5,7 @@ import {
 	QuerySnapshot,
 	WhereFilterOp,
 	Query as FSQuery,
+	Filter,
 } from '@google-cloud/firestore';
 import { BaseQuery, BaseModel, WhereProp } from 'firestore-storage-core';
 
@@ -13,10 +14,20 @@ export class Query<T extends BaseModel> extends BaseQuery<T, WhereFilterOp, Prom
 		super();
 	}
 
-	protected applyWhere(key: string, operator: FirebaseFirestore.WhereFilterOp, value: any) {
-		this.base = this.base.where(key, operator, value);
-		return this;
-	}
+	protected applyWhere<K extends string | Filter>(
+        keyOrFilter: K,
+        ...args: K extends string 
+            ? [FirebaseFirestore.WhereFilterOp, any]
+            : []
+    ): this {
+        if (typeof keyOrFilter === 'string') {
+            const [operator, value] = args as [FirebaseFirestore.WhereFilterOp, any];
+            this.base = this.base.where(keyOrFilter, operator, value);
+        } else {
+            this.base = this.base.where(keyOrFilter as Filter);
+        }
+        return this;
+    }
 
 	orderBy(prop: WhereProp<T>, direction: OrderByDirection) {
 		this.base = this.base.orderBy(this.getWhereProp(prop), direction);
