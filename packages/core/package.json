@@ -41,7 +41,8 @@
   "dependencies": {
     "lodash": "^4.17.21",
     "reflect-metadata": "^0.1.13",
-    "ts-object-path": "^0.1.2"
+    "ts-object-path": "^0.1.2",
+    "@google-cloud/firestore": "^7.11.0"
   },
   "gitHead": "0b06debcfa978dcfd12f74599cded3802179e34b"
 }
