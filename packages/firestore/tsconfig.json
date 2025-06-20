@@ -8,7 +8,7 @@
       "node",
       "mocha"
     ],
-    "strict": false,
+    "strict": true,
     "paths": {
       "firestore-storage-core": ["../core"]
     }
