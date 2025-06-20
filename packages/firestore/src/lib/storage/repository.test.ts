@@ -210,4 +210,25 @@ describe('Repository', function () {
 			signIns.should.eql([9, 8, 7, 6, 5, 4, 3, 2, 1, 0]);
 		});
 	});
+
+	describe('#stream()', function () {
+		it('should stream documents', async () => {
+			const accountId = 'acc1' as AccountId;
+
+			for (let i = 0; i < 100; i++) {
+				await userRepo.create({ userName: `name-${i}`, signInCount: i }, { accountId });
+			}
+
+			const stream = userRepo.stream(
+				(qb) => {
+					return qb.where('signInCount', '<', 10).orderBy('signInCount', 'desc');
+				},
+				{ accountId }
+			);
+
+			for await (const item of stream) {
+				console.log(item); // Typed T instance
+			}
+		});
+	});
 });

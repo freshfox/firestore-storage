@@ -113,6 +113,34 @@ export abstract class BaseRepository<
 		return this.internalPaginate(cb, itemsCb, ids, last);
 	}
 
+	stream(cb: (qb: Query<T>) => Query<T>, ids: CollectionIds<Path>): AsyncIterable<T> {
+		const path = this.getCollectionPath(ids);
+		const collection = this.firestore.collection(path);
+		const query = cb ? cb(new Query<T>(collection)).getQuery() : collection;
+
+		const stream = query.stream();
+
+		const asyncIterator: AsyncIterable<T> = {
+			[Symbol.asyncIterator]() {
+				const reader = stream[Symbol.asyncIterator]();
+				return {
+					async next() {
+						const { value, done } = await reader.next();
+						if (done) return { done: true, value: undefined };
+						const obj = value.exists ? thisRepo.fromFirestoreToObject(value) : null;
+						if (obj === null) return this.next(); // skip missing
+						return { value: obj, done: false };
+					},
+				};
+			},
+		};
+
+		// Needed so `thisRepo` works inside the iterator
+		const thisRepo = this;
+
+		return asyncIterator;
+	}
+
 	async groupQuery(cb?: (qb: Query<T>) => Query<T>): Promise<T[]> {
 		const group = this.firestore.collectionGroup(this.getCollectionName());
 		const result = await (cb ? cb(new Query<T>(group)).execute() : group.get());
