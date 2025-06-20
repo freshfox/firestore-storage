@@ -115,7 +115,7 @@ export abstract class BaseRepository<
 				throw new FirestoreStorageError(this.getPath().path(), ids);
 			}
 		}
-		return all;
+		return all as T[];
 	}
 
 	async count(cb: (qb: Query<T>) => Query<T>, ids: CollectionIds<Path>) {
@@ -171,10 +171,11 @@ export abstract class BaseRepository<
 			try {
 				await cb(docRef, data);
 			} catch (err) {
-				throw new FirestoreStorageError(this.getPath().path(), ids, err.message);
+				const msg = err instanceof Error ? err.message : err;
+				throw new FirestoreStorageError(this.getPath().path(), ids, String(msg));
 			}
 			const doc = await docRef.get();
-			return this.fromFirestoreToObject(doc as DocumentSnapshot<T>);
+			return this.fromFirestoreToObject(doc as DocumentSnapshot<T>) as T;
 		});
 	}
 
