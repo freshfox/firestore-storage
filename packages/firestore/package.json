@@ -1,6 +1,6 @@
 {
   "name": "firestore-storage",
-  "version": "7.1.0",
+  "version": "7.2.0",
   "description": "A typed wrapper around Firestore including a query-builder and an in-memory implementation for testing",
   "main": "dist/lib/index.js",
   "types": "dist/lib/index.d.ts",
@@ -45,7 +45,7 @@
     "@firebase/rules-unit-testing": "^2.0.7",
     "@types/mocha": "^9.0.0",
     "@types/node": "^14.11.8",
-    "firestore-storage-core": "^7.0.3",
+    "firestore-storage-core": "^7.0.4",
     "mocha": "^9.1.3",
     "node-env-file": "^0.1.8",
     "should": "^13.2.3",
