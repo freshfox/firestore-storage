@@ -38,6 +38,7 @@ export interface User extends BaseModel {
 		zip?: string;
 		city?: string;
 	};
+	signInCount?: number;
 }
 
 export const AccountsPath = new CollectionPath<'accountId', AccountId>('accounts', 'accountId');

@@ -5,11 +5,12 @@ import {
 	QuerySnapshot,
 	WhereFilterOp,
 	Query as FSQuery,
+	DocumentSnapshot,
 } from '@google-cloud/firestore';
 import { BaseQuery, BaseModel, WhereProp } from 'firestore-storage-core';
 
 export class Query<T extends BaseModel> extends BaseQuery<T, WhereFilterOp, Promise<QuerySnapshot<T>>> {
-	constructor(private base: CollectionReference | CollectionGroup | FSQuery) {
+	constructor(protected base: CollectionReference | CollectionGroup | FSQuery) {
 		super();
 	}
 
@@ -30,6 +31,11 @@ export class Query<T extends BaseModel> extends BaseQuery<T, WhereFilterOp, Prom
 
 	offset(offset: number) {
 		this.base = this.base.offset(offset);
+		return this;
+	}
+
+	startAfter(snapshot: DocumentSnapshot<T>) {
+		this.base = this.base.startAfter(snapshot);
 		return this;
 	}
 

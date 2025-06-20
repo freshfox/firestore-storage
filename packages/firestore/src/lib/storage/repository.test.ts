@@ -61,12 +61,12 @@ describe('Repository', function () {
 			const u3 = await userRepo.save({ userName: 'u3', address: { city: 'Berlin' } }, ids);
 
 			const users = await userRepo.query((qb) => {
-				return qb.where((u) => u.address.city, '==', 'Vienna');
+				return qb.where((u) => u.address!.city, '==', 'Vienna');
 			}, ids);
 
 			users.should.length(2);
-			users.find((u) => u.id === u1.id).should.not.undefined();
-			users.find((u) => u.id === u2.id).should.not.undefined();
+			users.find((u) => u.id === u1.id)!.should.not.undefined();
+			users.find((u) => u.id === u2.id)!.should.not.undefined();
 		});
 	});
 
@@ -184,6 +184,30 @@ describe('Repository', function () {
 				},
 				_rawPath: user._rawPath,
 			});
+		});
+	});
+
+	describe('#paginate()', function () {
+		it('should paginate documents', async () => {
+			const accountId = 'acc1' as AccountId;
+
+			for (let i = 0; i < 20; i++) {
+				await userRepo.create({ userName: `name-${i}`, signInCount: i }, { accountId });
+			}
+
+			let signIns: number[] = [];
+			await userRepo.paginate(
+				(qb) => {
+					return qb.where('signInCount', '<', 10).orderBy('signInCount', 'desc').limit(2);
+				},
+				(items) => {
+					for (const item of items) {
+						signIns.push(item.signInCount);
+					}
+				},
+				{ accountId }
+			);
+			signIns.should.eql([9, 8, 7, 6, 5, 4, 3, 2, 1, 0]);
 		});
 	});
 });

@@ -11,7 +11,7 @@ import {
 	ModelDataWithId,
 } from 'firestore-storage-core';
 import { Query } from './query';
-import { DocumentReference, DocumentSnapshot, Firestore } from '@google-cloud/firestore';
+import { DocumentReference, DocumentSnapshot, Firestore, FieldPath } from '@google-cloud/firestore';
 import { applyToDoc } from './utils';
 import { IDocumentTransformer } from 'firestore-storage-core/dist/cjs';
 
@@ -79,6 +79,38 @@ export abstract class BaseRepository<
 		return result.docs.map((doc) => {
 			return this.fromFirestoreToObject(doc)!;
 		});
+	}
+
+	async paginate(
+		cb: (qb: Query<T>) => Query<T>,
+		itemsCb: (items: T[]) => any,
+		ids: CollectionIds<Path>
+	): Promise<void> {
+		return this.internalPaginate(cb, itemsCb, ids);
+	}
+
+	private async internalPaginate(
+		cb: (qb: Query<T>) => Query<T>,
+		itemsCb: (items: T[]) => any,
+		ids: CollectionIds<Path>,
+		startAfterSnapshot?: DocumentSnapshot<T>
+	): Promise<void> {
+		const path = this.getCollectionPath(ids);
+		let query = cb(new Query<T>(this.firestore.collection(path)));
+		if (startAfterSnapshot) {
+			query = query.startAfter(startAfterSnapshot);
+		}
+		const snapshot = await query.execute();
+
+		if (snapshot.empty) {
+			return;
+		}
+
+		const docs = snapshot.docs.map((doc) => this.fromFirestoreToObject(doc as DocumentSnapshot<T>)!);
+		await itemsCb(docs);
+
+		const last = snapshot.docs[snapshot.docs.length - 1];
+		return this.internalPaginate(cb, itemsCb, ids, last);
 	}
 
 	async groupQuery(cb?: (qb: Query<T>) => Query<T>): Promise<T[]> {
